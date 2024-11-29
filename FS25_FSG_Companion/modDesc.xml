@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<modDesc descVersion="92">
+    <author>FSG Modding - FSG DaVaR</author>
+    <contributors>JTSage</contributors>
+    <version>1.0.0.0</version>
+    <title>
+      <en>FSG Companion</en>
+    </title>
+    <description>
+      <en><![CDATA[FSG Companion Mod - Designed to work with FSG MP Servers.
+
+https://www.fsgrealism.com]]></en>
+    </description>
+    <iconFilename>icon_FSGCompanion.dds</iconFilename>
+    <multiplayer supported="true" />
+    <extraSourceFiles>
+        <sourceFile filename="scripts/main.lua"/>
+    </extraSourceFiles>
+
+    <actions>
+        <action name="FSG_MENU" category="SYSTEM" axisType="HALF" ignoreComboMask="false" />
+    </actions>
+
+    <inputBinding>
+        <actionBinding action="FSG_MENU">
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_lctrl KEY_slash" />
+        </actionBinding>
+    </inputBinding>
+
+    <l10n filenamePrefix="lang/l10n" />
+</modDesc>

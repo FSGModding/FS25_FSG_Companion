@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+
+<GUI name="FSGSettingsGuiInfo">
+    <GuiElement type="empty" profile="uiInGameMenuFrame">
+
+        <GuiElement profile="fs25_menuHeaderPanel">
+          <Bitmap profile="fs25_menuHeaderIconBg">
+            <Bitmap profile="fs25_menuHeaderIcon" imageSliceId="gui.icon_options_help2" />
+          </Bitmap>
+          <Text profile="fs25_menuHeaderTitle" text="$l10n_ui_settings_info" />
+        </GuiElement>
+        <ScrollingLayout profile="fs25_settingsLayout" id="boxLayout" topClipperElementName="topClipper" bottomClipperElementName="bottomClipper">
+
+          <Text profile="fs25_helpLineText" name="text" text="$l10n_ui_settings_info_1" />
+          <Text profile="fs25_helpLineText" name="text" text="$l10n_ui_settings_info_2" />
+          <Text profile="fs25_helpLineText" name="text" text="$l10n_ui_settings_info_3" />
+          <Text profile="fs25_helpLineText" name="text" text="$l10n_ui_settings_info_4" />
+          <Text profile="fs25_helpLineText" name="text" text="$l10n_ui_settings_info_5" />
+          <Text profile="fs25_helpLineText" name="text" text="$l10n_ui_settings_info_6" />
+
+        </ScrollingLayout>
+        <Bitmap profile="fs25_settingsTooltipSeparator" />
+        <Bitmap profile="fs25_startClipper" name="topClipper" />
+        <Bitmap profile="fs25_stopClipper" name="bottomClipper" />
+
+    </GuiElement>
+</GUI>

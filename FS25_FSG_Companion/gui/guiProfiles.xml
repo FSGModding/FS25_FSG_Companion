@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+
+<GUIProfiles>
+
+  <Profile name="fs25_multiTextOptionTooltip_rtc" extends="fs25_textDefault" with="anchorTopRight">
+    <width value="580px" />
+    <position value="650px 0px" />
+    <textMaxNumLines value="3" />
+    <textColor value="$preset_colorTransparent" />
+    <textFocusedColor value="$preset_fs25_colorGreyText" />
+    <textHighlightedColor value="$preset_fs25_colorGreyText" />
+    <textDisabledColor value="$preset_colorTransparent" />
+    <textWrapWidth value="350px" />
+    <textMaxWidth value="350px" />
+  </Profile>
+
+  <Profile name="fs25_helpLineText_rtc" extends="fs25_textDefault">
+    <size value="566px 100px" />
+    <textSize value="16px" />
+    <textMaxWidth value="566px" />
+    <textMaxNumLines value="100" />
+    <textVerticalAlignment value="top" />
+    <textColor value="$preset_fs25_colorGreyText" />
+  </Profile>
+
+  <Profile name="fs25_settingsNoPermissionText_rtc" extends="fs25_textDefault" with="anchorMiddleStretchingX">
+    <size value="815px 50px" />
+    <textSize value="16px" />
+    <textAlignment value="right" />
+    <textColor value="$preset_fs25_colorGreyText" />
+  </Profile>
+
+</GUIProfiles>

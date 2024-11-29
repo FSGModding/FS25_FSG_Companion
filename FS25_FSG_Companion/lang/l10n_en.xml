@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<l10n>
+  <translationContributors>DaVaR</translationContributors>
+  <texts>
+  
+    <!-- Server Responses -->
+    <text name="chat_greeting01"                      text="Hey %s!" />
+    <text name="chat_greeting02"                      text="Hi there %s!" />
+    <text name="chat_greeting03"                      text="Hello %s!" />
+    <text name="chat_greeting04"                      text="Good day %s!" />
+    <text name="chat_greeting05"                      text="Howdy %s!" />
+    <text name="chat_greetingTrigger01"               text="hi" />
+    <text name="chat_greetingTrigger02"               text="hello" />
+    <text name="chat_greetingTrigger03"               text="hey" />
+    <text name="chat_greetingTrigger04"               text="howdy" />
+    <text name="chat_greetingTrigger05"               text="sup" />
+    <text name="chat_now_admin"                       text=" is now Admin!" />
+    <text name="chat_game_saved"                      text="Game is Saving!" />
+    <text name="chat_now_already_admin"               text="You are already Admin!" />
+    <text name="chat_admin_removed"                   text=" is no longer Admin!" />
+    <text name="chat_is_already_admin"                text=" is already Admin!" />
+    <text name="chat_rememberme"                      text=" is now auto Admin!" />
+    <text name="chat_forgetme"                        text=" is no longer auto Admin!" />
+    <text name="chat_forgetme_error"                  text=" error removing auto Admin!" />
+
+    <!-- Commands -->   
+    <text name="chat_command_me_admin"                text="#meAdmin" />
+    <text name="chat_command_remove_admin"            text="#meNoAdmin" />
+    <text name="chat_command_users"                   text="#getUsers" />
+    <text name="chat_command_moo"                     text="#moo" />
+    <text name="chat_command_make_admin"              text="#makeAdmin" />
+    <text name="chat_command_rememberme"              text="#rememberMe" />
+    <text name="chat_command_forgetme"                text="#forgetMe" />
+    <text name="chat_command_getfarms"                text="#getFarms" />
+    <text name="chat_command_makefm"                  text="#makeFM" />
+    <text name="chat_command_save_vehicles"           text="#saveVehicles" />
+
+    <!-- Help Info -->    
+    <text name="chat_command_info_me_admin"           text="If user has logged in as admin before, they can use this to make them admin again upon return to server." />
+    <text name="chat_command_info_remove_admin"       text="Removes admin from yourself on current session. " />
+    <text name="chat_command_info_users"              text="Displays all available users on server with ID." />
+    <text name="chat_command_info_moo"                text="This command prints a text cow because why not." />
+    <text name="chat_command_info_make_admin"         text="Admin can use this command to make another online user an admin.  User ID provided from #getUsers command." />
+    <text name="chat_command_info_rememberme"         text="Sets user to auto admin when they log on the server." />
+    <text name="chat_command_info_forgetme"           text="Sets user to no longer auto admin when they log on the server." />
+    <text name="chat_command_info_getfarms"           text="Displays all available farms on server with ID." />
+    <text name="chat_command_info_makefm"             text="Add user to farm with user id and farm id.  User ID provided from #getUsers command.  Farm ID provided from #getFarms command." />
+    <text name="chat_command_info_save_vehicles"      text="Saves locations of all vehicles on the server to a file to be called later with #resetVehicles" />
+
+    <!-- Help Page Text -->   
+    <text name="dc_help_title"                        text="FSG Companion" />
+    <text name="dc_overview"                          text="FSG Companion Help" />
+    <text name="dc_help_page_base_text"               text="FSG Companion is a simple yet advanced dedicated server tool to help admins better manage their servers." />
+    <text name="dc_help_page_base_cmds"               text="The following command can be typed directly into the multiplayer chat to be executed." />
+
+    <!-- Warnings -->   
+    <text name="rc_max_hire_warn"                     text="Max hired workers reached for this farm." />
+    <text name="rc_ss_off"                            text="Super Strength Disabled by Server." />
+    <text name="rc_max_pens"                          text="This farm has max %s pins." />
+    <text name="rc_max_placeables"                    text="This farm has max placeables for this store item." />
+    <text name="rc_max_productions"                   text="This farm has max factories for this store item." />
+    <text name="rc_max_sellingpoints"                 text="This farm has max selling points for this store item." />
+    <text name="rc_max_farmhouses"                    text="This farm has max farmhouses for this store item." />
+    <text name="rc_max_lights"                        text="This farm has max lights for this store item." />
+    <text name="rc_max_generators"                    text="This farm has max generators for this store item." />
+    <text name="rc_admin_only_place"                  text="Only Admins Can Place This Item." />
+    <text name="sync_warning"                         text="Sync Warning - Player Incoming!" />
+    <text name="rc_max_items"                         text="This farm has max items for this store item." />
+    <text name="rc_max_missions"                      text="This farm has reached max missions allowed." />
+
+    <!-- Vehicle Storage -->    
+    <text name ="button_storeVehicle"                 text="Store Vehicle" />
+    <text name ="button_storeVehicleConfirm"          text="Do you really want to store this vehicle on the website for $1,000?" />
+
+    <!-- Vehicle Edit -->   
+    <text name="infohud_vehicleOwnerFarmId"           text="Owner Farm Id" />
+    <text name="infohud_vehicleOperatingTime"         text="Operating Time" />
+
+    <!-- Field Info Texts -->   
+    <text name="fieldInfo_expectedYield"              text="Expected Yield" />
+    <text name="fieldInfo_yieldPotential"             text="Yield Potential" />
+    <text name="text_Foragable"                       text="Forage" />
+    <text name="text_Narrow_Wheels"                   text="Narrow only" />
+    <text name="text_All_Wheels"                      text="All tires and tracks" />
+
+    <!-- Setting Menu -->
+    <text name="input_FSG_MENU"                       text="FSG Companion" />
+    <text name="ui_settings_info"                     text="FSG Companion Info" />
+    <text name="ui_settings_settings"                 text="FSG Companion Settings" />
+    <text name="ui_settings_tools"                    text="FSG Companion Tools" />
+    <text name="ui_settings_companion_settings"       text="Companion Settings" />
+    <text name="ui_settings_game_limits"              text="Game Limits" />
+    <text name="ui_settings_paintAnywhere"            text="Paint Anywhere" />
+    <text name="ui_settings_toolTip_paintAnywhere"    text="Allows players to paint or terraform anywhere on the map." />
+    <text name="ui_settings_hireLimit"                text="Hired AI Limit" />
+    <text name="ui_settings_toolTip_hireLimit"        text="Max number of AI allowed to be hired per farm." />
+    <text name="ui_settings_maxMissions"              text="Max Missions" />
+    <text name="ui_settings_toolTip_maxMissions"      text="Max number of Missions allowed to be active per farm." />
+    <text name="ui_settings_husbandryLimit"           text="Husbandry Limit" />
+    <text name="ui_settings_toolTip_husbandryLimit"   text="Max number of animal pins allowed per store animal type." />
+    <text name="ui_settings_productionPoints"         text="Production Point Limit" />
+    <text name="ui_settings_toolTip_productionPoints" text="Max number of productions per store item allowed per farm." />
+    <text name="ui_settings_sellingPoints"            text="Selling Point Limit" />
+    <text name="ui_settings_toolTip_sellingPoints"    text="Max number of selling points per store item allowed per farm." />
+    <text name="ui_settings_farmHouses"               text="Farm House Limit" />
+    <text name="ui_settings_toolTip_farmHouses"       text="Max number of farm houses per store item allowed per farm." />
+    <text name="ui_settings_generators"               text="Generator Limit" />
+    <text name="ui_settings_toolTip_generators"       text="Max number of generators per store item allowed per farm." />
+    <text name="ui_settings_floodLighting"            text="Light Pole Limit" />
+    <text name="ui_settings_toolTip_floodLighting"    text="Max number of light poles per store item allowed per farm." />
+    <text name="ui_settings_otherPlaceables"          text="Other Placeable Limit" />
+    <text name="ui_settings_toolTip_otherPlaceables"  text="Max number of placeables per store item allowed per farm." />
+    <text name="ui_settings_gardenSheds"              text="Garden Shed Limit" />
+    <text name="ui_settings_toolTip_gardenSheds"      text="Max number of gardenSheds per store item allowed per farm." />
+    <text name="ui_settings_dismissWorkers"           text="Auto Dismiss Workers" />
+    <text name="ui_settings_toolTip_dismissWorkers"   text="Any workers left hired on an empty farm are auto dismissed." /> 
+    <text name="ui_settings_inboxActive"              text="Companion Inbox" />
+    <text name="ui_settings_toolTip_inboxActive"      text="When enabled the FSG Companion will process commands that are in the inbox folder.  When disabled commands are ignored." /> 
+    <text name="ui_transactionId"                     text="Transaction Id" />
+    <text name="ui_settings_toolTip_transactionId"    text="Current Transaction Id for website communication tracking." />
+    <text name="ui_settings_coop"                     text="CO-OP Settings" />
+    <text name="ui_settings_coopLimitsEnabled"        text="CO-OP Limits" />
+    <text name="ui_settings_toolTip_coopLimitsEnabled" text="Enables CO-OP limits for the server." />
+    <text name="ui_settings_coopMinCruiseSpeed"       text="Min Cruise Speed" />
+    <text name="ui_settings_toolTip_coopMinCruiseSpeed" text="System checks for vehicles that are driving with cruise set at or below min cruise speed." />
+    <text name="ui_settings_coopMinCruiseMin"         text="Min Cruise Speed Minutes" />
+    <text name="ui_settings_toolTip_coopMinCruiseMin" text="How many minutes a vehicle can be set at the min cruise speed before cruise is stopped." />
+    <text name="ui_settings_disableSleep"             text="Disable Sleep" />
+    <text name="ui_settings_toolTip_disableSleep"     text="When enabled players will not be able to sleep in game via the sleep triggers." />
+
+    <!-- Info Text -->
+    <text name="ui_settings_info_1"                   text="Welcome to FSG Realism!  We are excited that you are a part of this journey in pixel farming!" />
+    <text name="ui_settings_info_2"                   text="Our FSG Companion mod enables our servers to communicate with the website to complete transactions such as Money Transfers, Vehicle Transfers, and much more." />
+    <text name="ui_settings_info_3"                   text="The settings in this panel are only editable by our admins, but we have made them visible for everyone to view." />
+    <text name="ui_settings_info_4"                   text="FSG Companion is designed to work with https://www.FSGRealism.com" />
+    <text name="ui_settings_info_5"                   text="Powered by https://www.FarmSimGame.com" />
+    <text name="ui_settings_info_6"                   text="Designed by https://www.FSGModding.com" />
+
+    <!-- Real Time Sync Stuffs -->
+    <text name="title_realTimeSync"                   text="FSG Companion Real Time Sync" />
+    <text name="title_realTimeSync_title"             text="Real Time Sync Settings" />
+    <text name="setting_realTimeSync_serverOffset"    text="Game Time Offset" />
+    <text name="toolTip_realTimeSync_serverOffset"    text="Offset the game time from UTC time in hours." />
+    <text name="setting_realTimeSync_timeFixHour"     text="Game Time Fix Hour" />
+    <text name="toolTip_realTimeSync_timeFixHour"     text="Limit server time to auto fix to a set hour based on computer offset time.  Always will keep time matched." />
+    <text name="setting_realTimeSync_autoSetTime"     text="Game Set Time" />
+    <text name="toolTip_realTimeSync_autoSetTime"     text="Allow game set time when more than 5 min ahead instead of slowing time down. Skips to next day." />
+    <text name="setting_realTimeSync_timeSyncEnable"  text="Real Time Sync" />
+    <text name="toolTip_realTimeSync_timeSyncEnable"  text="Turn Real Time Sync On or Off." />
+    <text name="title_realTimeSync_inProgress"        text="Time Sync In Progress - Target time: " />
+    <text name="title_realTimeSync_setInProgress"     text="Time Sync In Progress - Time set to: " />
+    <text name="setting_realTimeSync_progressNotification"    text="Time Sync Notification" />
+    <text name="toolTip_realTimeSync_progressNotification"    text="Enable or disable the time sync notification that lets you know when time sync is in progress." />
+
+  </texts>
+</l10n>

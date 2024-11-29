@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<helpLines>
+    <!--Help category-->
+    <category title="$l10n_dc_help_title">
+        <!-- Help tab -->
+        <page title="$l10n_dc_overview">
+            <paragraph>
+                <text text="$l10n_dc_help_page_base_text" />
+            </paragraph>
+            <paragraph>
+                <text text="$l10n_dc_help_page_base_cmds" />
+            </paragraph>
+            <paragraph>
+                <title text="$l10n_chat_command_me_admin" />
+                <text text="$l10n_chat_command_info_me_admin" />
+            </paragraph>
+            <paragraph>
+                <title text="$l10n_chat_command_users" />
+                <text text="$l10n_chat_command_info_users" />
+            </paragraph>
+            <paragraph>
+                <title text="$l10n_chat_command_moo" />
+                <text text="$l10n_chat_command_info_moo" />
+            </paragraph>
+            <paragraph>
+                <title text="$l10n_chat_command_make_admin" />
+                <text text="$l10n_chat_command_info_make_admin" />
+            </paragraph>
+            <paragraph>
+                <title text="$l10n_chat_command_rememberme" />
+                <text text="$l10n_chat_command_info_rememberme" />
+            </paragraph>
+            <paragraph>
+                <title text="$l10n_chat_command_forgetme" />
+                <text text="$l10n_chat_command_info_forgetme" />
+            </paragraph>
+        </page>
+    </category>
+</helpLines>

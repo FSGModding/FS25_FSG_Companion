@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+
+<GUI name="FSGSettingsGuiSettings">
+
+    <GuiElement type="empty" profile="uiInGameMenuFrame">
+
+        <GuiElement profile="fs25_menuHeaderPanel">
+          <Bitmap profile="fs25_menuHeaderIconBg">
+            <Bitmap profile="fs25_menuHeaderIcon" imageSliceId="gui.icon_options_generalSettings2" />
+          </Bitmap>
+          <Text profile="fs25_menuHeaderTitle" text="$l10n_ui_settings_settings" />
+        </GuiElement>
+        
+        <ScrollingLayout profile="fs25_settingsLayout" id="companionSettingsLayout" topClipperElementName="topClipper" bottomClipperElementName="bottomClipper">
+
+            <!-- Companion Settings Title -->
+            <Text profile="fs25_settingsSectionHeader" name="sectionHeader" text="$l10n_ui_settings_companion_settings" />
+
+            <!-- Auto Dismiss Workers -->
+            <Bitmap profile="fs25_multiTextOptionContainer">
+              <BinaryOption profile="fs25_settingsBinaryOption" onClick="onClickUpdateDismissWorkers" id="updateDismissWorkers">
+                <Text profile="fs25_multiTextOptionTooltip" name="ignore" text="$l10n_ui_settings_toolTip_dismissWorkers" />
+              </BinaryOption>
+              <Text profile="fs25_settingsMultiTextOptionTitle" text="$l10n_ui_settings_dismissWorkers" />
+            </Bitmap>
+
+            <!-- Companion Inbox Active -->
+            <Bitmap profile="fs25_multiTextOptionContainer">
+              <BinaryOption profile="fs25_settingsBinaryOption" onClick="onClickUpdateInboxActive" id="updateInboxActive">
+                <Text profile="fs25_multiTextOptionTooltip" name="ignore" text="$l10n_ui_settings_toolTip_inboxActive" />
+              </BinaryOption>
+              <Text profile="fs25_settingsMultiTextOptionTitle" text="$l10n_ui_settings_inboxActive" />
+            </Bitmap>
+
+            <!-- FSG Transaction Id -->
+            <Bitmap profile="fs25_multiTextOptionContainer">
+              <TextInput profile="fs25_settingsTextInput" id="updateTransactionId" onEnterPressed="onEnterPressedUpdateTransactionId" focusOnHighlight="true" imeDescription="$l10n_ui_transactionId" imePlaceholder="1" imeTitle="$l10n_ui_transactionId">
+                <ThreePartBitmap profile="fs25_textInputBg" />
+                <Bitmap profile="fs25_textInputIconBox">
+                  <Bitmap profile="fs25_textInputIcon" />
+                </Bitmap>
+                <Text profile="fs25_multiTextOptionTooltip" name="ignore" text="$l10n_ui_settings_toolTip_transactionId" position="680px 0px" />
+              </TextInput>
+              <Text profile="fs25_settingsMultiTextOptionTitle" text="$l10n_ui_transactionId" />
+            </Bitmap>
+
+            <!-- Disable Sleep -->
+            <Bitmap profile="fs25_multiTextOptionContainer">
+              <BinaryOption profile="fs25_settingsBinaryOption" onClick="onClickUpdateDisableSleep" id="updateDisableSleep">
+                <Text profile="fs25_multiTextOptionTooltip" name="ignore" text="$l10n_ui_settings_toolTip_disableSleep" />
+              </BinaryOption>
+              <Text profile="fs25_settingsMultiTextOptionTitle" text="$l10n_ui_settings_disableSleep" />
+            </Bitmap>
+
+            <!-- Game Limits Title -->
+            <Text profile="fs25_settingsSectionHeader" name="sectionHeader" text="$l10n_ui_settings_game_limits" />
+
+            <!-- Hire Limit Option -->
+            <Bitmap profile="fs25_multiTextOptionContainer" id="onClickUpdateHireLimitBox">
+              <MultiTextOption profile="fs25_settingsMultiTextOption" onClick="onClickUpdateHireLimit" id="updateHireLimit" texts="0|1|2|3|4|5|6|7|8|9|10">
+                <Text profile="fs25_multiTextOptionTooltip" name="ignore" text="$l10n_ui_settings_toolTip_hireLimit" />
+              </MultiTextOption>
+              <Text profile="fs25_settingsMultiTextOptionTitle" text="$l10n_ui_settings_hireLimit" />
+            </Bitmap>
+
+            <!-- Max Missions Option -->
+            <Bitmap profile="fs25_multiTextOptionContainer" id="onClickUpdateMaxMissionsBox">
+              <MultiTextOption profile="fs25_settingsMultiTextOption" onClick="onClickUpdateMaxMissions" id="updateMaxMissions" texts="0|1|2|3|4|5|6|7|8|9|10">
+                <Text profile="fs25_multiTextOptionTooltip" name="ignore" text="$l10n_ui_settings_toolTip_maxMissions" />
+              </MultiTextOption>
+              <Text profile="fs25_settingsMultiTextOptionTitle" text="$l10n_ui_settings_maxMissions" />
+            </Bitmap>
+
+            <!-- Husbandry Limit Option -->
+            <Bitmap profile="fs25_multiTextOptionContainer" id="onClickUpdateHusbandryLimitBox">
+              <MultiTextOption profile="fs25_settingsMultiTextOption" onClick="onClickUpdateHusbandryLimit" id="updateHusbandryLimit" texts="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30">
+                <Text profile="fs25_multiTextOptionTooltip" name="ignore" text="$l10n_ui_settings_toolTip_husbandryLimit" />
+              </MultiTextOption>
+              <Text profile="fs25_settingsMultiTextOptionTitle" text="$l10n_ui_settings_husbandryLimit" />
+            </Bitmap>
+
+            <!-- Production Points Limit Option -->
+            <Bitmap profile="fs25_multiTextOptionContainer" id="onClickUpdateProductionPointsBox">
+              <MultiTextOption profile="fs25_settingsMultiTextOption" onClick="onClickUpdateProductionPoints" id="updateProductionPoints" texts="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30">
+                <Text profile="fs25_multiTextOptionTooltip" name="ignore" text="$l10n_ui_settings_toolTip_productionPoints" />
+              </MultiTextOption>
+              <Text profile="fs25_settingsMultiTextOptionTitle" text="$l10n_ui_settings_productionPoints" />
+            </Bitmap>
+
+            <!-- Selling Points Limit Option -->
+            <Bitmap profile="fs25_multiTextOptionContainer" id="onClickUpdateSellingPointsBox">
+              <MultiTextOption profile="fs25_settingsMultiTextOption" onClick="onClickUpdateSellingPoints" id="updateSellingPoints" texts="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30">
+                <Text profile="fs25_multiTextOptionTooltip" name="ignore" text="$l10n_ui_settings_toolTip_sellingPoints" />
+              </MultiTextOption>
+              <Text profile="fs25_settingsMultiTextOptionTitle" text="$l10n_ui_settings_sellingPoints" />
+            </Bitmap>
+
+            <!-- Farm Houses Limit Option -->
+            <Bitmap profile="fs25_multiTextOptionContainer" id="onClickUpdateFarmHousesBox">
+              <MultiTextOption profile="fs25_settingsMultiTextOption" onClick="onClickUpdateFarmHouses" id="updateFarmHouses" texts="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30">
+                <Text profile="fs25_multiTextOptionTooltip" name="ignore" text="$l10n_ui_settings_toolTip_farmHouses" />
+              </MultiTextOption>
+              <Text profile="fs25_settingsMultiTextOptionTitle" text="$l10n_ui_settings_farmHouses" />
+            </Bitmap>
+
+            <!-- Generators Limit Option -->
+            <Bitmap profile="fs25_multiTextOptionContainer" id="onClickUpdateGeneratorsBox">
+              <MultiTextOption profile="fs25_settingsMultiTextOption" onClick="onClickUpdateGenerators" id="updateGenerators" texts="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30">
+                <Text profile="fs25_multiTextOptionTooltip" name="ignore" text="$l10n_ui_settings_toolTip_generators" />
+              </MultiTextOption>
+              <Text profile="fs25_settingsMultiTextOptionTitle" text="$l10n_ui_settings_generators" />
+            </Bitmap>
+
+            <!-- Garden Sheds Option -->
+            <Bitmap profile="fs25_multiTextOptionContainer" id="onClickUpdateGardenShedsBox">
+              <MultiTextOption profile="fs25_settingsMultiTextOption" onClick="onClickUpdateGardenSheds" id="updateGardenSheds" texts="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30">
+                <Text profile="fs25_multiTextOptionTooltip" name="ignore" text="$l10n_ui_settings_toolTip_gardenSheds" />
+              </MultiTextOption>
+              <Text profile="fs25_settingsMultiTextOptionTitle" text="$l10n_ui_settings_gardenSheds" />
+            </Bitmap>
+
+            <!-- Flood Lighting Limit Option -->
+            <Bitmap profile="fs25_multiTextOptionContainer" id="onClickUpdateFloodLightingBox">
+              <MultiTextOption profile="fs25_settingsMultiTextOption" onClick="onClickUpdateFloodLighting" id="updateFloodLighting" texts="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30">
+                <Text profile="fs25_multiTextOptionTooltip" name="ignore" text="$l10n_ui_settings_toolTip_floodLighting" />
+              </MultiTextOption>
+              <Text profile="fs25_settingsMultiTextOptionTitle" text="$l10n_ui_settings_floodLighting" />
+            </Bitmap>
+
+            <!-- Other Placeables Limit Option -->
+            <Bitmap profile="fs25_multiTextOptionContainer" id="onClickUpdateOtherPlaceablesBox">
+              <MultiTextOption profile="fs25_settingsMultiTextOption" onClick="onClickUpdateOtherPlaceables" id="updateOtherPlaceables" texts="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30">
+                <Text profile="fs25_multiTextOptionTooltip" name="ignore" text="$l10n_ui_settings_toolTip_otherPlaceables" />
+              </MultiTextOption>
+              <Text profile="fs25_settingsMultiTextOptionTitle" text="$l10n_ui_settings_otherPlaceables" />
+            </Bitmap>
+
+
+            <!-- Companion Settings Title -->
+            <Text profile="fs25_settingsSectionHeader" name="sectionHeader" text="$l10n_ui_settings_coop" />
+
+            <!-- Coop Server Limits -->
+            <Bitmap profile="fs25_multiTextOptionContainer">
+              <BinaryOption profile="fs25_settingsBinaryOption" onClick="onClickUpdateCoopLimitsEnabled" id="updateCoopLimitsEnabled">
+                <Text profile="fs25_multiTextOptionTooltip" name="ignore" text="$l10n_ui_settings_toolTip_coopLimitsEnabled" />
+              </BinaryOption>
+              <Text profile="fs25_settingsMultiTextOptionTitle" text="$l10n_ui_settings_coopLimitsEnabled" />
+            </Bitmap>
+
+            <!-- Coop Min Cruise Speed -->            
+            <Bitmap profile="fs25_multiTextOptionContainer" id="onClickUpdateCoopMinCruiseSpeedBox">
+              <MultiTextOption profile="fs25_settingsMultiTextOption" onClick="onClickUpdateCoopMinCruiseSpeed" id="updateCoopMinCruiseSpeed" texts="0 kph|1 kph|2 kph|3 kph|4 kph|5 kph|6 kph|7 kph|8 kph|9 kph|10 kph|11 kph|12 kph|13 kph|14 kph|15 kph">
+                <Text profile="fs25_multiTextOptionTooltip" name="ignore" text="$l10n_ui_settings_toolTip_coopMinCruiseSpeed" />
+              </MultiTextOption>
+              <Text profile="fs25_settingsMultiTextOptionTitle" text="$l10n_ui_settings_coopMinCruiseSpeed" />
+            </Bitmap>
+
+            <!-- Coop Min Cruise Minutes -->
+            <Bitmap profile="fs25_multiTextOptionContainer" id="onClickUpdateCoopMinCruiseMinBox">
+              <MultiTextOption profile="fs25_settingsMultiTextOption" onClick="onClickUpdateCoopMinCruiseMin" id="updateCoopMinCruiseMin" texts="0 min|1 min|2 min|3 min|4 min|5 min|6 min|7 min|8 min|9 min|10 min|11 min|12 min|13 min|14 min|15 min">
+                <Text profile="fs25_multiTextOptionTooltip" name="ignore" text="$l10n_ui_settings_toolTip_coopMinCruiseMin" />
+              </MultiTextOption>
+              <Text profile="fs25_settingsMultiTextOptionTitle" text="$l10n_ui_settings_coopMinCruiseMin" />
+            </Bitmap>
+
+        </ScrollingLayout>
+        <Bitmap profile="fs25_settingsTooltipSeparator" />
+        <Bitmap profile="fs25_startClipper" name="topClipper" />
+        <Bitmap profile="fs25_stopClipper" name="bottomClipper" />
+
+    </GuiElement>
+
+
+</GUI>
