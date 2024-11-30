@@ -84,6 +84,7 @@
     <text name="text_All_Wheels"                      text="All tires and tracks" />
 
     <!-- Setting Menu -->
+    <text name="FSG_MENU"                             text="FSG Companion" />
     <text name="input_FSG_MENU"                       text="FSG Companion" />
     <text name="ui_settings_info"                     text="FSG Companion Info" />
     <text name="ui_settings_settings"                 text="FSG Companion Settings" />

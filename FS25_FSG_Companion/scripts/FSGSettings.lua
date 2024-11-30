@@ -25,8 +25,7 @@ function FSGSettings.new(mission, i18n, modDirectory, modName)
   self.ServerHour             = 0
   self.ServerMinCleanUTC      = 0
   self.TimeSpeed              = 1
-  self.displayMessage         = 1
-  self.serverMin              = 0
+  self.actionEventId          = nil
 
   -- Load mod default settings
   self.settings = FS22PrefSaver:new(
@@ -73,16 +72,12 @@ function FSGSettings:loadMap(filename)
 	self.settings:loadSettings()
 	self.settings:saveSettings()
 
-  FSGSettings.eventName = {}
-
-  -- PlayerInputComponent.registerActionEvents = Utils.appendedFunction(PlayerInputComponent.registerActionEvents, FSGSettings.registerActionEventsPlayer)
-
   local FSGInfoFrame = FSGSettingsGuiInfoFrame:new(nil, g_i18n)
   local FSGToolsFrame = FSGSettingsGuiToolsFrame:new(nil, g_i18n)
   local FSGSettingsFrame = FSGSettingsGuiSettingsFrame:new(nil, g_i18n)
   local FSGTimeSyncFrame = FSGSettingsGuiTimeSyncFrame:new(nil, g_i18n)
 
-  -- g_gui:loadProfiles(FSGSettings.modDirectory .. "gui/guiProfiles.xml")
+  g_gui:loadProfiles(FSGSettings.modDirectory .. "gui/guiProfiles.xml")
 
   FSGSettings.gui = FSGSettingsGui:new(g_messageCenter, g_i18n, g_inputBinding)
 
@@ -96,14 +91,13 @@ end
 
 -- Register Player Interaction
 function FSGSettings:updateActionEvents()
-  if FSGSettings.EventId == nil then
+  if self.actionEventId == nil then
     rcDebug(" Info: FSGS-updateActionEvents")
-    local result, eventName = g_inputBinding:registerActionEvent(InputAction.FSG_MENU,'FSG_MENU', FSGSettings.actionAdditionalInfo_openGui, false, true, true, true)
-    if result then
-        table.insert(FSGSettings.eventName, eventName)
-        g_inputBinding.events[eventName].displayIsVisible = true
-        FSGSettings.EventId = eventName
-    end
+    -- We have to run this often to work in MP
+    local _, actionEventId = g_inputBinding:registerActionEvent('FSG_MENU', self, FSGSettings.actionAdditionalInfo_openGui, false, true, false, true)
+    g_inputBinding:setActionEventTextPriority(actionEventId, GS_PRIO_VERY_LOW)
+    g_inputBinding:setActionEventText(actionEventId, g_i18n:getText("FSG_MENU"))
+    self.actionEventId = actionEventId
   end
 end
 
@@ -408,82 +402,6 @@ function FSGSettings:refresh()
     FSGSettingsGuiTimeSyncFrame:updateSettings()
     FSGSettingsGuiToolsFrame:updateSettings()
   end
-end
-
----Draws the companionMessage display
--- FS25 - Will need to figure out how this is done in FS25.  - FSGSettings.lua:458: attempt to index nil with 'hud'
--- function FSGSettings:draw()
---     -- No need to render on a server
---     if not g_client then
---       return
---     end 
-
---     -- If the hud is hidden, don't show messages
---     if g_noHudModeEnabled or not g_currentMission.hud.isVisible then
---       return
---     end
-
---     -- Messages to diplay in rotation on bottom left of screen
---     self.messages = {
---       "Welcome to Farm Sim Game Realism Servers",
---       "Powered By Fragnet.net/FSG",
---       "Powered By FSGRealism.com",
---       "Thank you for playing on FSG Realism"
---     }
-
---     -- Check to see which message to display
---     local currentMin = g_currentMission.environment.currentMinute
-
---     if currentMin ~= self.serverMin then
---       self.displayMessage = self.displayMessage + 1
-
---       if self.displayMessage > #self.messages then
---           self.displayMessage = 1
---       end
-
---       self.serverMin = currentMin
---     end
-
---     -- Make sure text is enabled
---     local text = self.messages[self.displayMessage]
-
---     -- If no text then don't draw duh
---     if text == nil or text == "" then
---       return
---     end
-
---     --Class the draw function of the super class to render the background
---     -- FSGSettings:superClass().draw(self)
-
---     --Store the color in a local for faster access
---     local textSize = g_currentMission.inGameMenu.hud.inputHelp.helpTextSize
-
---     --Get the position of the display
---     local posX, posY = self:findOrigin()
-
---     --Disable bold textrendering
---     setTextBold(true)
---     --Set textrendering to right alignment
---     setTextAlignment(RenderText.ALIGN_LEFT)
---     --Set the color of the textrendering for the text
---     setTextColor(1, 1, 1, 1)
-
---     --Render the text
---     renderText(posX, posY, textSize, text)
-
---     --As text rendering functions are using a global scope we need to reset all our changes
---     setTextBold(false)
---     --Reset text alignment to left
---     setTextAlignment(RenderText.ALIGN_LEFT)
---     --Reset text color to white
---     setTextColor(1, 1, 1, 1)
--- end
-
-function FSGSettings:findOrigin()
-	local tmpX = 0.01622
-	local tmpY = 0.00800
-
-	return tmpX, tmpY
 end
 
 -- Gets transactionId for current command to help avoid duplicates

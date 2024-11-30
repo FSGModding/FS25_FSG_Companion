@@ -26,6 +26,7 @@ local modEnvironmentCoopSiloManager
 local modEnvironmentFarmPlaceableTax
 local modEnvironmentFillManager
 local modEnvironmentFSGSettings
+local modEnvironmentInfoMessages
 
 ---Source files 
 local sourceFiles = {
@@ -50,6 +51,7 @@ local sourceFiles = {
   "scripts/FSGSettings.lua",
   "scripts/fs22ModPrefSaver.lua",
   "scripts/paintAndTerraformAnywhere.lua",
+  "scripts/infoMessages.lua",
   -- Gui
   "gui/FSGSettingsGui.lua",
   "gui/FSGSettingsGuiInfoFrame.lua",
@@ -149,6 +151,10 @@ local function load(mission)
   modEnvironmentFSGSettings = FSGSettings:new(mission, g_i18n, modDirectory, modName)
   getfenv(0)["g_fsgSettings"] = modEnvironmentFSGSettings
 
+  assert(g_infoMessages == nil)
+  modEnvironmentInfoMessages = InfoMessages:new()
+  getfenv(0)["g_infoMessages"] = modEnvironmentInfoMessages
+
   if mission:getIsClient() then
     addModEventListener(modEnvironmentChat)
     addModEventListener(modEnvironmentonSave)
@@ -166,6 +172,7 @@ local function load(mission)
     addModEventListener(modEnvironmentFarmPlaceableTax)
     addModEventListener(modEnvironmentFillManager)
     addModEventListener(modEnvironmentFSGSettings)
+    addModEventListener(modEnvironmentInfoMessages)
   end
 
 end
@@ -286,6 +293,13 @@ local function unload()
     modEnvironmentFSGSettings = nil
     if g_fsgSettings ~= nil then
       getfenv(0)["g_fsgSettings"] = nil
+    end
+  end
+  removeModEventListener(modEnvironmentInfoMessages)
+  if modEnvironmentInfoMessages ~= nil then
+    modEnvironmentInfoMessages = nil
+    if g_infoMessages ~= nil then
+      getfenv(0)["g_infoMessages"] = nil
     end
   end
 end

@@ -25,20 +25,20 @@ function Limits:loadMap()
   ProductionChainManager.NUM_MAX_PRODUCTION_POINTS = 240.00000;
 
   -- Check if map has active collectables then remove them
-  local collectiblesSystem = g_currentMission.collectiblesSystem
-  g_currentMission.collectiblesSystem.isComplete = true
-  if collectiblesSystem ~= nil then
-    rcDebug("Collectables Found - Removing Them")
-		for _, info in pairs(collectiblesSystem.collectibles) do
-			collectiblesSystem.collected[info.index] = true
-			if info.groupName ~= nil then
-				collectiblesSystem.groups[info.groupName].collectedItems = collectiblesSystem.groups[info.groupName].collectedItems + 1
-			end
-		end
-    collectiblesSystem:updateCollectiblesState()
-    collectiblesSystem:updateTargetState()
-    collectiblesSystem:updateHotspotState()
-  end
+  -- local collectiblesSystem = g_currentMission.collectiblesSystem
+  -- g_currentMission.collectiblesSystem.isComplete = true
+  -- if collectiblesSystem ~= nil then
+  --   rcDebug("Collectables Found - Removing Them")
+	-- 	for _, info in pairs(collectiblesSystem.collectibles) do
+	-- 		collectiblesSystem.collected[info.index] = true
+	-- 		if info.groupName ~= nil then
+	-- 			collectiblesSystem.groups[info.groupName].collectedItems = collectiblesSystem.groups[info.groupName].collectedItems + 1
+	-- 		end
+	-- 	end
+  --   collectiblesSystem:updateCollectiblesState(collectiblesSystem)
+  --   collectiblesSystem:updateTargetState(collectiblesSystem)
+  --   collectiblesSystem:updateHotspotState(collectiblesSystem)
+  -- end
 
 end
 
