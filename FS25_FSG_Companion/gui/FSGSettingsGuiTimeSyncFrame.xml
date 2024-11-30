@@ -55,6 +55,8 @@
               <Text profile="fs25_settingsMultiTextOptionTitle" text="$l10n_setting_realTimeSync_progressNotification" />
             </Bitmap>
 
+            <!-- MP Admin Warning -->
+            <Text profile="fs25_settingsNoPermissionText_rtc" id="fsgSettingsNoPermissionText" name="fsgSettingsNoPermissionText" text="$l10n_ui_fsgSettingsNoPermissionText" />
 
         </ScrollingLayout>
         <Bitmap profile="fs25_settingsTooltipSeparator" />

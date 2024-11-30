@@ -69,7 +69,7 @@ function FSGSettingsGuiSettingsFrame:onFrameOpen()
     -- Alternates the background colors
     local set = true
     for _, tableRow in pairs(self.companionSettingsLayout.elements) do
-      if tableRow.name == "sectionHeader" then
+      if tableRow.name == "sectionHeader" or tableRow.name == "fsgSettingsNoPermissionText" then
         set = true
       elseif tableRow:getIsVisible() then
         local color = InGameMenuSettingsFrame.COLOR_ALTERNATING[set]
@@ -78,6 +78,7 @@ function FSGSettingsGuiSettingsFrame:onFrameOpen()
       end
     end
 
+    self.fsgSettingsNoPermissionText:setVisible(not g_currentMission:getIsServer() and not g_currentMission.isMasterUser)
 
 end
 

@@ -163,6 +163,9 @@
               <Text profile="fs25_settingsMultiTextOptionTitle" text="$l10n_ui_settings_coopMinCruiseMin" />
             </Bitmap>
 
+            <!-- MP Admin Warning -->
+            <Text profile="fs25_settingsNoPermissionText_rtc" id="fsgSettingsNoPermissionText" name="fsgSettingsNoPermissionText" text="$l10n_ui_fsgSettingsNoPermissionText" />
+
         </ScrollingLayout>
         <Bitmap profile="fs25_settingsTooltipSeparator" />
         <Bitmap profile="fs25_startClipper" name="topClipper" />

@@ -67,6 +67,7 @@
     <text name="sync_warning"                         text="Sync Warning - Player Incoming!" />
     <text name="rc_max_items"                         text="This farm has max items for this store item." />
     <text name="rc_max_missions"                      text="This farm has reached max missions allowed." />
+    <text name="ui_fsgSettingsNoPermissionText"       text="Only Admins can alter these settings." />
 
     <!-- Vehicle Storage -->    
     <text name ="button_storeVehicle"                 text="Store Vehicle" />
