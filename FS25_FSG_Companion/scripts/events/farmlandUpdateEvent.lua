@@ -36,7 +36,7 @@ end
 function FarmlandUpdateEvent:run(connection)
   rcDebug("FUE-run")
   g_farmlandManager:setLandOwnership(self.farmlandId, self.farmId)
-  g_fieldManager:updateFieldOwnership()
+  -- g_fieldManager:updateFieldOwnership() -- Looks like this is no longer a thing
 end
 
 function FarmlandUpdateEvent.sendEvent(...)

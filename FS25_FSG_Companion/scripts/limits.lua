@@ -144,24 +144,27 @@ end
 
 -- 
 function Limits.startContract(self, superFunc, leaseVehicles)
-	local contract = self:getSelectedContract()
-	local farmId = g_currentMission:getFarmId()
+  local contract = self:getSelectedContract()
+  local farmId = g_currentMission:getFarmId()
 
+  -- Check to see if the player has taken max contracts
 	if Limits:hasFarmReachedMissionLimit(farmId) then
 		InfoDialog.show(g_i18n:getText("rc_max_missions"), nil, nil, g_i18n:getText("button_cancel"))
 
 		return
 	end
 
-	if leaseVehicles and not contract.mission:isSpawnSpaceAvailable() then
-    InfoDialog.show(g_i18n:getText("warning_noFreeMissionSpace"), nil, nil, g_i18n:getText("button_cancel"))
-	else
-		local result = g_missionManager:startMission(contract.mission, farmId, leaseVehicles)
+  if contract == nil then
+    return
+  else
+    if leaseVehicles and not contract.mission:isSpawnSpaceAvailable() then
+      InfoDialog.show(g_i18n:getText("warning_noFreeMissionSpace"), nil, nil, DialogElement.TYPE_WARNING)
+    else
+      g_messageCenter:subscribe(MissionStartEvent, self.onMissionStarted, self)
+      g_client:getServerConnection():sendEvent(MissionStartEvent.new(contract.mission, farmId, leaseVehicles))
+    end
+  end
 
-		if result ~= false and leaseVehicles and g_currentMission.missionInfo.difficulty == 1 and not g_currentMission.missionDynamicInfo.isMultiplayer then
-      InfoDialog.show(g_i18n:getText("ui_missionVehiclesAtShop"), nil, nil, g_i18n:getText("button_cancel"))
-		end
-	end
 end
 
 -- Set a hard limit of missions any given farm can have
@@ -237,8 +240,8 @@ function Limits:canBuyPlaceable()
   if self.storeItem.rawXMLFilename == "fsgCoopInbound.xml" 
     or self.storeItem.rawXMLFilename == "fsgCoopOutbound.xml" 
     or self.storeItem.rawXMLFilename == "fsgCoopInboundObjects.xml" 
-    or self.storeItem.rawXMLFilename == "$data/placeables/lizard/electricityGenerators/level05/electricityGenerator05.xml"
-    or self.storeItem.rawXMLFilename == "placeables/productionPoints/miningShaftTower/miningShaftTower.xml" then
+    or self.storeItem.rawXMLFilename == "$data/placeables/brandless/electricityGenerators/level05/electricityGenerator05.xml"
+  then
       -- Make sure we are on server and user is master before allowing 
       rcDebug("Checking to make sure user is on server and master user.")
       if g_currentMission:getIsServer() or g_currentMission.isMasterUser then

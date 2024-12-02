@@ -92,8 +92,8 @@ end
 
 -- Register Player Interaction
 function FSGSettings:updateActionEvents()
-  if self.actionEventId == nil then
-    rcDebug(" Info: FSGS-updateActionEvents")
+  if g_currentMission:getIsClient() == true then
+    -- rcDebug(" Info: FSGS-updateActionEvents")
     -- We have to run this often to work in MP
     local _, actionEventId = g_inputBinding:registerActionEvent('FSG_MENU', self, FSGSettings.actionAdditionalInfo_openGui, false, true, false, true)
     g_inputBinding:setActionEventTextPriority(actionEventId, GS_PRIO_VERY_LOW)

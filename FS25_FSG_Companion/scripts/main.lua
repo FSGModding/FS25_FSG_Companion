@@ -376,6 +376,7 @@ local function init()
 
   Farm.COLOR_SEND_NUM_BITS = 6 -- Adjusting to accommodate more colors
 
+  -- Does not look like the uvs are used anymore for farms
   Farm.ICON_UVS = {
     {330,0,256,256},
     {660,0,256,256},
@@ -409,6 +410,41 @@ local function init()
     {0,620,256,256},
     {330,620,256,256},
     {660,620,256,256},        
+  }
+
+  Farm.ICON_SLICE_IDS = {
+    "gui.multiplayer_chicken",
+    "gui.multiplayer_goat",
+    "gui.multiplayer_pig",
+    "gui.multiplayer_horse",
+    "gui.multiplayer_bull",
+    "gui.multiplayer_chainsaw",
+    "gui.multiplayer_barn",
+    "gui.multiplayer_vehicle",
+    "gui.multiplayer_chicken",
+    "gui.multiplayer_goat",
+    "gui.multiplayer_pig",
+    "gui.multiplayer_horse",
+    "gui.multiplayer_bull",
+    "gui.multiplayer_chainsaw",
+    "gui.multiplayer_barn",
+    "gui.multiplayer_vehicle",
+    "gui.multiplayer_chicken",
+    "gui.multiplayer_goat",
+    "gui.multiplayer_pig",
+    "gui.multiplayer_horse",
+    "gui.multiplayer_bull",
+    "gui.multiplayer_chainsaw",
+    "gui.multiplayer_barn",
+    "gui.multiplayer_vehicle",
+    "gui.multiplayer_chicken",
+    "gui.multiplayer_goat",
+    "gui.multiplayer_pig",
+    "gui.multiplayer_horse",
+    "gui.multiplayer_bull",
+    "gui.multiplayer_chainsaw",
+    "gui.multiplayer_barn",
+    "gui.multiplayer_vehicle",
   }
 
   -- runs when player sends a message in multiplayer chat
