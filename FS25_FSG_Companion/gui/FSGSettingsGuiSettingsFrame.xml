@@ -135,6 +135,13 @@
               <Text profile="fs25_settingsMultiTextOptionTitle" text="$l10n_ui_settings_otherPlaceables" />
             </Bitmap>
 
+            <!-- Disable Borrow Equipment -->
+            <Bitmap profile="fs25_multiTextOptionContainer">
+              <BinaryOption profile="fs25_settingsBinaryOption" onClick="onClickUpdateDisableBorrowEquipment" id="updateDisableBorrowEquipment">
+                <Text profile="fs25_multiTextOptionTooltip" name="ignore" text="$l10n_ui_settings_toolTip_disableBorrowEquipment" />
+              </BinaryOption>
+              <Text profile="fs25_settingsMultiTextOptionTitle" text="$l10n_ui_settings_disableBorrowEquipment" />
+            </Bitmap>
 
             <!-- Companion Settings Title -->
             <Text profile="fs25_settingsSectionHeader" name="sectionHeader" text="$l10n_ui_settings_coop" />

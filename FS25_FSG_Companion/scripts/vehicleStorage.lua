@@ -15,37 +15,33 @@ function VehicleStorage.new(mission, i18n, modDirectory, modName)
 end
 
 -- Add store vehicle button to shop menu
-function VehicleStorage:setVehicle(vehicle)
-  --rcDebug("VehicleStorage-setVehicle")
-  if vehicle ~= nil then 
+function VehicleStorage:setVehicle(vehicle, second)
+  -- rcDebug("VehicleStorage-setVehicle")
+  -- rcDebug(self)
+  if vehicle ~= nil and self.isDealer == true then 
     -- Do not display on single player.
     if g_currentMission.missionDynamicInfo.isMultiplayer then
-      if vehicle.propertyState == Vehicle.PROPERTY_STATE_OWNED then
+      if vehicle.propertyState == VehiclePropertyState.OWNED then
 
         -- Get vehicle id
         if vehicle.id ~= self.previousVehicle then
 
           rcDebug("Vehicle Owned")
-
-          if self.storageButton ~= nil then
-            self.storageButton:unlinkElement()
-            self.storageButton:delete()
-            self.storageButton = nil
-          end
         
-          local storageCost = 1000
-          local StorageElement = self.sellButton:clone(self)
-          StorageElement:setText(string.format("%s (%s)", g_i18n:getText("button_storeVehicle"),g_i18n:formatMoney(storageCost, 0, true, true)))
-          StorageElement:setInputAction("MENU_EXTRA_2")
-          StorageElement:setVisible(vehicle ~= nil)
-          StorageElement.onClickCallback = function ()
-            VehicleStorage:storeVehicleConfirm(vehicle)
+          if self.storageButton == nil then
+            local storageCost = 1000
+            local StorageElement = self.sellButton:clone()
+            StorageElement:setText(string.format("%s (%s)", g_i18n:getText("button_storeVehicle"),g_i18n:formatMoney(storageCost, 0, true, true)))
+            StorageElement:setInputAction("MENU_MAP_ACTION_1")
+            StorageElement:setVisible(vehicle ~= nil)
+            StorageElement.onClickCallback = function ()
+              VehicleStorage:storeVehicleConfirm(vehicle)
+            end
+            self.sellButton.parent:addElement(StorageElement)
+            self.storageButton = StorageElement
+
+            self.previousVehicle = vehicle.id
           end
-          self.sellButton.parent:addElement(StorageElement)
-          self.storageButton = StorageElement
-
-          self.previousVehicle = vehicle.id
-
         end
       else
         rcDebug("Vehicle Not Owned")
@@ -66,16 +62,15 @@ end
 
 -- Confirm with player to store vehicle
 function VehicleStorage:storeVehicleConfirm(vehicle)
-	YesNoDialog.show({
-		text = g_i18n:getText("button_storeVehicleConfirm"),
-		callback = function (yes)
-			if yes then
-        if g_currentMission.missionDynamicInfo.isMultiplayer then
-          VehicleStorageEvent.sendEvent(vehicle)
-        end
-			end
-		end
-	})
+	YesNoDialog.show(function(yes)
+    if yes then
+      if g_currentMission.missionDynamicInfo.isMultiplayer then
+        VehicleStorageEvent.sendEvent(vehicle)
+      else
+        -- VehicleStorage:storeVehicle(vehicle)
+      end
+    end
+	end, nil, g_i18n:getText("button_storeVehicleConfirm"))
 end
 
 -- Store the vehicle.  Save xml to outbox and remove from game.

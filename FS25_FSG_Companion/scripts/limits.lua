@@ -81,7 +81,7 @@ function Limits:toggleAIVehicle()
     end
   end
   -- If server then send to everyone, if not then we are local
-  if g_server ~= nil then
+  if g_server ~= nil and g_dedicatedServer ~= nil then
     LimitsEvent.sendEvent(selfData, ownerFarmId, activeJobVehicles, sequence)
   else
     Limits:toggleAIVehicleSecond(selfData, ownerFarmId, activeJobVehicles, sequence, true)
@@ -148,30 +148,18 @@ function Limits.startContract(self, superFunc, leaseVehicles)
 	local farmId = g_currentMission:getFarmId()
 
 	if Limits:hasFarmReachedMissionLimit(farmId) then
-		InfoDialog.show({
-			visible = true,
-			text = g_i18n:getText("rc_max_missions"),
-			dialogType = DialogElement.TYPE_INFO
-		})
+		InfoDialog.show(g_i18n:getText("rc_max_missions"), nil, nil, g_i18n:getText("button_cancel"))
 
 		return
 	end
 
 	if leaseVehicles and not contract.mission:isSpawnSpaceAvailable() then
-		InfoDialog.show({
-			visible = true,
-			text = g_i18n:getText("warning_noFreeMissionSpace"),
-			dialogType = DialogElement.TYPE_WARNING
-		})
+    InfoDialog.show(g_i18n:getText("warning_noFreeMissionSpace"), nil, nil, g_i18n:getText("button_cancel"))
 	else
 		local result = g_missionManager:startMission(contract.mission, farmId, leaseVehicles)
 
 		if result ~= false and leaseVehicles and g_currentMission.missionInfo.difficulty == 1 and not g_currentMission.missionDynamicInfo.isMultiplayer then
-			InfoDialog.show({
-				visible = true,
-				text = g_i18n:getText("ui_missionVehiclesAtShop"),
-				dialogType = DialogElement.TYPE_INFO
-			})
+      InfoDialog.show(g_i18n:getText("ui_missionVehiclesAtShop"), nil, nil, g_i18n:getText("button_cancel"))
 		end
 	end
 end
@@ -181,9 +169,9 @@ function Limits:hasFarmReachedMissionLimit(farmId)
   rcDebug("Limits - hasFarmReachedMissionLimit")
 	local maxMissions = math.floor(g_fsgSettings.settings:getValue("maxMissions")) - 1 or 2
 	local total = 0
-	for _, mission in ipairs(g_missionManager.missions) do
+	for _, mission in ipairs(g_missionManager:getMissions()) do
 		if mission.farmId == farmId and
-			(mission.status == AbstractMission.STATUS_RUNNING or mission.status == AbstractMission.STATUS_FINISHED) then
+			(mission.status == MissionStatus.RUNNING or mission.status == MissionStatus.FINISHED) then
 			total = total + 1
 		end
 	end
@@ -736,5 +724,8 @@ end
 
 -- Hide the borrow items button for contracts
 function Limits:setButtonsForState()
-	self.leaseButtonInfo.disabled = true
+  -- Check to see if contract borrow equipment disabled
+  if g_fsgSettings.settings:getValue("disableBorrowEquipment") then
+	  self.leaseButtonInfo.disabled = true
+  end
 end

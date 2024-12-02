@@ -29,33 +29,34 @@ function FSGSettings.new(mission, i18n, modDirectory, modName)
 
   -- Load mod default settings
   self.settings = FS22PrefSaver:new(
-    "FS25_FSG_Companion",
-    "Settings.xml",
+    self.modName,
+    self.modName .. "_Settings.xml",
     false,
     {
-      dismissWorkers      = {true, "bool"},
-      inboxActive         = {true, "bool"},
-      paintAnywhere       = {false, "bool"},
-      hireLimit           = {3, "int"},
-      maxMissions         = {3, "int"},
-      husbandryLimit      = {3, "int"},
-      productionPoints    = {3, "int"},
-      sellingPoints       = {2, "int"},
-      farmHouses          = {2, "int"},
-      generators          = {2, "int"},
-      gardenSheds         = {21, "int"},
-      floodLighting       = {21, "int"},
-      otherPlaceables     = {6, "int"},
-      progressNoti        = {true, "bool"},
-      timeSyncEnable      = {true, "bool"},
-      serverOffset        = {1, "int"},
-      timeFixHour         = {1, "int"},
-      autoSetTime         = {false, "bool"},
-      transactionId       = {0, "int"},
-      coopLimitsEnabled   = {false, "bool"},
-      coopMinCruiseSpeed  = {3, "int"},
-      coopMinCruiseMin    = {3, "int"},
-      disableSleep        = {true, "bool"}
+      dismissWorkers          = {true, "bool"},
+      inboxActive             = {true, "bool"},
+      paintAnywhere           = {false, "bool"},
+      hireLimit               = {3, "int"},
+      maxMissions             = {3, "int"},
+      husbandryLimit          = {3, "int"},
+      productionPoints        = {3, "int"},
+      sellingPoints           = {2, "int"},
+      farmHouses              = {2, "int"},
+      generators              = {2, "int"},
+      gardenSheds             = {21, "int"},
+      floodLighting           = {21, "int"},
+      otherPlaceables         = {6, "int"},
+      progressNoti            = {true, "bool"},
+      timeSyncEnable          = {true, "bool"},
+      serverOffset            = {1, "int"},
+      timeFixHour             = {1, "int"},
+      autoSetTime             = {false, "bool"},
+      transactionId           = {0, "int"},
+      coopLimitsEnabled       = {false, "bool"},
+      coopMinCruiseSpeed      = {3, "int"},
+      coopMinCruiseMin        = {3, "int"},
+      disableSleep            = {true, "bool"},
+      disableBorrowEquipment  = {false, "bool"}
     },
 		nil,
 		nil
@@ -73,7 +74,7 @@ function FSGSettings:loadMap(filename)
 	self.settings:saveSettings()
 
   local FSGInfoFrame = FSGSettingsGuiInfoFrame:new(nil, g_i18n)
-  local FSGToolsFrame = FSGSettingsGuiToolsFrame:new(nil, g_i18n)
+  -- local FSGToolsFrame = FSGSettingsGuiToolsFrame:new(nil, g_i18n)
   local FSGSettingsFrame = FSGSettingsGuiSettingsFrame:new(nil, g_i18n)
   local FSGTimeSyncFrame = FSGSettingsGuiTimeSyncFrame:new(nil, g_i18n)
 
@@ -82,7 +83,7 @@ function FSGSettings:loadMap(filename)
   FSGSettings.gui = FSGSettingsGui:new(g_messageCenter, g_i18n, g_inputBinding)
 
   g_gui:loadGui(FSGSettings.modDirectory .. "gui/FSGSettingsGuiInfoFrame.xml", "FSGSettingsGuiInfoFrame", FSGInfoFrame, true)
-  g_gui:loadGui(FSGSettings.modDirectory .. "gui/FSGSettingsGuiToolsFrame.xml", "FSGSettingsGuiToolsFrame", FSGToolsFrame, true)
+  -- g_gui:loadGui(FSGSettings.modDirectory .. "gui/FSGSettingsGuiToolsFrame.xml", "FSGSettingsGuiToolsFrame", FSGToolsFrame, true)
   g_gui:loadGui(FSGSettings.modDirectory .. "gui/FSGSettingsGuiSettingsFrame.xml", "FSGSettingsGuiSettingsFrame", FSGSettingsFrame, true)
   g_gui:loadGui(FSGSettings.modDirectory .. "gui/FSGSettingsGuiTimeSyncFrame.xml", "FSGSettingsGuiTimeSyncFrame", FSGTimeSyncFrame, true)
   g_gui:loadGui(FSGSettings.modDirectory .. "gui/FSGSettingsGui.xml", "FSGSettingsGui", FSGSettings.gui)

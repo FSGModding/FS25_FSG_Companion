@@ -129,6 +129,8 @@
     <text name="ui_settings_toolTip_coopMinCruiseMin" text="How many minutes a vehicle can be set at the min cruise speed before cruise is stopped." />
     <text name="ui_settings_disableSleep"             text="Disable Sleep" />
     <text name="ui_settings_toolTip_disableSleep"     text="When enabled players will not be able to sleep in game via the sleep triggers." />
+    <text name="ui_settings_disableBorrowEquipment"   text="Disable Borrow Equipment" />
+    <text name="ui_settings_toolTip_disableBorrowEquipment"   text="Disables the ability to borrow equipment for contracts." /> 
 
     <!-- Info Text -->
     <text name="ui_settings_info_1"                   text="Welcome to FSG Realism!  We are excited that you are a part of this journey in pixel farming!" />

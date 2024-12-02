@@ -120,7 +120,7 @@ function VehicleEdit:consoleCommandStoreVehicle()
     if self.isServer then
       -- User is server or host
       rcDebug('  Info: ==VehicleEdit:consoleCommandStoreVehicle: user is server.')
-      -- Since we are local, go ahead and set the hours for vehicle
+      -- Since we are local, go ahead store vehicle
       VehicleStorageEvent.sendEvent(self.currentVehicle)
       rcDebug("Selected Vehicle was sent to storage.")
     else

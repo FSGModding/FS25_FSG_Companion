@@ -72,7 +72,7 @@ function onSave.vehicleStats()
 
       local isSelling        = (vehicle.isDeleted ~= nil and vehicle.isDeleted) or (vehicle.isDeleting ~= nil and vehicle.isDeleting)
       --local hasConned        = vehicle.getIsControlled ~= nil
-      local isProperty       = vehicle.propertyState == 1 or vehicle.propertyState == 2 or vehicle.propertyState == 3
+      local isProperty       = vehicle.propertyState == VehiclePropertyState.OWNED or vehicle.propertyState == VehiclePropertyState.LEASED or vehicle.propertyState == VehiclePropertyState.MISSION
       local isPallet         = vehicle.typeName == "pallet" or vehicle.typeName == "bigBag" or vehicle.typeName == "treeSaplingPallet"
       local isTrain          = vehicle.typeName == "locomotive"
       local isBelt           = vehicle.typeName == "conveyorBelt" or vehicle.typeName == "pickupConveyorBelt"

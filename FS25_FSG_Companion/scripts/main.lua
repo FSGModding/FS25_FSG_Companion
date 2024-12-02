@@ -337,6 +337,8 @@ local function init()
   Mission00.load = Utils.prependedFunction(Mission00.load, load)
   Mission00.loadMission00Finished = Utils.appendedFunction(Mission00.loadMission00Finished, loadedMission)
 
+  MissionManager.MAX_MISSIONS_PER_FARM = 10
+
   FarmManager.MAX_NUM_FARMS = 20
   FarmManager.FARM_ID_SEND_NUM_BITS = 12
   FarmManager.MAX_FARM_ID = 4095

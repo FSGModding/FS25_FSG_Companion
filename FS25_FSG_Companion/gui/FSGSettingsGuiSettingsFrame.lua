@@ -149,6 +149,10 @@ function FSGSettingsGuiSettingsFrame:updateSettings()
   self.updateTransactionId:setText(tostring(transactionId))
   self.updateTransactionId:setDisabled(true) -- for display only
 
+  local disableBorrowEquipment = g_fsgSettings.settings:getValue("disableBorrowEquipment")
+  self.updateDisableBorrowEquipment:setIsChecked(disableBorrowEquipment, self.isOpening)
+  self.updateDisableBorrowEquipment:setDisabled(not g_currentMission:getIsServer() and not g_currentMission.isMasterUser)
+
   local coopLimitsEnabled = g_fsgSettings.settings:getValue("coopLimitsEnabled")
   self.updateCoopLimitsEnabled:setIsChecked(coopLimitsEnabled, self.isOpening)
   self.updateCoopLimitsEnabled:setDisabled(not g_currentMission:getIsServer() and not g_currentMission.isMasterUser)
@@ -324,6 +328,23 @@ function FSGSettingsGuiSettingsFrame:onClickUpdateOtherPlaceables(state)
 end
 
 function FSGSettingsGuiSettingsFrame:onEnterPressedUpdateTransactionId()
+end
+
+function FSGSettingsGuiSettingsFrame:onClickUpdateDisableBorrowEquipment(state)
+  rcDebug("FSGSettingsGuiSettingsFrame:onClickUpdateDisableBorrowEquipment")
+  g_fsgSettings.settings:setValue(
+    "disableBorrowEquipment",
+    state == CheckedOptionElement.STATE_CHECKED
+  )
+  g_fsgSettings.settings:saveSettings()
+  if not self.isServer then
+    -- Send setting data to the server
+    if state == 1 then state = false else state = true end
+    rcDebug('FSGSettingsGuiSettingsFrame:onClickUpdateDisableBorrowEquipment: ')
+    rcDebug(state)
+
+    FCSettingEvent.sendEvent(2, "disableBorrowEquipment", state)
+  end
 end
 
 function FSGSettingsGuiSettingsFrame:onClickUpdateCoopLimitsEnabled(state)

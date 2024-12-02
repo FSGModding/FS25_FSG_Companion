@@ -3,7 +3,7 @@
   <Bitmap profile="fs25_fullScreenBackground" id="background" />
   <Paging profile="uiInGameMenuPaging" onPageChange="onPageChange" onPageUpdate="onPageUpdate" id="pagingElement">
     <FrameReference ref="FSGSettingsGuiInfo" name="FSGSettingsGuiInfo" id="pageFSGInfo" />
-    <FrameReference ref="FSGSettingsGuiTools" name="FSGSettingsGuiTools" id="pageFSGTools" />
+    <!-- <FrameReference ref="FSGSettingsGuiTools" name="FSGSettingsGuiTools" id="pageFSGTools" /> -->
     <FrameReference ref="FSGSettingsGuiSettings" name="FSGSettingsGuiSettings" id="pageFSGSettings" />
     <FrameReference ref="FSGSettingsGuiTimeSync" name="FSGSettingsGuiTimeSync" id="pageFSGTimeSync" />
   </Paging>

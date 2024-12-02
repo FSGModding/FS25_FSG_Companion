@@ -27,7 +27,7 @@ function FSGSettingsGui:onGuiSetupFinished()
     self.clickBackCallback = self:makeSelfCallback(self.onButtonBack)
 
     self.pageFSGInfo:initialize()
-    self.pageFSGTools:initialize()
+    -- self.pageFSGTools:initialize()
     self.pageFSGSettings:initialize()
     self.pageFSGTimeSync:initialize()
 
@@ -45,7 +45,7 @@ function FSGSettingsGui:setupPages(gui)
 
     local pages = {
         {gui.pageFSGInfo,       'gui.icon_options_help2'},
-        {gui.pageFSGTools,      'gui.icon_options_gameSettings2'},
+        -- {gui.pageFSGTools,      'gui.icon_options_gameSettings2'},
         {gui.pageFSGSettings,   'gui.icon_options_generalSettings2'},
         {gui.pageFSGTimeSync,   'gui.icon_ingameMenu_calendar'},
     }
