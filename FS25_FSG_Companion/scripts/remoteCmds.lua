@@ -64,6 +64,7 @@ function RemoteCommands:runNewFiles(file)
       local transferData = nil
       local command = nil
 
+      -- Delete the file if not valid
       if xmlFile == nil then
         -- File is not valid
         deleteFile(loadFile)
@@ -246,13 +247,9 @@ function RemoteCommands:runNewFiles(file)
                 commandComplete = true
               end
             end
-
-
           -- Add elseif above here for another command
           -- End of command watch
           end
-
-
           -- End Commands loop
         end
 
@@ -281,16 +278,13 @@ function RemoteCommands:runNewFiles(file)
         if command == "storeVehicle" then
           -- Run the vehicleStorage load function
           rcDebug("Command: storeVehicle")
-
           transferData = VehicleStorage:loadVehicle(loadFile)
           commandData.id = commandData.vehicleId
           if transferData ~= nil then
             commandComplete = true
           end
-
         -- Add elseif here for another command
         end
-
       end
 
       -- check if the command completed
@@ -333,11 +327,8 @@ function RemoteCommands:runNewFiles(file)
         -- delete the command file
         deleteFile(loadFile)
       end
-
     end 
-
   end
-
 end
 
 
@@ -800,7 +791,7 @@ function RemoteCommands:coopBaleStore(commandData)
     if fillType ~= nil then
       -- Check if wrapping colors are set
       if commandData.wrappingColor == nil or commandData.wrappingColor == '' then
-        commandData.wrappingColor = "1-1-1-1"
+        commandData.wrappingColor = "1-1-1"
       end
       g_coopSiloManager:addBale(commandData.farmId,commandData.xmlFilename,commandData.fillLevel,commandData.wrappingState,commandData.supportsWrapping,commandData.baleValueScale,commandData.wrappingColor,commandData.fillTypeName,commandData.isFermenting,commandData.fermentationTime)
       -- Send data back to website

@@ -771,15 +771,10 @@ function onSave:getProductionStats()
     local productionsOuput = {}
     for _, thisProd in ipairs(thesePoints) do
       
-      -- rcDebug(thisProd.owningPlaceable)
-      -- rcDebug(thisProd.owningPlaceable.placeableLoadingData.position)
-
       local farmId          = thisProd:getOwnerFarmId()
       local isOwned         = thisProd.isOwned
       local name            = thisProd:getName()
-      -- local x               = thisProd.owningPlaceable.placeableLoadingData.position.x 
-      -- local y               = thisProd.owningPlaceable.placeableLoadingData.position.y
-      -- local z               = thisProd.owningPlaceable.placeableLoadingData.position.z
+      -- local x, y, z         = getWorldTranslation(thisProd.rootNode)
       local storeItem       = thisProd.owningPlaceable.storeItem
       local sellPrice       = thisProd.owningPlaceable:getSellPrice()
 
@@ -1058,9 +1053,7 @@ function onSave:getAnimalStats()
         local thisNumClusters = thisHusb:getNumOfClusters()
         local animalTypeIndex = thisHusb:getAnimalTypeIndex()
         local clusters        = thisHusb:getClusters()
-        local x               = thisHusb.position.x or 0
-        local y               = thisHusb.position.y or 0
-        local z               = thisHusb.position.z or 0
+        -- local x, y, z         = getWorldTranslation(thisHusb.rootNode)
         local dispFood        = {}
         local dispOuts        = {}
         local sellPrice       = thisHusb:getSellPrice()
@@ -1174,7 +1167,7 @@ function onSave:getAnimalStats()
         table.insert(animalStats, {
           farmId          = farmId,
           name            = name,
-          position        = tostring(x .. " " .. y .. " " .. z),
+          -- position        = tostring(x .. " " .. y .. " " .. z),
           sellPrice       = sellPrice,
           thisNumClusters = thisNumClusters,
           animalTypeIndex = animalTypeIndex,
@@ -1207,7 +1200,7 @@ function onSave:getAnimalStats()
 
         newxmlFile:setString(key .. subKey .. "#name", tostring(as.name))
         newxmlFile:setString(key .. subKey .. "#farmId", tostring(as.farmId))
-        newxmlFile:setString(key .. subKey .. "#position", tostring(as.position))
+        -- newxmlFile:setString(key .. subKey .. "#position", tostring(as.position))
         newxmlFile:setString(key .. subKey .. "#sellPrice", tostring(as.sellPrice))
         newxmlFile:setString(key .. subKey .. "#thisNumClusters", tostring(as.thisNumClusters))
         newxmlFile:setString(key .. subKey .. "#animalTypeIndex", tostring(as.animalTypeIndex))

@@ -27,14 +27,14 @@ function FarmCleanUp:onMinuteChanged(currentMinute)
     return
   end
   -- rcDebug("FarmCleanUp:onMinuteChanged")
-  -- if g_server ~= nil and self.isServer and g_dedicatedServer ~= nil then
+  if g_server ~= nil and self.isServer and g_dedicatedServer ~= nil then
     -- Make sure we only run once per minute
     if self.runCurrentMinute ~= currentMinute then
       FarmCleanUp:checkSuperStrength()
       FarmCleanUp:checkCoopLimits()
       self.runCurrentMinute = currentMinute
     end
-  -- end
+  end
 end
 
 function FarmCleanUp:onDayChanged()

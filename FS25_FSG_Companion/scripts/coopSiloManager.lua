@@ -160,11 +160,18 @@ function CoopSiloManager:checkCoopObjectStorage()
           -- Make sure bale is not part of a mission.
           if objectBale.isMissionBale ~= true then
   
+            rcDebug(objectBale)
+
             local farmId = objectBale.ownerFarmId or objectBale.farmId
 
             local fillTypeName = g_fillTypeManager:getFillTypeNameByIndex(objectBale.fillType)
 
-            local wrappingColor = objectBale.wrappingColor[1] .. "-" .. objectBale.wrappingColor[2] .. "-" .. objectBale.wrappingColor[3] .. "-" .. objectBale.wrappingColor[4]
+            local wrappingColor = nil
+            if objectBale.wrappingColor[4] ~= nil then
+              wrappingColor = objectBale.wrappingColor[1] .. "-" .. objectBale.wrappingColor[2] .. "-" .. objectBale.wrappingColor[3] .. "-" .. objectBale.wrappingColor[4]
+            else
+              wrappingColor = objectBale.wrappingColor[1] .. "-" .. objectBale.wrappingColor[2] .. "-" .. objectBale.wrappingColor[3]
+            end
 
             local commandOutboxDir = getUserProfileAppPath()  .. "modSettings/FS25_FSG_Companion/commands/outbox"
             local transactionId = g_fsgSettings:getTransactionId()

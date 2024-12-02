@@ -64,7 +64,7 @@ function PlaceTerraformPaintAnywhere:verifyAccess(superFunc, x, y, z)
   end
 end
 
-function PlaceTerraformPaintAnywhere:isInsideRestrictedZone(...)
+function PlaceTerraformPaintAnywhere:isInsideRestrictedZone(superFunc, ...)
   if g_fsgSettings.settings:getValue("paintAnywhere") then
     return false
   else
@@ -72,7 +72,7 @@ function PlaceTerraformPaintAnywhere:isInsideRestrictedZone(...)
   end
 end
 
-function PlaceTerraformPaintAnywhere:isModificationAreaOnOwnedLand(...)
+function PlaceTerraformPaintAnywhere:isModificationAreaOnOwnedLand(superFunc,...)
   if g_fsgSettings.settings:getValue("paintAnywhere") then
     return true
   else
@@ -80,7 +80,7 @@ function PlaceTerraformPaintAnywhere:isModificationAreaOnOwnedLand(...)
   end
 end
 
-function PlaceTerraformPaintAnywhere:hasObjectOverlapInModificationArea(...)
+function PlaceTerraformPaintAnywhere:hasObjectOverlapInModificationArea(superFunc,...)
   if g_fsgSettings.settings:getValue("paintAnywhere") then
     return false
   else
