@@ -18,13 +18,13 @@
             <!-- Paint Anywhere Option -->
             <Bitmap profile="fs25_multiTextOptionContainer">
               <BinaryOption profile="fs25_settingsBinaryOption" onClick="onClickUpdatePaintAnywhere" id="updatePaintAnywhere">
-                <Text profile="fs25_multiTextOptionTooltip" name="ignore" text="$l10n_ui_settings_toolTip_paintAnywhere" />
+                <Text profile="fs25_multiTextOptionTooltip_fsg" name="ignore" text="$l10n_ui_settings_toolTip_paintAnywhere" />
               </BinaryOption>
               <Text profile="fs25_settingsMultiTextOptionTitle" text="$l10n_ui_settings_paintAnywhere" />
             </Bitmap>
 
             <!-- MP Admin Warning -->
-            <Text profile="fs25_settingsNoPermissionText_rtc" id="fsgSettingsNoPermissionText" name="fsgSettingsNoPermissionText" text="$l10n_ui_fsgSettingsNoPermissionText" />
+            <Text profile="fs25_settingsNoPermissionText_fsg" id="fsgSettingsNoPermissionText" name="fsgSettingsNoPermissionText" text="$l10n_ui_fsgSettingsNoPermissionText" />
 
         </ScrollingLayout>
         <Bitmap profile="fs25_settingsTooltipSeparator" />

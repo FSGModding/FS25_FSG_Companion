@@ -142,7 +142,7 @@ function VehicleStorage:loadVehicle(xmlFileVehicle)
   local function asyncCallbackFunction(_, vehicle, vehicleLoadState, arguments)
     rcDebug("vehicleLoadState")
     rcDebug(vehicleLoadState)
-    if vehicleLoadState == VehicleLoadingUtil.VEHICLE_LOAD_OK then
+    if vehicleLoadState == VehicleLoadingState.OK then
       print("Vehcile Spawned From Storage.  Send Confirmation.")
       return true
     else  
@@ -176,9 +176,9 @@ function VehicleStorage:loadVehicle(xmlFileVehicle)
       return errorMsg
     end
 
-    local vehicle = VehicleLoadingUtil.loadVehicleFromSavegameXML(xmlFile, key, true, false, nil, false, asyncCallbackFunction, nil, args)
+    local vehicle = VehicleSystem:loadFromXMLFile(xmlFile, asyncCallbackFunction, nil, args, true, false)
 
-    if vehicle ~= VehicleLoadingUtil.VEHICLE_LOAD_OK then
+    if vehicle ~= VehicleLoadingState.OK then
       local transferData = {
         farmId = vehicleFarmId,
         info = "Vehicle Transfer Successful"

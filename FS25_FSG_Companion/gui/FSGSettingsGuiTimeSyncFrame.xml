@@ -18,7 +18,7 @@
             <!-- Time Sync Enable Option -->
             <Bitmap profile="fs25_multiTextOptionContainer">
               <BinaryOption profile="fs25_settingsBinaryOption" onClick="onClickUpdateTimeSyncEnable" id="updateTimeSyncEnable">
-                <Text profile="fs25_multiTextOptionTooltip" name="ignore" text="$l10n_toolTip_realTimeSync_timeSyncEnable" />
+                <Text profile="fs25_multiTextOptionTooltip_fsg" name="ignore" text="$l10n_toolTip_realTimeSync_timeSyncEnable" />
               </BinaryOption>
               <Text profile="fs25_settingsMultiTextOptionTitle" text="$l10n_setting_realTimeSync_timeSyncEnable" />
             </Bitmap>
@@ -26,7 +26,7 @@
             <!-- Time Sync Offset Option -->
             <Bitmap profile="fs25_multiTextOptionContainer" id="onClickUpdateTimeSyncServerOffsetBox">
               <MultiTextOption profile="fs25_settingsMultiTextOption" onClick="onClickUpdateTimeSyncServerOffset" id="updateTimeSyncServerOffset" texts="UTC-11:00|UTC-10:00|UTC-09:00|UTC-08:00|UTC-07:00|UTC-06:00|UTC-05:00|UTC-04:00|UTC-03:00|UTC-02:00|UTC-01:00|UTC|UTC+01:00|UTC+02:00|UTC+03:00|UTC+04:00|UTC+05:00|UTC+06:00|UTC+07:00|UTC+08:00|UTC+09:00|UTC+10:00|UTC+11:00">
-                <Text profile="fs25_multiTextOptionTooltip" name="ignore" text="$l10n_toolTip_realTimeSync_serverOffset" />
+                <Text profile="fs25_multiTextOptionTooltip_fsg" name="ignore" text="$l10n_toolTip_realTimeSync_serverOffset" />
               </MultiTextOption>
               <Text profile="fs25_settingsMultiTextOptionTitle" text="$l10n_setting_realTimeSync_serverOffset" />
             </Bitmap>
@@ -34,7 +34,7 @@
             <!-- Time Sync Fix Hour Option -->
             <Bitmap profile="fs25_multiTextOptionContainer" id="onClickUpdateTimeSyncTimeFixHourBox">
               <MultiTextOption profile="fs25_settingsMultiTextOption" onClick="onClickUpdateTimeSyncTimeFixHour" id="updateTimeSyncTimeFixHour" texts="Always|02:00|03:00|04:00|05:00|06:00|07:00|08:00|09:00|10:00|11:00|12:00|13:00|14:00|15:00|16:00|17:00|18:00|19:00|20:00|21:00">
-                <Text profile="fs25_multiTextOptionTooltip" name="ignore" text="$l10n_toolTip_realTimeSync_timeFixHour" />
+                <Text profile="fs25_multiTextOptionTooltip_fsg" name="ignore" text="$l10n_toolTip_realTimeSync_timeFixHour" />
               </MultiTextOption>
               <Text profile="fs25_settingsMultiTextOptionTitle" text="$l10n_setting_realTimeSync_timeFixHour" />
             </Bitmap>
@@ -42,7 +42,7 @@
             <!-- Time Sync Set Time Option -->
             <Bitmap profile="fs25_multiTextOptionContainer">
               <BinaryOption profile="fs25_settingsBinaryOption" onClick="onClickUpdateTimeSyncAutoSetTime" id="updateTimeSyncAutoSetTime">
-                <Text profile="fs25_multiTextOptionTooltip" name="ignore" text="$l10n_toolTip_realTimeSync_autoSetTime" />
+                <Text profile="fs25_multiTextOptionTooltip_fsg" name="ignore" text="$l10n_toolTip_realTimeSync_autoSetTime" />
               </BinaryOption>
               <Text profile="fs25_settingsMultiTextOptionTitle" text="$l10n_setting_realTimeSync_autoSetTime" />
             </Bitmap>
@@ -50,13 +50,13 @@
             <!-- Time Sync Progress Notification Option -->
             <Bitmap profile="fs25_multiTextOptionContainer">
               <BinaryOption profile="fs25_settingsBinaryOption" onClick="onClickUpdateTimeSyncProgressNotification" id="updateTimeSyncProgressNotification">
-                <Text profile="fs25_multiTextOptionTooltip" name="ignore" text="$l10n_toolTip_realTimeSync_progressNotification" />
+                <Text profile="fs25_multiTextOptionTooltip_fsg" name="ignore" text="$l10n_toolTip_realTimeSync_progressNotification" />
               </BinaryOption>
               <Text profile="fs25_settingsMultiTextOptionTitle" text="$l10n_setting_realTimeSync_progressNotification" />
             </Bitmap>
 
             <!-- MP Admin Warning -->
-            <Text profile="fs25_settingsNoPermissionText_rtc" id="fsgSettingsNoPermissionText" name="fsgSettingsNoPermissionText" text="$l10n_ui_fsgSettingsNoPermissionText" />
+            <Text profile="fs25_settingsNoPermissionText_fsg" id="fsgSettingsNoPermissionText" name="fsgSettingsNoPermissionText" text="$l10n_ui_fsgSettingsNoPermissionText" />
 
         </ScrollingLayout>
         <Bitmap profile="fs25_settingsTooltipSeparator" />

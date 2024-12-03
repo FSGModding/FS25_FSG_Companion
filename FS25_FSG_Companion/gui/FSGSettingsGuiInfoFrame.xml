@@ -11,12 +11,12 @@
         </GuiElement>
         <ScrollingLayout profile="fs25_settingsLayout" id="boxLayout" topClipperElementName="topClipper" bottomClipperElementName="bottomClipper">
 
-          <Text profile="fs25_helpLineText" name="text" text="$l10n_ui_settings_info_1" />
-          <Text profile="fs25_helpLineText" name="text" text="$l10n_ui_settings_info_2" />
-          <Text profile="fs25_helpLineText" name="text" text="$l10n_ui_settings_info_3" />
-          <Text profile="fs25_helpLineText" name="text" text="$l10n_ui_settings_info_4" />
-          <Text profile="fs25_helpLineText" name="text" text="$l10n_ui_settings_info_5" />
-          <Text profile="fs25_helpLineText" name="text" text="$l10n_ui_settings_info_6" />
+          <Text profile="fs25_helpLineText_fsg" name="text" text="$l10n_ui_settings_info_1" />
+          <Text profile="fs25_helpLineText_fsg" name="text" text="$l10n_ui_settings_info_2" />
+          <Text profile="fs25_helpLineText_fsg" name="text" text="$l10n_ui_settings_info_3" />
+          <Text profile="fs25_helpLineText_fsg" name="text" text="$l10n_ui_settings_info_4" />
+          <Text profile="fs25_helpLineText_fsg" name="text" text="$l10n_ui_settings_info_5" />
+          <Text profile="fs25_helpLineText_fsg" name="text" text="$l10n_ui_settings_info_6" />
 
         </ScrollingLayout>
         <Bitmap profile="fs25_settingsTooltipSeparator" />

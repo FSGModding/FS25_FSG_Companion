@@ -2,7 +2,7 @@
 
 <GUIProfiles>
 
-  <Profile name="fs25_multiTextOptionTooltip_rtc" extends="fs25_textDefault" with="anchorTopRight">
+  <Profile name="fs25_multiTextOptionTooltip_fsg" extends="fs25_textDefault" with="anchorTopRight">
     <width value="580px" />
     <position value="650px 0px" />
     <textMaxNumLines value="3" />
@@ -14,7 +14,7 @@
     <textMaxWidth value="350px" />
   </Profile>
 
-  <Profile name="fs25_helpLineText_rtc" extends="fs25_textDefault">
+  <Profile name="fs25_helpLineText_fsg" extends="fs25_textDefault">
     <size value="566px 100px" />
     <textSize value="16px" />
     <textMaxWidth value="566px" />
@@ -23,7 +23,7 @@
     <textColor value="$preset_fs25_colorGreyText" />
   </Profile>
 
-  <Profile name="fs25_settingsNoPermissionText_rtc" extends="fs25_textDefault" with="anchorMiddleStretchingX">
+  <Profile name="fs25_settingsNoPermissionText_fsg" extends="fs25_textDefault" with="anchorMiddleStretchingX">
     <size value="815px 50px" />
     <textSize value="16px" />
     <textAlignment value="right" />

@@ -366,7 +366,9 @@ function CoopSiloManager:addBale(farmId,xmlFilename,fillLevel,wrappingState,supp
       abstractBale.baleAttributes.wrappingColor[1] = tonumber(wc1)
       abstractBale.baleAttributes.wrappingColor[2] = tonumber(wc2)
       abstractBale.baleAttributes.wrappingColor[3] = tonumber(wc3)
-      abstractBale.baleAttributes.wrappingColor[4] = tonumber(wc4)
+      if wc4 ~= nil then
+        abstractBale.baleAttributes.wrappingColor[4] = tonumber(wc4)
+      end
       abstractBale.baleAttributes.isMissionBale = false
       abstractBale.baleAttributes.fillType = tonumber(fillType)
       if abstractBale.baleAttributes.isFermenting then

@@ -29,8 +29,8 @@ function FSGSettings.new(mission, i18n, modDirectory, modName)
 
   -- Load mod default settings
   self.settings = FS22PrefSaver:new(
-    self.modName,
-    self.modName .. "_Settings.xml",
+    "FS25_FSG_Companion",
+    "CompanionSettings.xml",
     false,
     {
       dismissWorkers          = {true, "bool"},

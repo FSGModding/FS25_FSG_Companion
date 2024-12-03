@@ -19,7 +19,7 @@ function FieldStats.new(mission, i18n, modDirectory, modName)
   self.runCurrentHour   = 0
   self.fruitTypes       = {}
 
-  -- g_messageCenter:subscribe(MessageType.HOUR_CHANGED, self.onHourChanged, self)
+  g_messageCenter:subscribe(MessageType.HOUR_CHANGED, self.onHourChanged, self)
 
 	return self
 end
@@ -27,24 +27,25 @@ end
 
 -- MARK: onHourChanged
 -- FS25 - Looks like some things changed here.  Will have to revisit to get field stats - FSGSettings.lua:458: attempt to index nil with 'hud' - fieldStats.lua:237: attempt to call a nil value
--- function FieldStats:onHourChanged(currentHour)
---   -- rcDebug("FieldStats:onHourChanged")
---   if g_server ~= nil then
---     -- Make sure we only run once per hour
---     if self.runCurrentHour ~= currentHour then
---       FieldStats:getFieldStats()
---       self.runCurrentHour = currentHour
---     end
---   end
--- end
+function FieldStats:onHourChanged(currentHour)
+  -- rcDebug("FieldStats:onHourChanged")
+  if g_server ~= nil then
+    -- Make sure we only run once per hour
+    if self.runCurrentHour ~= currentHour then
+      FieldStats:getFieldStats()
+      self.runCurrentHour = currentHour
+    end
+  end
+end
 
 -- MARK: getFieldStats
 function FieldStats:getFieldStats()
   rcDebug("FieldStats:getFieldStats")
 
-  -- if g_server ~= nil and g_dedicatedServer ~= nil then
-  --   g_server:broadcastEvent(ChatEvent.new("Lag Warning! Updating Field Stats for website!",g_currentMission.missionDynamicInfo.serverName,FarmManager.SPECTATOR_FARM_ID,0))
-  -- end
+  -- Shows notification when this script is running as it tends to take a bit to run.  Most cases it does not really lag, so can quote out to disable.
+  if g_server ~= nil and g_dedicatedServer ~= nil then
+    g_server:broadcastEvent(ChatEvent.new("Lag Warning! Updating Field Stats for website!",g_currentMission.missionDynamicInfo.serverName,FarmManager.SPECTATOR_FARM_ID,0))
+  end
 
   -- Delete any files that are in FieldsData folder
 	local modSettingsFolderPath = getUserProfileAppPath()  .. "modSettings/FS25_FSG_Companion/FieldsData"
@@ -68,9 +69,10 @@ function FieldStats:getFieldStats()
           fieldFruitName = fieldFruitType.name
         end
 
-        --rcDebug("Getting Field Data")
+        -- rcDebug("Getting Field Data")
+        -- rcDebug(field)
         local extraData = {
-          currentField = field.fieldId,
+          currentField = field.farmland.id,
           fieldAreaFull = field.fieldArea,
           fieldFruitName = fieldFruitName,
           posX = field.posX,
@@ -233,11 +235,11 @@ function FieldStats.getFieldStatusAsync(startWorldX, startWorldZ, widthWorldX, w
 			status.plowFactor = numPixels / fieldArea
 		end)
 
-		if Platform.gameplay.useRolling then
-			g_asyncTaskManager:addSubtask(function ()
-				status.needsRollingFactor = FSDensityMapUtil.getRollerFactor(startWorldX, startWorldZ, widthWorldX, widthWorldZ, heightWorldX, heightWorldZ)
-			end)
-		end
+		-- if Platform.gameplay.useRolling then
+		-- 	g_asyncTaskManager:addSubtask(function ()
+		-- 		status.needsRollingFactor = FSDensityMapUtil.getRollerFactor(startWorldX, startWorldZ, widthWorldX, widthWorldZ, heightWorldX, heightWorldZ)
+		-- 	end)
+		-- end
 
 		if Platform.gameplay.useStubbleShred then
 			g_asyncTaskManager:addSubtask(function ()
@@ -376,7 +378,7 @@ function FieldStats:getFieldFruitStatusStage(data)
   -- rcDebug("FieldStats:getFieldFruitStatusStage")
 
 	if (self.fruitTypes == nil) then
-		self.fruitTypes = g_currentMission.fruitTypeManager.indexToFruitType;
+		self.fruitTypes = g_fruitTypeManager.indexToFruitType;
 	end
 
 	if (data == nil) then
@@ -406,7 +408,7 @@ function FieldStats:getFieldFruitStatusStage(data)
 
 		-- Wheel type info
 		local destructionInfo = self.fruitTypes[fruitIndex].destruction
-		if (currentGrowthState ~= nil and destructionInfo.filterStart ~= nil and destructionInfo.filterEnd ~= nil) then
+		if (currentGrowthState ~= nil and destructionInfo ~= nil and destructionInfo.filterStart ~= nil and destructionInfo.filterEnd ~= nil) then
 			-- Crops like SugarBeets have the cutState (harvested state) within the bounds of the crop destruction filter. Therefore, explicitly exclude that state
 			local narrowWheelsRequired = currentGrowthState >= destructionInfo.filterStart 
 										and currentGrowthState <= destructionInfo.filterEnd 
@@ -457,7 +459,7 @@ function FieldStats:getFieldInfo(data)
 		local plowFactor = data.plowFactor
 		local weedFactor = data.weedFactor
 		local stubbleFactor = data.stubbleFactor
-		local rollerFactor = 1 - data.needsRollingFactor
+		-- local rollerFactor = 1 - data.needsRollingFactor
 		local missionInfo = g_currentMission.missionInfo
 
 		if not missionInfo.plowingRequiredEnabled then
@@ -472,7 +474,7 @@ function FieldStats:getFieldInfo(data)
 		harvestMultiplier = harvestMultiplier + plowFactor * 0.1
 		harvestMultiplier = harvestMultiplier + weedFactor * 0.15
 		harvestMultiplier = harvestMultiplier + stubbleFactor * 0.025
-		harvestMultiplier = harvestMultiplier + rollerFactor * 0.025
+		-- harvestMultiplier = harvestMultiplier + rollerFactor * 0.025
 		local yieldPotential = 1
 		local yieldPotentialToHa = 0
 
@@ -539,7 +541,7 @@ function FieldStats:onFieldDataUpdateFinished(data)
 		local weedInfo = FieldStats:fieldAddWeed(data)
 		local limeInfo = FieldStats:fieldAddLime(data)
 		local plowingInfo = FieldStats:fieldAddPlowing(data)
-		local rollingInfo = FieldStats:fieldAddRolling(data)
+		-- local rollingInfo = FieldStats:fieldAddRolling(data)
     local fertilizationInfo = FieldStats:fieldAddFertilization(data)
 
     -- Put the field data together in a single table before sending to xml
@@ -558,7 +560,7 @@ function FieldStats:onFieldDataUpdateFinished(data)
       weedInfo = weedInfo,
       limeInfo = limeInfo,
       plowingInfo = plowingInfo,
-      rollingInfo = rollingInfo,
+      -- rollingInfo = rollingInfo,
       fertilizationInfo = fertilizationInfo,
       fieldAreaFull = data.fieldAreaFull,
       fieldFruitName = data.fieldFruitName,
@@ -637,7 +639,7 @@ function FieldStats:fieldAddLime(data)
 		return
 	end
 
-	local isRequired = PlayerHUDUpdater.LIME_REQUIRED_THRESHOLD < data.needsLimeFactor
+	local isRequired = MapOverlayGenerator.SOIL_STATE_INDEX.NEEDS_LIME < data.needsLimeFactor
 
 	if isRequired and g_currentMission.missionInfo.limeRequired then
 		return g_i18n:getText("ui_growthMapNeedsLime")
@@ -646,7 +648,7 @@ function FieldStats:fieldAddLime(data)
 end
 
 function FieldStats:fieldAddPlowing(data)
-	local isRequired = data.plowFactor < PlayerHUDUpdater.PLOWING_REQUIRED_THRESHOLD
+	local isRequired = data.plowFactor < MapOverlayGenerator.SOIL_STATE_INDEX.NEEDS_PLOWING
 
 	if isRequired and g_currentMission.missionInfo.plowingRequiredEnabled then
 		return g_i18n:getText("ui_growthMapNeedsPlowing")
@@ -659,7 +661,7 @@ function FieldStats:fieldAddRolling(data)
 		return
 	end
 
-	local isRequired = PlayerHUDUpdater.ROLLING_REQUIRED_THRESHOLD < data.needsRollingFactor
+	local isRequired = MapOverlayGenerator.SOIL_STATE_INDEX.NEEDS_ROLLING < data.needsRollingFactor
 
 	if isRequired then
 		return g_i18n:getText("ui_growthMapNeedsRolling")
@@ -678,15 +680,16 @@ end
 
 -- adds farm manager to remember file
 function FieldStats:saveFieldDataXML(fieldData)
-  -- rcDebug("FM-saveFieldDataXML")
+  rcDebug("FM-saveFieldDataXML")
+  rcDebug(fieldData)
+
 	local modSettingsFolderPath = getUserProfileAppPath()  .. "modSettings/FS25_FSG_Companion/FieldsData"
 	local modSettingsFile = modSettingsFolderPath .. "/Field-" .. fieldData.fieldId .. "-" .. fieldData.ownerFarmId .. ".xml"
 
 	local key = "fields"
   local subKey = ".field"
 
-  -- rcDebug("Creating Field Data File")
-  -- rcDebug(fieldData)
+  rcDebug("Creating Field Data File")
 
   xmlFile = createXMLFile(key, modSettingsFile, key)
   

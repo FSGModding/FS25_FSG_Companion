@@ -567,8 +567,6 @@ local function init()
     })
   end)
 
-
-
 end
 
 ---Run when player is connected to server

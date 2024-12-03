@@ -19,9 +19,9 @@ function RemoteCommands.new(mission, i18n, modDirectory, modName)
 end
 
 function RemoteCommands:update(dt)
-	if not g_server and not g_dedicatedServer then
-		return
-	end
+	-- if not g_server and not g_dedicatedServer then
+		-- return
+	-- end
 
 	if g_updateLoopIndex % self.setValueTimerFrequency == 0 then
     getFiles(self.commandInboxDir, "checkNewFiles", self)

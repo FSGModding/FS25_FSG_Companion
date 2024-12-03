@@ -280,21 +280,10 @@ function Limits:loadItem(super, rawXMLFilename, baseDir, customEnvironment, isMo
   local mapStoreItem = false
   local placeableStoreItem = false
 
+  -- If you don't want custom map items to be loaded with custom maps add them here.
   if 
-    customEnvironment == "FS25_IslandBasernMF" or 
-    customEnvironment == "FS25_BackRoadsCounty4x" or
-    customEnvironment == "FS25_Chilliwack_BC" or
-    customEnvironment == "FS25_Departement_Haut_Beyleron" or
-    customEnvironment == "FS25_Elmcreek_Extreme4x" or
-    customEnvironment == "FS25_Frankenmuth_Map_4X" or
-    customEnvironment == "FS25_Green_Valley_Nebraska_4X" or
-    customEnvironment == "FS25_GreenMountain" or
-    customEnvironment == "FS25_LaPlaineFrancaise" or
-    customEnvironment == "FS25_MidwesthorizonFSGRealismEdit" or
-    customEnvironment == "FS25_UMRV_BYF_4X" or
-    customEnvironment == "FS25_Green_Valley_Nebraska_BYF_4X" or
-    customEnvironment == "FS25_HobosHollow_4x" or
-    customEnvironment == "FS25_Dunalka"
+    customEnvironment == "FS25_CustomMapName" or 
+    customEnvironment == "FS25_AnotherCustomMapName"
   then
     mapStoreItem = true
   end
