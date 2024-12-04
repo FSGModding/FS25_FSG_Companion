@@ -28,6 +28,14 @@ function VehicleStorage:setVehicle(vehicle, second)
 
           rcDebug("Vehicle Owned")
         
+          -- Need to remove the old button when the vehicle changes to create a new one.
+          if self.storageButton ~= nil then
+            self.storageButton:unlinkElement()
+            self.storageButton:delete()
+            self.storageButton = nil
+          end
+
+          -- Add button to store selected vehicle
           if self.storageButton == nil then
             local storageCost = 1000
             local StorageElement = self.sellButton:clone()
@@ -67,7 +75,7 @@ function VehicleStorage:storeVehicleConfirm(vehicle)
       if g_currentMission.missionDynamicInfo.isMultiplayer then
         VehicleStorageEvent.sendEvent(vehicle)
       else
-        -- VehicleStorage:storeVehicle(vehicle)
+        VehicleStorage:storeVehicle(vehicle)
       end
     end
 	end, nil, g_i18n:getText("button_storeVehicleConfirm"))
@@ -143,7 +151,7 @@ function VehicleStorage:loadVehicle(xmlFileVehicle)
     rcDebug("vehicleLoadState")
     rcDebug(vehicleLoadState)
     if vehicleLoadState == VehicleLoadingState.OK then
-      print("Vehcile Spawned From Storage.  Send Confirmation.")
+      print("Vehicle Spawned From Storage.  Send Confirmation.")
       return true
     else  
       printf("Warning: corrupt vehicles xml '%s', vehicle '%s' could not be loaded", arguments.xmlFilename, arguments.key)

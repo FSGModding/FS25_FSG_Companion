@@ -1415,7 +1415,8 @@ function onSave:getFieldStats()
           fieldAreaFull = xmlFile:getString(fieldKey .. "#fieldAreaFull"),
           fieldFruitName = xmlFile:getString(fieldKey .. "#fieldFruitName"),
           posX = xmlFile:getString(fieldKey .. "#posX"),
-          posZ = xmlFile:getString(fieldKey .. "#posZ")
+          posZ = xmlFile:getString(fieldKey .. "#posZ"),
+          farmlandPrice = xmlFile:getString(fieldKey .. "#farmlandPrice")
         }
         table.insert(fields, field)
       end)
@@ -1450,6 +1451,7 @@ function onSave:getFieldStats()
     newxmlFile:setString(key .. subKey .. "#fieldFruitName", tostring(saveField.fieldFruitName))
     newxmlFile:setString(key .. subKey .. "#posX", tostring(saveField.posX))
     newxmlFile:setString(key .. subKey .. "#posZ", tostring(saveField.posZ))
+    newxmlFile:setString(key .. subKey .. "#farmlandPrice", tostring(saveField.farmlandPrice))
     index = index + 1
   end
 

@@ -748,7 +748,7 @@ function FarmCleanUp:checkCoopLimits()
   -- Check if coop limits are enabled
   if g_fsgSettings.settings:getValue("coopLimitsEnabled") then
     rcDebug("CO-OP Limits Enabled")
-    -- Get vehcile cruise min speed 
+    -- Get Vehicle cruise min speed 
     local coopMinCruiseSpeed = g_fsgSettings.settings:getValue("coopMinCruiseSpeed")
     local coopMinCruiseMin = g_fsgSettings.settings:getValue("coopMinCruiseMin")
     if coopMinCruiseSpeed ~= nil and coopMinCruiseSpeed > 0 then

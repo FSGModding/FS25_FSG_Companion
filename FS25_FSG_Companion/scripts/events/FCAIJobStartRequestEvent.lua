@@ -1,80 +1,71 @@
+-- Updated to FS25 standards with farmId bits corrected.
+-- Custom bits added for hire limits as well.
 FCAIJobStartRequestEvent = {}
 local FCAIJobStartRequestEvent_mt = Class(FCAIJobStartRequestEvent, Event)
-
 InitEventClass(FCAIJobStartRequestEvent, "FCAIJobStartRequestEvent")
-
--- Lines 12-15
 function FCAIJobStartRequestEvent.emptyNew()
-	local self = Event.new(FCAIJobStartRequestEvent_mt)
-
-	return self
+	return Event.new(FCAIJobStartRequestEvent_mt)
 end
-
--- Lines 19-26
-function FCAIJobStartRequestEvent.new(job, superFunc, startFarmId)
-  rcDebug("FCAIJobStartRequestEvent-new")
+function FCAIJobStartRequestEvent.new(job, startFarmId)
 	local self = FCAIJobStartRequestEvent.emptyNew()
-	rcDebug(job)
-  rcDebug(startFarmId)
-  self.job = job
+	self.job = job
 	self.startFarmId = startFarmId
-
 	return self
 end
-
--- Lines 30-36
 function FCAIJobStartRequestEvent.newServerToClient(state, jobTypeIndex)
 	local self = FCAIJobStartRequestEvent.emptyNew()
 	self.state = state
 	self.jobTypeIndex = jobTypeIndex
-
 	return self
 end
-
--- Lines 40-52
-function FCAIJobStartRequestEvent:readStream(streamId, connection)
-	if not connection:getIsServer() then
+function FCAIJobStartRequestEvent.readStream(self, streamId, connection)
+	if connection:getIsServer() then
+    self.startFarmId = streamReadUIntN(streamId, FarmManager.FARM_ID_SEND_NUM_BITS)
+		self.state = streamReadUInt8(streamId)
+		self.jobTypeIndex = streamReadUInt16(streamId)
+	else
 		self.startFarmId = streamReadUIntN(streamId, FarmManager.FARM_ID_SEND_NUM_BITS)
 		local jobTypeIndex = streamReadUInt16(streamId)
 		self.job = g_currentMission.aiJobTypeManager:createJob(jobTypeIndex)
-
 		self.job:readStream(streamId, connection)
-	else
-		self.state = streamReadUInt8(streamId)
-		self.jobTypeIndex = streamReadUInt16(streamId)
 	end
-
 	self:run(connection)
 end
-
--- Lines 56-66
-function FCAIJobStartRequestEvent:writeStream(streamId, connection)
+function FCAIJobStartRequestEvent.writeStream(self, streamId, connection)
 	if connection:getIsServer() then
-    streamWriteUIntN(streamId, self.startFarmId, FarmManager.FARM_ID_SEND_NUM_BITS)
-
+		streamWriteUIntN(streamId, self.startFarmId, FarmManager.FARM_ID_SEND_NUM_BITS)
 		local jobTypeIndex = g_currentMission.aiJobTypeManager:getJobTypeIndex(self.job)
-
 		streamWriteUInt16(streamId, jobTypeIndex)
 		self.job:writeStream(streamId, connection)
 	else
+    streamWriteUIntN(streamId, self.startFarmId, FarmManager.FARM_ID_SEND_NUM_BITS)
 		streamWriteUInt8(streamId, self.state)
 		streamWriteUInt16(streamId, self.jobTypeIndex)
 	end
 end
-
--- Lines 70-86
-function FCAIJobStartRequestEvent:run(connection)
-	if not connection:getIsServer() then
-    rcDebug("FCAIJobStartRequestEvent-run")
-    rcDebug(self.startFarmId)
+function FCAIJobStartRequestEvent.run(self, connection)
+  rcDebug("FCFCAIJobStartRequestEvent-run")
+	if connection:getIsServer() then
+		g_messageCenter:publish(FCAIJobStartRequestEvent, self.state, self.jobTypeIndex)
+		return
+	else
 		local jobTypeIndex = g_currentMission.aiJobTypeManager:getJobTypeIndex(self.job)
 		local startable, state = self.job:getIsStartable(connection)
+
+    -- Start custom bits to make sure within our settings
+    rcDebug(self.startFarmId)
+
+    -- If starterFarmId nil then use default
+    local newStarterFarmId = FarmManager.SINGLEPLAYER_FARM_ID
+    if self.startFarmId ~= nil then
+      newStarterFarmId = self.startFarmId
+    end
 
     -- Check if farm is at limit
     -- Get number of active jobs for farm
     local activeJobVehicles = 0
     for _, job in ipairs(g_currentMission.aiSystem:getActiveJobs()) do
-      if job.startedFarmId == self.startFarmId then
+      if job.startedFarmId == newStarterFarmId then
         activeJobVehicles = activeJobVehicles + 1
       end
     end
@@ -90,20 +81,19 @@ function FCAIJobStartRequestEvent:run(connection)
         rcDebug("Max AI Hired For Farm")
         startable = false
         if g_client then
-          g_currentMission:showBlinkingWarning(g_i18n:getText("rc_max_hire_warn"), 5000)
+          -- g_currentMission:showBlinkingWarning(g_i18n:getText("rc_max_hire_warn"), 5000)
+          InfoDialog.show(g_i18n:getText("rc_max_hire_warn"), nil, nil, DialogElement.TYPE_WARNING)
         end        
       end
     end
+    -- End custom Bits to make sure within our settings
 
-		if not startable then
+
+		if startable then
+			connection:sendEvent(FCAIJobStartRequestEvent.newServerToClient(0, jobTypeIndex))
+			g_currentMission.aiSystem:startJob(self.job, newStarterFarmId)
+		else
 			connection:sendEvent(FCAIJobStartRequestEvent.newServerToClient(state, jobTypeIndex))
-
-			return
 		end
-
-		connection:sendEvent(FCAIJobStartRequestEvent.newServerToClient(0, jobTypeIndex))
-		g_currentMission.aiSystem:startJob(self.job, self.startFarmId)
-	else
-		g_messageCenter:publish(FCAIJobStartRequestEvent, self.state, self.jobTypeIndex)
 	end
 end

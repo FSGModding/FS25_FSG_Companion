@@ -436,7 +436,15 @@ end
 -- Overwrite the basegame function to only show objects that are owned by current farm.
 function CoopSiloManager:setObjectInfos(superFunc, objectInfos, maxUnloadAmount)
   rcDebug("CoopSiloManager - getIsActivatable")
-	local farmId = g_currentMission:getFarmId()
+	local farmId = FarmManager.SINGLEPLAYER_FARM_ID
+  if g_localPlayer and g_localPlayer.farmId ~= nil then
+    farmId = g_localPlayer.farmId
+  else
+    farmId = g_currentMission:getFarmId()
+  end
+
+  rcDebug("farmId")
+  rcDebug(farmId)
 
 	self.objectInfos = objectInfos
 	self.maxUnloadAmount = maxUnloadAmount or self.maxUnloadAmount
@@ -444,18 +452,18 @@ function CoopSiloManager:setObjectInfos(superFunc, objectInfos, maxUnloadAmount)
 
 	for _, objectInfo in pairs(objectInfos) do
     -- Remove ojbects that are not owned by current farm
-    rcDebug("objectInfo")
-    rcDebug(objectInfo)
+    -- rcDebug("objectInfo")
+    -- rcDebug(objectInfo)
 
-    rcDebug("objectInfo.objects Table")
-    rcDebug(objectInfo.objects)
+    -- rcDebug("objectInfo.objects Table")
+    -- rcDebug(objectInfo.objects)
     for i = 1, #objectInfo.objects do
       rcDebug("objectInfo.objects Single")
       rcDebug(objectInfo.objects[i])
-      if (objectInfo.objects[i].palletAttributes ~= nil and objectInfo.objects[i].palletAttributes.ownerFarmId ~= nil and objectInfo.objects[i].palletAttributes.ownerFarmId ~= farmId)
-      or (objectInfo.objects[i].baleAttributes~= nil and objectInfo.objects[i].baleAttributes.ownerFarmId ~= nil and objectInfo.objects[i].baleAttributes.ownerFarmId ~= farmId)
-      or (objectInfo.objects[i].palletAttributes ~= nil and objectInfo.objects[i].palletAttributes.farmId ~= nil and objectInfo.objects[i].palletAttributes.farmId ~= farmId)
-      or (objectInfo.objects[i].baleAttributes~= nil and objectInfo.objects[i].baleAttributes.farmId ~= nil and objectInfo.objects[i].baleAttributes.farmId ~= farmId) then
+      if (objectInfo.objects[i] ~= nil and objectInfo.objects[i].palletAttributes ~= nil and objectInfo.objects[i].palletAttributes.ownerFarmId ~= nil and objectInfo.objects[i].palletAttributes.ownerFarmId ~= farmId)
+      or (objectInfo.objects[i] ~= nil and objectInfo.objects[i].baleAttributes~= nil and objectInfo.objects[i].baleAttributes.ownerFarmId ~= nil and objectInfo.objects[i].baleAttributes.ownerFarmId ~= farmId)
+      or (objectInfo.objects[i] ~= nil and objectInfo.objects[i].palletAttributes ~= nil and objectInfo.objects[i].palletAttributes.farmId ~= nil and objectInfo.objects[i].palletAttributes.farmId ~= farmId)
+      or (objectInfo.objects[i] ~= nil and objectInfo.objects[i].baleAttributes~= nil and objectInfo.objects[i].baleAttributes.farmId ~= nil and objectInfo.objects[i].baleAttributes.farmId ~= farmId) then
         table.remove(objectInfo.objects, i)
       end
     end

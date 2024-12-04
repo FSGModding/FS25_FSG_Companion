@@ -68,6 +68,7 @@
     <text name="rc_max_items"                         text="This farm has max items for this store item." />
     <text name="rc_max_missions"                      text="This farm has reached max missions allowed." />
     <text name="ui_fsgSettingsNoPermissionText"       text="Only Admins can alter these settings." />
+    <text name="rc_production_purchase_disabled"      text="The purchase of productions has been disabled." />
 
     <!-- Vehicle Storage -->    
     <text name ="button_storeVehicle"                 text="Store Vehicle" />
@@ -83,7 +84,11 @@
     <text name="text_Foragable"                       text="Forage" />
     <text name="text_Narrow_Wheels"                   text="Narrow only" />
     <text name="text_All_Wheels"                      text="All tires and tracks" />
-
+    <text name="text_growth_stage"                    text="Growth Stage" />
+    <text name="text_wheel_type"                      text="Safe Wheel" />
+    <text name="text_none"                            text="None" />
+    <text name="text_unknown"                         text="Unknown" />
+    
     <!-- Setting Menu -->
     <text name="FSG_MENU"                             text="FSG Companion" />
     <text name="input_FSG_MENU"                       text="FSG Companion" />

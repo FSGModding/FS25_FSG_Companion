@@ -44,7 +44,8 @@ end
 
 -- Disable ability to buy existing productions
 function Limits:disableBuyProduction()
-  -- Just do nothing I guess.  
+  -- Let the player know they can not buy productions
+  InfoDialog.show(g_i18n:getText("rc_production_purchase_disabled"), nil, nil, DialogElement.TYPE_WARNING)
 end
 
 -- Limit the number of AI that any given farm can hire.
@@ -119,7 +120,8 @@ function Limits:toggleAIVehicleSecond(selfData, ownerFarmId, activeJobVehicles, 
         rcDebug("Max AI Hired For Farm")
         startableJob = false
         if localUser then
-          g_currentMission:showBlinkingWarning(g_i18n:getText("rc_max_hire_warn"), 5000)
+          -- g_currentMission:showBlinkingWarning(g_i18n:getText("rc_max_hire_warn"), 5000)
+          InfoDialog.show(g_i18n:getText("rc_max_hire_warn"), nil, nil, DialogElement.TYPE_WARNING)
         end        
       end
     end
@@ -149,7 +151,7 @@ function Limits.startContract(self, superFunc, leaseVehicles)
 
   -- Check to see if the player has taken max contracts
 	if Limits:hasFarmReachedMissionLimit(farmId) then
-		InfoDialog.show(g_i18n:getText("rc_max_missions"), nil, nil, g_i18n:getText("button_cancel"))
+		InfoDialog.show(g_i18n:getText("rc_max_missions"), nil, nil, DialogElement.TYPE_WARNING)
 
 		return
 	end
@@ -260,12 +262,11 @@ function Limits:canBuyPlaceable()
 	return false, infoText
 end
 
--- Overwrite the basegame function to disable the ability to buy farmlands in game
-function Limits:showContextInput(canEnter, canReset, canVisit, canSetMarker, removeMarker, canBuy, canSell)
-  -- rcDebug("Limits - showContextInput")
-	self.buttonBuyFarmland:setVisible(false)
-	self.buttonSellFarmland:setVisible(false)
-  self.farmlandValueBox:setVisible(false)
+-- Disable the buy farmland button
+function Limits:setMapInputContext(enterVehicle, resetVehicle, sellVehicle, visitPlace, setMarker, removeMarker, buy, sell, manage)
+  self.contextActions[InGameMenuMapFrame.ACTIONS.BUY].isActive = false
+  self.contextActions[InGameMenuMapFrame.ACTIONS.SELL].isActive = false
+  self:updateContextInputBarVisibility()
 end
 
 -- Disables farmland buy sell

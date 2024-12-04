@@ -314,9 +314,6 @@ local function init()
   -- Mod is loaded in to the game here.  Yay!
   rcDebug("Starting the FSG Realism Companion")
 
-  -- FS25 - This is not needed.  Not planning to add new crops at this time
-  -- FillManager:loadMod()
-
   -- Create folder for this mod if not one already
   local modSettingsFolderPath = getUserProfileAppPath()  .. "modSettings/FS25_FSG_Companion"
   if ( not fileExists(modSettingsFolderPath) ) then createFolder(modSettingsFolderPath) end
@@ -499,31 +496,27 @@ local function init()
   -- Vehicle Storage Stuffs
   WorkshopScreen.setVehicle = Utils.appendedFunction(WorkshopScreen.setVehicle, VehicleStorage.setVehicle)
 
-  -- Vehicle Edit Stuffs
+  -- Add the ability to use the console command to store vehicles to the website.
   Vehicle.showInfo = Utils.appendedFunction(Vehicle.showInfo, VehicleEdit.showInfo)
 
   -- Overwrite how object storage player interaction works
+  -- This one still needs work.  It allows player to pull out all players products.
   PlaceableObjectStorageActivatable.getIsActivatable = Utils.overwrittenFunction(PlaceableObjectStorageActivatable.getIsActivatable, CoopSiloManager.getIsActivatable)
 
   -- Overwrite how object storage selection is displayed.  Limit to farm only stuffs.
   ObjectStorageDialog.setObjectInfos = Utils.overwrittenFunction(ObjectStorageDialog.setObjectInfos, CoopSiloManager.setObjectInfos)
 
-  -- Overwrite the button to buy or sell land so that it is always disabled
-  InGameMenuMapFrame.showContextInput = Utils.appendedFunction(InGameMenuMapFrame.showContextInput, Limits.showContextInput)
+  -- Disable the ability to purchase land
+  InGameMenuMapFrame.setMapInputContext = Utils.appendedFunction(InGameMenuMapFrame.setMapInputContext, Limits.setMapInputContext)
   InGameMenuMapFrame.onClickBuyFarmland = Utils.overwrittenFunction(InGameMenuMapFrame.onClickBuyFarmland, Limits.blockFarmland)
   InGameMenuMapFrame.onClickSellFarmland = Utils.overwrittenFunction(InGameMenuMapFrame.onClickSellFarmland, Limits.blockFarmland)
   InGameMenuMapFrame.onYesNoBuyFarmland = Utils.overwrittenFunction(InGameMenuMapFrame.onYesNoBuyFarmland, Limits.blockFarmland)
   InGameMenuMapFrame.onYesNoSellFarmland = Utils.overwrittenFunction(InGameMenuMapFrame.onYesNoSellFarmland, Limits.blockFarmland)
   
-  -- Disable loans in game by removing the button
+  -- Disable loans in game by disabling the loan button
   InGameMenuStatisticsFrame.hasPlayerLoanPermission = Utils.appendedFunction(InGameMenuStatisticsFrame.hasPlayerLoanPermission, hasPlayerLoanPermission)
 
-  -- FS25 - Not needed anymore as we are not going to add new animals or crops to the game
-  -- FillTypeManager.loadMapData = Utils.appendedFunction(FillTypeManager.loadMapData, FillManager.loadMapData)
-  -- PlaceableHusbandryAnimals.createHusbandry = Utils.overwrittenFunction(PlaceableHusbandryAnimals.createHusbandry, FillManager.createHusbandry)
-  -- AnimalSystem.loadMapData = Utils.overwrittenFunction(AnimalSystem.loadMapData, FillManager.loadMapDataAnimals)
-  -- I18N.getText = Utils.overwrittenFunction(I18N.getText, FillManager.getText)
-
+  -- Disables the ability to buy productions
   ProductionPoint.buyRequest = Utils.overwrittenFunction(ProductionPoint.buyRequest, Limits.disableBuyProduction)
 
   -- FS25 - They changed up the store loading process.  Will have to revisit this in time to block things we don't want to allow in game.
@@ -531,41 +524,36 @@ local function init()
 
   InGameMenuContractsFrame.setButtonsForState = Utils.appendedFunction(InGameMenuContractsFrame.setButtonsForState, Limits.setButtonsForState)
 
+  -- Update silos storages for the new farmId system
   PlaceableSilo.onLoad = Utils.overwrittenFunction(PlaceableSilo.onLoad, FillManager.onLoad)
-
   FSBaseMission.onFinishedLoading = Utils.appendedFunction(FSBaseMission.onFinishedLoading, FillManager.updateStorages)
 
   -- Disables Sleeping in Game
   SleepManager.getCanSleep = Utils.overwrittenFunction(SleepManager.getCanSleep, FSGSettings.disableSleep)
 
-  -- Overwrite AI Job Start Event to use new farm Id settings
+  -- Overwrite AI Job Start Event to use new farm Id bits settings
   AIJobStartEvent.new = Utils.overwrittenFunction(AIJobStartEvent.new, FCAIJobStartEvent.new)
   AIJobStartRequestEvent.new = Utils.overwrittenFunction(AIJobStartRequestEvent.new, FCAIJobStartRequestEvent.new)
 
-  -- Overwrite Tree Plant Event to use new farm Id settings
+  -- Overwrite Tree Plant Event to use new farm Id bits settings
   TreePlantEvent.new = Utils.overwrittenFunction(TreePlantEvent.new, FCTreePlantEvent.new)
 
   -- Updates the silo buy price factor
   PlaceableSiloActivatable.run = Utils.overwrittenFunction(PlaceableSiloActivatable.run, function(self, superFunc)
     local data = {}
-
     for _, storage in pairs(self.placeable.spec_silo.storages) do
       for fillType, fillLevel in pairs(storage:getFillLevels()) do
         if data[fillType] == nil then
           data[fillType] = 0
         end
-
         data[fillType] = data[fillType] + storage:getFreeCapacity(fillType)
       end
     end
-
-    RefillDialog.show({
-      data = data,
-      priceFactor = 2.1,
-      callback = self.placeable.refillAmount,
-      target = self.placeable
-    })
+    RefillDialog.show(self.placeable.refillAmount, self.placeable, data, 2.1)
   end)
+
+  -- Add more field information to the hud
+  PlayerHUDUpdater.fieldAddField = Utils.appendedFunction(PlayerHUDUpdater.fieldAddField, FieldStats.fieldAddField)
 
 end
 
