@@ -92,11 +92,15 @@ end
 -- Check if a player is trying to hire a worker
 function Limits:toggleAIVehicleSecond(selfData, ownerFarmId, activeJobVehicles, sequence, localUser)
   rcDebug("Limits - toggleAIVehicle2")
+  rcDebug("ownerFarmId: " .. ownerFarmId)
   rcDebug("sequence: " .. sequence)
   rcDebug("activeJobVehicles: " .. activeJobVehicles)
+  rcDebug("Mission FarmId: " .. g_currentMission:getFarmId())
 
   -- Only run if player farm matches farm that was triggered
   if g_currentMission:getFarmId() ~= ownerFarmId then 
+    -- rcDebug("Mission farm does not match job farm.")
+    g_currentMission:showBlinkingWarning(g_i18n:getText("rc_own_hire_warn"), 5000)
     return
   end
 
@@ -120,19 +124,13 @@ function Limits:toggleAIVehicleSecond(selfData, ownerFarmId, activeJobVehicles, 
         rcDebug("Max AI Hired For Farm")
         startableJob = false
         if localUser then
-          -- g_currentMission:showBlinkingWarning(g_i18n:getText("rc_max_hire_warn"), 5000)
-          InfoDialog.show(g_i18n:getText("rc_max_hire_warn"), nil, nil, DialogElement.TYPE_WARNING)
+          g_currentMission:showBlinkingWarning(g_i18n:getText("rc_max_hire_warn"), 5000)
         end        
       end
     end
 
-    rcDebug("startableJob")
-    rcDebug(startableJob)
 		if startableJob then
-      rcDebug("currentOwnerFarmId")
-      rcDebug(currentOwnerFarmId)
 			g_client:getServerConnection():sendEvent(FCAIJobStartRequestEvent.new(startableJob, nil, currentOwnerFarmId))
-
 			return
 		end
 

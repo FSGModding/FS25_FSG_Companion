@@ -69,6 +69,7 @@
     <text name="rc_max_missions"                      text="This farm has reached max missions allowed." />
     <text name="ui_fsgSettingsNoPermissionText"       text="Only Admins can alter these settings." />
     <text name="rc_production_purchase_disabled"      text="The purchase of productions has been disabled." />
+    <text name="rc_own_hire_warn"                     text="You can only hire equipment that is owned by your farm." />
 
     <!-- Vehicle Storage -->    
     <text name ="button_storeVehicle"                 text="Store Vehicle" />
@@ -85,7 +86,7 @@
     <text name="text_Narrow_Wheels"                   text="Narrow only" />
     <text name="text_All_Wheels"                      text="All tires and tracks" />
     <text name="text_growth_stage"                    text="Growth Stage" />
-    <text name="text_wheel_type"                      text="Safe Wheel" />
+    <text name="text_wheel_type"                      text="Preferred Tire" />
     <text name="text_none"                            text="None" />
     <text name="text_unknown"                         text="Unknown" />
     

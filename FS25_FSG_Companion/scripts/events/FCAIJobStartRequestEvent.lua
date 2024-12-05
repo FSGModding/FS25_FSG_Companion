@@ -6,7 +6,7 @@ InitEventClass(FCAIJobStartRequestEvent, "FCAIJobStartRequestEvent")
 function FCAIJobStartRequestEvent.emptyNew()
 	return Event.new(FCAIJobStartRequestEvent_mt)
 end
-function FCAIJobStartRequestEvent.new(job, startFarmId)
+function FCAIJobStartRequestEvent.new(job, superFunc, startFarmId)
 	local self = FCAIJobStartRequestEvent.emptyNew()
 	self.job = job
 	self.startFarmId = startFarmId
@@ -20,7 +20,6 @@ function FCAIJobStartRequestEvent.newServerToClient(state, jobTypeIndex)
 end
 function FCAIJobStartRequestEvent.readStream(self, streamId, connection)
 	if connection:getIsServer() then
-    self.startFarmId = streamReadUIntN(streamId, FarmManager.FARM_ID_SEND_NUM_BITS)
 		self.state = streamReadUInt8(streamId)
 		self.jobTypeIndex = streamReadUInt16(streamId)
 	else
@@ -38,7 +37,6 @@ function FCAIJobStartRequestEvent.writeStream(self, streamId, connection)
 		streamWriteUInt16(streamId, jobTypeIndex)
 		self.job:writeStream(streamId, connection)
 	else
-    streamWriteUIntN(streamId, self.startFarmId, FarmManager.FARM_ID_SEND_NUM_BITS)
 		streamWriteUInt8(streamId, self.state)
 		streamWriteUInt16(streamId, self.jobTypeIndex)
 	end
@@ -53,7 +51,7 @@ function FCAIJobStartRequestEvent.run(self, connection)
 		local startable, state = self.job:getIsStartable(connection)
 
     -- Start custom bits to make sure within our settings
-    rcDebug(self.startFarmId)
+    -- rcDebug(self.startFarmId)
 
     -- If starterFarmId nil then use default
     local newStarterFarmId = FarmManager.SINGLEPLAYER_FARM_ID
@@ -71,8 +69,8 @@ function FCAIJobStartRequestEvent.run(self, connection)
     end
 
     local hireLimit = math.floor(g_fsgSettings.settings:getValue("hireLimit")) - 1 or 2
-    rcDebug("Hire Limit")
-    rcDebug(hireLimit)
+    -- rcDebug("Hire Limit")
+    -- rcDebug(hireLimit)
 
     -- If there are multipe missions, loop through them to check what farms they belong to
     if activeJobVehicles ~= nil then
@@ -81,8 +79,7 @@ function FCAIJobStartRequestEvent.run(self, connection)
         rcDebug("Max AI Hired For Farm")
         startable = false
         if g_client then
-          -- g_currentMission:showBlinkingWarning(g_i18n:getText("rc_max_hire_warn"), 5000)
-          InfoDialog.show(g_i18n:getText("rc_max_hire_warn"), nil, nil, DialogElement.TYPE_WARNING)
+          g_currentMission:showBlinkingWarning(g_i18n:getText("rc_max_hire_warn"), 5000)
         end        
       end
     end
