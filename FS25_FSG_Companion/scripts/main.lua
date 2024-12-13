@@ -50,7 +50,6 @@ local sourceFiles = {
   "scripts/fillManager.lua",
   "scripts/FSGSettings.lua",
   "scripts/fs22ModPrefSaver.lua",
-  -- "scripts/paintAndTerraformAnywhere.lua",
   "scripts/infoMessages.lua",
   -- Gui
   "gui/FSGSettingsGui.lua",

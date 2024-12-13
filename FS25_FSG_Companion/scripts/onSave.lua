@@ -66,8 +66,8 @@ function onSave.vehicleStats()
   local allVehicles = {}
   local newxmlFile
   -- Loop through all the vehicles and send their data to a table if they are not farm 0
-  if g_currentMission.vehicles ~= nil then
-    for _, vehicle in ipairs(g_currentMission.vehicles) do
+  if g_currentMission.vehicleSystem.vehicles ~= nil then
+    for _, vehicle in ipairs(g_currentMission.vehicleSystem.vehicles) do
       --rcDebug(vehicle)
 
       local isSelling        = (vehicle.isDeleted ~= nil and vehicle.isDeleted) or (vehicle.isDeleting ~= nil and vehicle.isDeleting)

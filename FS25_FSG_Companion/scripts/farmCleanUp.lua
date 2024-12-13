@@ -30,7 +30,7 @@ function FarmCleanUp:onMinuteChanged(currentMinute)
   if g_server ~= nil and self.isServer and g_dedicatedServer ~= nil then
     -- Make sure we only run once per minute
     if self.runCurrentMinute ~= currentMinute then
-      FarmCleanUp:checkSuperStrength()
+      -- FarmCleanUp:checkSuperStrength()
       FarmCleanUp:checkCoopLimits()
       self.runCurrentMinute = currentMinute
     end
@@ -347,6 +347,10 @@ function FarmCleanUp:cleanPallets()
     local mission = g_currentMission
 
     local function getVehicleIsPallet(vehicle)
+
+        -- rcDebug("Vehicle Data")
+        -- rcDebug(vehicle)
+
         if vehicle.isPallet or vehicle.typeName == "pallet" or vehicle.typeName == "treeSaplingPallet" or vehicle.typeName == "bigBag" then
             return true
         end
@@ -401,8 +405,8 @@ function FarmCleanUp:cleanPallets()
 
     local removedPallets = {}
 
-    for i = #mission.vehicles, 1, -1 do
-        local vehicle = mission.vehicles[i]
+    for i = #g_currentMission.vehicleSystem.vehicles, 1, -1 do
+        local vehicle = g_currentMission.vehicleSystem.vehicles[i]
 
         if vehicle.isa ~= nil and vehicle:isa(Vehicle) and vehicle.trainSystem == nil then
             if getVehicleIsPallet(vehicle) then
@@ -441,7 +445,7 @@ function FarmCleanUp:cleanPallets()
                           x = baleData.x,
                           z = baleData.z
                         })
-                        mission:removeVehicle(vehicle)
+                        g_currentMission.vehicleSystem:removeVehicle(vehicle)
                         numRemoved = numRemoved + 1
                     end
                 end
@@ -495,6 +499,9 @@ function FarmCleanUp:cleanBales()
 
     local itemsToSave = g_currentMission.itemSystem.itemsToSave
     local balesToRemove = {}
+
+    -- rcDebug("itemsToSave")
+    -- rcDebug(itemsToSave)
 
     for _, item in pairs(itemsToSave) do
         local object = item.item
@@ -755,8 +762,8 @@ function FarmCleanUp:checkCoopLimits()
       coopMinCruiseSpeed = coopMinCruiseSpeed - 1
       coopMinCruiseMin = coopMinCruiseMin - 1
       -- Loop through all the vehicles and send their data to a table if they are not farm 0
-      if g_currentMission.vehicles ~= nil then
-        for _, vehicle in ipairs(g_currentMission.vehicles) do
+      if g_currentMission.vehicleSystem.vehicles ~= nil then
+        for _, vehicle in ipairs(g_currentMission.vehicleSystem.vehicles) do
           -- Check each vehicle to see if cruise is active
           if vehicle.getCruiseControlState ~= nil and vehicle:getCruiseControlState() == Drivable.CRUISECONTROL_STATE_ACTIVE then
             -- Check if speed is less than limit

@@ -17,7 +17,8 @@ function VehicleEdit:new(mission, i18n, modDirectory, modName)
   self.ownerFarmId       = 0
   self.operatingTime     = 0
   self.hudUpdater        = {}
-  self.currentVehicle    = {}
+  self.curVeh                 = nil
+  self.currentVehicle         = nil
   self.setValueTimerFrequency = 60
 
   addConsoleCommand("editVehicleFarmId", "Set the vehicle owner farm id. [farmId]", "consoleCommandEditVehicleFarmId", self)
@@ -107,8 +108,9 @@ end
 function VehicleEdit:consoleCommandStoreVehicle()
   rcDebug("Info: ==VehicleEdit:consoleCommandStoreVehicle")
   -- Get vehicle data for current user
-  if g_currentMission.hud.controlledVehicle ~= nil then 
-    self.currentVehicle = g_currentMission.hud.controlledVehicle
+  self.curVeh = g_currentMission.hud.controlledVehicle
+  if self.curVeh ~= nil then 
+    self.currentVehicle = self.curVeh
   elseif self.hudUpdater.object ~= nil and self.hudUpdater.object.isActive ~= nil and self.hudUpdater.isVehicle then
     self.currentVehicle = self.hudUpdater.object
   else

@@ -72,7 +72,7 @@
     <text name="rc_own_hire_warn"                     text="You can only hire equipment that is owned by your farm." />
 
     <!-- Vehicle Storage -->    
-    <text name ="button_storeVehicle"                 text="Store Vehicle" />
+    <text name ="button_storeVehicle"                 text="Store Vehicle to Website" />
     <text name ="button_storeVehicleConfirm"          text="Do you really want to store this vehicle on the website for $1,000?" />
 
     <!-- Vehicle Edit -->   
