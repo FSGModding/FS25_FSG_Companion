@@ -31,6 +31,7 @@ function FarmCleanUp:onMinuteChanged(currentMinute)
     -- Make sure we only run once per minute
     if self.runCurrentMinute ~= currentMinute then
       -- FarmCleanUp:checkSuperStrength()
+      FarmCleanUp.checkEmptyFarmsHiredWorkers()
       FarmCleanUp:checkCoopLimits()
       self.runCurrentMinute = currentMinute
     end
@@ -73,8 +74,6 @@ function FarmCleanUp:checkSuperStrength()
     end
   end
 
-  -- Run empty farm ai check
-  FarmCleanUp.checkEmptyFarmsHiredWorkers()
 end
 
 -- Disables super strength if on
@@ -123,7 +122,7 @@ function FarmCleanUp:checkEmptyFarmsHiredWorkers()
           else
             if job.startedFarmId == farm.farmId then
               -- Worker is part of current farm and should be dismissed
-              -- g_currentMission.aiSystem:removeJob(job)
+              g_currentMission.aiSystem:removeJob(job)
               g_currentMission.aiSystem:stopJob(job, AIMessageErrorUnknown.new())
             end
           end
@@ -195,13 +194,13 @@ function FarmCleanUp:cleanStumps()
 
           --Save path and filename
           local commandOutboxDir       = getUserProfileAppPath()  .. "modSettings/FS25_FSG_Companion/commands/outbox/"
-          local saveedFile       = commandOutboxDir .. "/removedStumps.xml"
+          local savedFile       = commandOutboxDir .. "/removedStumps.xml"
           local transactionId = g_fsgSettings:getTransactionId()
           --File Key for xml output
           local key ="removedStumps"
 
           --save data to xml file
-          newxmlFile = XMLFile.create(key, saveedFile, key)
+          newxmlFile = XMLFile.create(key, savedFile, key)
 
           local index = 0
 
@@ -289,14 +288,14 @@ function FarmCleanUp:cleanLogs()
 
           --Save path and filename
           local commandOutboxDir       = getUserProfileAppPath()  .. "modSettings/FS25_FSG_Companion/commands/outbox/"
-          local saveedFile       = commandOutboxDir .. "/removedLogs.xml"
+          local savedFile       = commandOutboxDir .. "/removedLogs.xml"
           local transactionId = g_fsgSettings:getTransactionId()
 
           --File Key for xml output
           local key ="removedLogs"
 
           --save data to xml file
-          newxmlFile = XMLFile.create(key, saveedFile, key)
+          newxmlFile = XMLFile.create(key, savedFile, key)
 
           local index = 0
 
@@ -457,14 +456,14 @@ function FarmCleanUp:cleanPallets()
     if removedPallets ~= nil and #removedPallets > 0 then
       --Save path and filename
       local commandOutboxDir       = getUserProfileAppPath()  .. "modSettings/FS25_FSG_Companion/commands/outbox/"
-      local saveedFile       = commandOutboxDir .. "/removedPallets.xml"
+      local savedFile       = commandOutboxDir .. "/removedPallets.xml"
       local transactionId = g_fsgSettings:getTransactionId()
 
       --File Key for xml output
       local key ="removedPallets"
 
       --save data to xml file
-      newxmlFile = XMLFile.create(key, saveedFile, key)
+      newxmlFile = XMLFile.create(key, savedFile, key)
 
       local index = 0
 
@@ -547,14 +546,14 @@ function FarmCleanUp:cleanBales()
     if removedBales ~= nil and #removedBales > 0 then
       --Save path and filename
       local commandOutboxDir       = getUserProfileAppPath()  .. "modSettings/FS25_FSG_Companion/commands/outbox/"
-      local saveedFile       = commandOutboxDir .. "/removedBales.xml"
+      local savedFile       = commandOutboxDir .. "/removedBales.xml"
       local transactionId = g_fsgSettings:getTransactionId()
 
       --File Key for xml output
       local key ="removedBales"
 
       --save data to xml file
-      newxmlFile = XMLFile.create(key, saveedFile, key)
+      newxmlFile = XMLFile.create(key, savedFile, key)
 
       local index = 0
 

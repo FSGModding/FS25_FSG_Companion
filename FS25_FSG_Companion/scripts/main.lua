@@ -49,7 +49,7 @@ local sourceFiles = {
   "scripts/farmPlaceableTax.lua",
   "scripts/fillManager.lua",
   "scripts/FSGSettings.lua",
-  "scripts/fs22ModPrefSaver.lua",
+  "scripts/fs25ModPrefSaver.lua",
   "scripts/infoMessages.lua",
   -- Gui
   "gui/FSGSettingsGui.lua",
@@ -553,6 +553,13 @@ local function init()
 
   -- Add more field information to the hud
   PlayerHUDUpdater.fieldAddField = Utils.appendedFunction(PlayerHUDUpdater.fieldAddField, FieldStats.fieldAddField)
+
+  -- Disable the ability for productions to use nearby storages until glitch is fixed
+  ProductionPoint.findStorageExtensions = Utils.overwrittenFunction(ProductionPoint.findStorageExtensions, function(self)
+    -- Do nothing.  This stops the check for local storages 
+  end)
+
+  TreePlanter.actionEventPlant = Utils.overwrittenFunction(TreePlanter.actionEventPlant, Limits.actionEventPlant)
 
 end
 

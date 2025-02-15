@@ -141,6 +141,10 @@ function FSGSettingsGuiSettingsFrame:updateSettings()
   self.updateFloodLighting:setState(floodLighting)
   self.updateFloodLighting:setDisabled(not g_currentMission:getIsServer() and not g_currentMission.isMasterUser)
 
+  local placeableGreenhouses = g_fsgSettings.settings:getValue("placeableGreenhouses")
+  self.updatePlaceableGreenhouses:setState(placeableGreenhouses)
+  self.updatePlaceableGreenhouses:setDisabled(not g_currentMission:getIsServer() and not g_currentMission.isMasterUser)
+
   local otherPlaceables = g_fsgSettings.settings:getValue("otherPlaceables")
   self.updateOtherPlaceables:setState(otherPlaceables)
   self.updateOtherPlaceables:setDisabled(not g_currentMission:getIsServer() and not g_currentMission.isMasterUser)
@@ -312,6 +316,18 @@ function FSGSettingsGuiSettingsFrame:onClickUpdateFloodLighting(state)
     rcDebug('FSGSettingsGuiSettingsFrame:onClickUpdateFloodLighting: ')
     rcDebug(state)
     FCSettingEvent.sendEvent(3, "floodLighting", state)
+  end
+end
+
+function FSGSettingsGuiSettingsFrame:onClickUpdatePlaceableGreenhouses(state)
+  rcDebug("FSGSettingsGuiSettingsFrame:onClickUpdatePlaceableGreenhouses")
+  g_fsgSettings.settings:setValue("placeableGreenhouses",state)
+  g_fsgSettings.settings:saveSettings()
+  if not self.isServer then
+    -- Send setting data to the server
+    rcDebug('FSGSettingsGuiSettingsFrame:onClickUpdatePlaceableGreenhouses: ')
+    rcDebug(state)
+    FCSettingEvent.sendEvent(3, "placeableGreenhouses", state)
   end
 end
 

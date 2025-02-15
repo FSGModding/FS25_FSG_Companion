@@ -28,7 +28,7 @@ function FSGSettings.new(mission, i18n, modDirectory, modName)
   self.actionEventId          = nil
 
   -- Load mod default settings
-  self.settings = FS22PrefSaver:new(
+  self.settings = FS25PrefSaver:new(
     "FS25_FSG_Companion",
     "CompanionSettings.xml",
     false,
@@ -56,7 +56,8 @@ function FSGSettings.new(mission, i18n, modDirectory, modName)
       coopMinCruiseSpeed      = {3, "int"},
       coopMinCruiseMin        = {3, "int"},
       disableSleep            = {true, "bool"},
-      disableBorrowEquipment  = {false, "bool"}
+      disableBorrowEquipment  = {false, "bool"},
+      placeableGreenhouses    = {2, "int"}
     },
 		nil,
 		nil
@@ -447,4 +448,6 @@ function FSGSettings:join()
   FCSettingEvent.sendEvent(3, "coopMinCruiseSpeed", g_fsgSettings.settings:getValue("coopMinCruiseSpeed"))
   FCSettingEvent.sendEvent(3, "coopMinCruiseMin", g_fsgSettings.settings:getValue("coopMinCruiseMin"))
   FCSettingEvent.sendEvent(2, "disableSleep", g_fsgSettings.settings:getValue("disableSleep"))
+  FCSettingEvent.sendEvent(3, "placeableGreenhouses", g_fsgSettings.settings:getValue("placeableGreenhouses"))
+  
 end

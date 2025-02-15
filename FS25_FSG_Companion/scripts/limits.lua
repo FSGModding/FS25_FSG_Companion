@@ -211,8 +211,8 @@ function Limits:canBuyPlaceable()
 	local maxItemCount = math.floor(g_fsgSettings.settings:getValue("otherPlaceables")) - 1 or 5
   local infoText = g_i18n:getText("rc_max_placeables")
 
-  -- rcDebug("Store Item Category Name")
-  -- rcDebug(self.storeItem.categoryName)
+  rcDebug("Store Item Category Name")
+  rcDebug(self.storeItem.categoryName)
 
   -- Check if placeable is a set type and has a different limit
   if self.storeItem.categoryName == "PRODUCTIONPOINTS" then
@@ -233,14 +233,37 @@ function Limits:canBuyPlaceable()
   elseif self.storeItem.categoryName == "FLOODLIGHTING" then
     maxItemCount = math.floor(g_fsgSettings.settings:getValue("floodLighting")) - 1 or 20
     infoText = g_i18n:getText("rc_max_lights")
+  elseif self.storeItem.categoryName == "PLACEABLEMISC" then
+    if string.find(self.storeItem.rawXMLFilename:lower(), "greenhouses") then
+      maxItemCount = math.floor(g_fsgSettings.settings:getValue("placeableGreenhouses")) - 1 or 1
+      infoText = g_i18n:getText("rc_max_greenhouses")
+    end
   end
 
   -- Checks to see if brand is fsg-coop and only allows admins to place
+  -- rcDebug("Store Item XML Filename")
   -- rcDebug(self.storeItem.rawXMLFilename)
   if self.storeItem.rawXMLFilename == "fsgCoopInbound.xml" 
     or self.storeItem.rawXMLFilename == "fsgCoopOutbound.xml" 
-    or self.storeItem.rawXMLFilename == "fsgCoopInboundObjects.xml" 
+    or self.storeItem.rawXMLFilename == "fsgCoopInboundObjects.xml"
+    
+    -- Block easy money stuff
     or self.storeItem.rawXMLFilename == "$data/placeables/brandless/electricityGenerators/level05/electricityGenerator05.xml"
+    or self.storeItem.rawXMLFilename == "$data/placeables/brandless/productionPointsGeneric/stoneQuarry/stoneQuarry.xml"
+    or self.storeItem.rawXMLFilename == "$data/placeables/mapEU/cementFactoryEU/cementFactoryPlaceable.xml"
+    or self.storeItem.rawXMLFilename == "$data/placeables/brandless/productionPointsSmall/cementFactory/cementFactory.xml"
+
+    -- Block Selling Stations US
+    or self.storeItem.rawXMLFilename == "$data/placeables/brandless/farmerKioskBig/farmerKioskBig.xml"
+    or self.storeItem.rawXMLFilename == "$data/placeables/mapUS/farmersMarketUS/farmersMarketUS.xml"
+    or self.storeItem.rawXMLFilename == "$data/placeables/brandless/farmerKioskSmall/farmerKioskSmall.xml"
+    or self.storeItem.rawXMLFilename == "$data/placeables/brandless/sellingStationGeneric/debrisCrusher/debrisCrusher.xml"
+    or self.storeItem.rawXMLFilename == "$data/placeables/brandless/productionPointsSmall/biomassHeatingPlant/biomassHeatingPlant.xml"
+    or self.storeItem.rawXMLFilename == "$data/placeables/mapEU/pianoFactory/pianoFactoryPlaceable.xml"
+    or self.storeItem.rawXMLFilename == "$data/placeables/brandless/productionPointsSmall/debrisCrusher/debrisCrusher.xml"
+    or self.storeItem.rawXMLFilename == "$data/placeables/brandless/productionPointsGeneric/biomassHeatingPlant/biomassHeatingPlant.xml"
+    
+
   then
       -- Make sure we are on server and user is master before allowing 
       rcDebug("Checking to make sure user is on server and master user.")
@@ -719,4 +742,36 @@ function Limits:setButtonsForState()
   if g_fsgSettings.settings:getValue("disableBorrowEquipment") then
 	  self.leaseButtonInfo.disabled = true
   end
+end
+
+function Limits.actionEventPlant(self, actionName, inputValue, callbackState, isAnalog)
+	local spec_treePlanter = self.spec_treePlanter
+	if spec_treePlanter.hasGroundContact then
+		if g_treePlantManager:canPlantTree() then
+			local x, y, z = getWorldTranslation(spec_treePlanter.node)
+
+      -- Check if current location is a field.
+      if FSDensityMapUtil.getIsFieldAtWorldPos(x, z) then
+        g_currentMission:showBlinkingWarning(g_i18n:getText("warning_canNotPlantOnField"))
+        return
+      end
+
+			if g_currentMission.accessHandler:canFarmAccessLand(self:getActiveFarm(), x, z) then
+				if PlacementUtil.isInsideRestrictedZone(g_currentMission.restrictedZones, x, y, z, true) then
+					g_currentMission:showBlinkingWarning(g_i18n:getText("warning_actionNotAllowedHere"))
+				else
+					self:createTree()
+				end
+			else
+				g_currentMission:showBlinkingWarning(g_i18n:getText("warning_youDontHaveAccessToThisLand"))
+				return
+			end
+		else
+			g_currentMission:showBlinkingWarning(g_i18n:getText("warning_tooManyTrees"))
+			return
+		end
+	else
+		g_currentMission:showBlinkingWarning(g_i18n:getText("warning_treePlanterNoGroundContact"))
+		return
+	end
 end

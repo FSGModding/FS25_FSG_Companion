@@ -5,7 +5,7 @@ InitEventClass(FCTreePlantEvent, "FCTreePlantEvent")
 function FCTreePlantEvent.emptyNew()
 	return Event.new(FCTreePlantEvent_mt)
 end
-function FCTreePlantEvent.new(treeType, x, y, z, rx, ry, rz, growthStateI, variationIndex, splitShapeFileId, isGrowing, price, farmId)
+function FCTreePlantEvent.new(treeType, _, x, y, z, rx, ry, rz, growthStateI, variationIndex, splitShapeFileId, isGrowing, price, farmId)
 	local self = FCTreePlantEvent.emptyNew()
 	self.treeType = treeType
 	self.x = x

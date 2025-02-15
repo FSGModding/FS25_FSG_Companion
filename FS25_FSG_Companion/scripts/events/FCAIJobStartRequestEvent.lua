@@ -6,7 +6,7 @@ InitEventClass(FCAIJobStartRequestEvent, "FCAIJobStartRequestEvent")
 function FCAIJobStartRequestEvent.emptyNew()
 	return Event.new(FCAIJobStartRequestEvent_mt)
 end
-function FCAIJobStartRequestEvent.new(job, superFunc, startFarmId)
+function FCAIJobStartRequestEvent.new(job, _, startFarmId)
 	local self = FCAIJobStartRequestEvent.emptyNew()
 	self.job = job
 	self.startFarmId = startFarmId

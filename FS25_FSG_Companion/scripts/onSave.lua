@@ -1345,7 +1345,10 @@ function onSave:getFills(fills)
       --rcDebug(fill)
 
       -- Get fill percentage
-      local fillPercentage = (fill.fillLevel / fill.capacity) * 100
+      local fillPercentage = 0
+      if fill.fillLevel ~= 0 and fill.capacity ~= 0 then
+        fillPercentage = (fill.fillLevel / fill.capacity) * 100
+      end
       local fillType = g_fillTypeManager:getFillTypeNameByIndex(fill.fillType)
       local fillLevel = fill.fillLevel
 

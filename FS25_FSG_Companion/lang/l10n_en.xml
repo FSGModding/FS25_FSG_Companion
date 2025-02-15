@@ -63,6 +63,7 @@
     <text name="rc_max_farmhouses"                    text="This farm has max farmhouses for this store item." />
     <text name="rc_max_lights"                        text="This farm has max lights for this store item." />
     <text name="rc_max_generators"                    text="This farm has max generators for this store item." />
+    <text name="rc_max_greenhouses"                   text="This farm has max greenhouses for this store item." />
     <text name="rc_admin_only_place"                  text="Only Admins Can Place This Item." />
     <text name="sync_warning"                         text="Sync Warning - Player Incoming!" />
     <text name="rc_max_items"                         text="This farm has max items for this store item." />
@@ -89,6 +90,7 @@
     <text name="text_wheel_type"                      text="Preferred Tire" />
     <text name="text_none"                            text="None" />
     <text name="text_unknown"                         text="Unknown" />
+    <text name="warning_canNotPlantOnField"           text="You can not plant trees in fields." />
     
     <!-- Setting Menu -->
     <text name="FSG_MENU"                             text="FSG Companion" />
@@ -116,6 +118,8 @@
     <text name="ui_settings_toolTip_generators"       text="Max number of generators per store item allowed per farm." />
     <text name="ui_settings_floodLighting"            text="Light Pole Limit" />
     <text name="ui_settings_toolTip_floodLighting"    text="Max number of light poles per store item allowed per farm." />
+    <text name="ui_settings_placeableGreenhouses"            text="Greenhouse Limit" />
+    <text name="ui_settings_toolTip_placeableGreenhouses"    text="Max number of greenhouses per store item allowed per farm." />
     <text name="ui_settings_otherPlaceables"          text="Other Placeable Limit" />
     <text name="ui_settings_toolTip_otherPlaceables"  text="Max number of placeables per store item allowed per farm." />
     <text name="ui_settings_gardenSheds"              text="Garden Shed Limit" />

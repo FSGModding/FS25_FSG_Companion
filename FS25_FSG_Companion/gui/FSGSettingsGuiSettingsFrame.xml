@@ -127,6 +127,14 @@
               <Text profile="fs25_settingsMultiTextOptionTitle" text="$l10n_ui_settings_floodLighting" />
             </Bitmap>
 
+            <!-- Greenhouses Limit Option -->
+            <Bitmap profile="fs25_multiTextOptionContainer" id="onClickUpdatePlaceableGreenhousesBox">
+              <MultiTextOption profile="fs25_settingsMultiTextOption" onClick="onClickUpdatePlaceableGreenhouses" id="updatePlaceableGreenhouses" texts="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30">
+                <Text profile="fs25_multiTextOptionTooltip_fsg" name="ignore" text="$l10n_ui_settings_toolTip_placeableGreenhouses" />
+              </MultiTextOption>
+              <Text profile="fs25_settingsMultiTextOptionTitle" text="$l10n_ui_settings_placeableGreenhouses" />
+            </Bitmap>
+
             <!-- Other Placeables Limit Option -->
             <Bitmap profile="fs25_multiTextOptionContainer" id="onClickUpdateOtherPlaceablesBox">
               <MultiTextOption profile="fs25_settingsMultiTextOption" onClick="onClickUpdateOtherPlaceables" id="updateOtherPlaceables" texts="0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30">
