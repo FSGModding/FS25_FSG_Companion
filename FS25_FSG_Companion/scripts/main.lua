@@ -70,6 +70,7 @@ local sourceFiles = {
   "scripts/events/FCAIJobStartEvent.lua",
   "scripts/events/FCTreePlantEvent.lua",
   "scripts/events/FCSettingEvent.lua",
+  "scripts/events/addMoneyEvent.lua",
 	-- Load all command files
 	"scripts/commands/forgetMe.lua",
 	"scripts/commands/getFarms.lua",
@@ -313,6 +314,8 @@ local function init()
   -- Mod is loaded in to the game here.  Yay!
   rcDebug("Starting the FSG Realism Companion")
 
+  g_overlayManager:addTextureConfigFile(g_currentModDirectory .. "gui/farmsGui.xml", "farmsGui")
+
   -- Create folder for this mod if not one already
   local modSettingsFolderPath = getUserProfileAppPath()  .. "modSettings/FS25_FSG_Companion"
   if ( not fileExists(modSettingsFolderPath) ) then createFolder(modSettingsFolderPath) end
@@ -367,80 +370,84 @@ local function init()
     {0, 1, 1, 1},        
     {1, 0, 1, 1},        
     {0.5, 0, 0, 1},      
-    {0, 0.5, 0, 1},      
+    {0, 0.5, 0, 1},
+    {0.878, 0.278, 0.545, 1},
+    {0.133, 0.812, 0.298, 1},
+    {0.066, 0.372, 0.807, 1},
+    {0.933, 0.678, 0.133, 1},
+    {0.384, 0.066, 0.807, 1},
   }
 
   Farm.COLOR_SEND_NUM_BITS = 6 -- Adjusting to accommodate more colors
 
-  -- Does not look like the uvs are used anymore for farms
   Farm.ICON_UVS = {
-    {330,0,256,256},
-    {660,0,256,256},
-    {330,310,256,256},
-    {0,310,256,256},
-    {660,310,256,256},
-    {0,620,256,256},
-    {330,620,256,256},
-    {660,620,256,256},
-    {330,0,256,256},
-    {660,0,256,256},
-    {330,310,256,256},
-    {0,310,256,256},
-    {660,310,256,256},
-    {0,620,256,256},
-    {330,620,256,256},
-    {660,620,256,256},
-    {330,0,256,256},
-    {660,0,256,256},
-    {330,310,256,256},
-    {0,310,256,256},
-    {660,310,256,256},
-    {0,620,256,256},
-    {330,620,256,256},
-    {660,620,256,256},
-    {330,0,256,256},
-    {660,0,256,256},
-    {330,310,256,256},
-    {0,310,256,256},
-    {660,310,256,256},
-    {0,620,256,256},
-    {330,620,256,256},
-    {660,620,256,256},        
+      { 330, 0, 256, 256 },
+      { 660, 0, 256, 256 },
+      { 330, 310, 256, 256 },
+      { 0, 310, 256, 256 },
+      { 660, 310, 256, 256 },
+      { 0, 620, 256, 256 },
+      { 330, 620, 256, 256 },
+      { 660, 620, 256, 256 },
+      { 330, 0, 256, 256 },
+      { 660, 0, 256, 256 },
+      { 330, 310, 256, 256 },
+      { 0, 310, 256, 256 },
+      { 660, 310, 256, 256 },
+      { 0, 620, 256, 256 },
+      { 330, 620, 256, 256 },
+      { 660, 620, 256, 256 },
+      { 330, 0, 256, 256 },
+      { 660, 0, 256, 256 },
+      { 330, 310, 256, 256 },
+      { 0, 310, 256, 256 },
+      { 660, 310, 256, 256 },
+      { 0, 620, 256, 256 },
+      { 330, 620, 256, 256 },
+      { 660, 620, 256, 256 },
+      { 330, 0, 256, 256 },
+      { 660, 0, 256, 256 },
+      { 330, 310, 256, 256 },
+      { 0, 310, 256, 256 },
+      { 660, 310, 256, 256 },
+      { 0, 620, 256, 256 },
+      { 330, 620, 256, 256 },
+      { 660, 620, 256, 256 },
   }
 
   Farm.ICON_SLICE_IDS = {
-    "gui.multiplayer_chicken",
-    "gui.multiplayer_goat",
-    "gui.multiplayer_pig",
-    "gui.multiplayer_horse",
-    "gui.multiplayer_bull",
-    "gui.multiplayer_chainsaw",
-    "gui.multiplayer_barn",
-    "gui.multiplayer_vehicle",
-    "gui.multiplayer_chicken",
-    "gui.multiplayer_goat",
-    "gui.multiplayer_pig",
-    "gui.multiplayer_horse",
-    "gui.multiplayer_bull",
-    "gui.multiplayer_chainsaw",
-    "gui.multiplayer_barn",
-    "gui.multiplayer_vehicle",
-    "gui.multiplayer_chicken",
-    "gui.multiplayer_goat",
-    "gui.multiplayer_pig",
-    "gui.multiplayer_horse",
-    "gui.multiplayer_bull",
-    "gui.multiplayer_chainsaw",
-    "gui.multiplayer_barn",
-    "gui.multiplayer_vehicle",
-    "gui.multiplayer_chicken",
-    "gui.multiplayer_goat",
-    "gui.multiplayer_pig",
-    "gui.multiplayer_horse",
-    "gui.multiplayer_bull",
-    "gui.multiplayer_chainsaw",
-    "gui.multiplayer_barn",
-    "gui.multiplayer_vehicle",
+    "farmsGui.multiplayer_01",
+    "farmsGui.multiplayer_02",
+    "farmsGui.multiplayer_03",
+    "farmsGui.multiplayer_04",
+    "farmsGui.multiplayer_05",
+    "farmsGui.multiplayer_06",
+    "farmsGui.multiplayer_07",
+    "farmsGui.multiplayer_08",
+    "farmsGui.multiplayer_09",
+    "farmsGui.multiplayer_10",
+    "farmsGui.multiplayer_11",
+    "farmsGui.multiplayer_12",
+    "farmsGui.multiplayer_13",
+    "farmsGui.multiplayer_14",
+    "farmsGui.multiplayer_15",
+    "farmsGui.multiplayer_16",
+    "farmsGui.multiplayer_17",
+    "farmsGui.multiplayer_18",
+    "farmsGui.multiplayer_19",
+    "farmsGui.multiplayer_20",
+    "farmsGui.multiplayer_21",
+    "farmsGui.multiplayer_22",
+    "farmsGui.multiplayer_23",
+    "farmsGui.multiplayer_24",
+    "farmsGui.multiplayer_25",
+    "farmsGui.multiplayer_26",
+    "farmsGui.multiplayer_27",
+    "farmsGui.multiplayer_28",
+    "farmsGui.multiplayer_29",
+    "farmsGui.multiplayer_30",
+    "farmsGui.multiplayer_31",
+    "farmsGui.multiplayer_32",
   }
 
   -- runs when player sends a message in multiplayer chat
@@ -460,7 +467,7 @@ local function init()
   HelpLineManager.loadMapData = Utils.overwrittenFunction(HelpLineManager.loadMapData, ChatLogger.loadMapDataHelpLineManager)
 
   -- Overwrites the dedi xml link output
-  FSBaseMission.updateGameStatsXML = Utils.overwrittenFunction(FSBaseMission.updateGameStatsXML, onUpdateGameStatsXML)
+  GameStats.updateStatsPlayers = Utils.overwrittenFunction(GameStats.updateStatsPlayers, onUpdateStatsPlayers)
 
   -- Triggers when a user is given farm manager aka all permissions
   Farm.promoteUser = Utils.appendedFunction(Farm.promoteUser, FarmManagerRC.addFarmManager)
@@ -551,6 +558,148 @@ local function init()
     RefillDialog.show(self.placeable.refillAmount, self.placeable, data, 2.1)
   end)
 
+  -- Overwrite Vehicle Set Config Stuffs
+  WorkshopScreen.setConfigurations = Utils.overwrittenFunction(WorkshopScreen.setConfigurations, function(self, superFunc, vehicleBuyData, vehicleId)
+
+    -- Close the shop config screen
+    g_shopConfigScreen:onClickBack()
+
+    -- If the vehicleBuyData is valid, continue with the config check
+    if vehicleBuyData:isValid() then
+      local hasChanged = false
+      local vehicle = NetworkUtil.getObject(vehicleId)
+
+      -- If the vehicle doesn't exist, exit early
+      if vehicle == nil then
+        return
+      end
+
+      -- Check if any of the selected configurations are different from the current ones
+      for configName, configValue in pairs(vehicleBuyData.configurations) do
+        if vehicle.configurations[configName] ~= configValue then
+          hasChanged = true
+          break
+        end
+      end
+
+      -- Check if other configuration data has changed
+      local configDataChanged = ConfigurationUtil.getConfigurationDataHasChanged(
+        vehicle.configFileName,
+        vehicleBuyData.configurationData,
+        vehicle.configurationData
+      )
+
+      local shouldSendEvent = configDataChanged or hasChanged
+
+      -- Check if license plate data has changed, and update the flag accordingly
+      if vehicle.getLicensePlatesDataIsEqual ~= nil then
+        local platesEqual = vehicle:getLicensePlatesDataIsEqual(vehicleBuyData.licensePlateData)
+        shouldSendEvent = not platesEqual or shouldSendEvent
+      end
+
+      -- If any changes were detected, handle the vehicle update
+      if shouldSendEvent then
+        local currentVehicle = g_localPlayer:getCurrentVehicle()
+
+        -- Make the player exit the vehicle if they’re currently in it
+        if currentVehicle ~= nil and vehicle == currentVehicle then
+          g_localPlayer:leaveVehicle()
+        end
+
+        -- Take the money from the farm for the upgrades. 
+        AddMoneyEvent:sendEvent(vehicleBuyData.price, vehicleBuyData.ownerFarmId, MoneyType.SHOP_VEHICLE_BUY)
+
+        -- Send event to server to update vehicle configuration
+        g_client:getServerConnection():sendEvent(ChangeVehicleConfigEvent.new(vehicle, vehicleBuyData))
+        return
+      end
+
+    else
+      -- Fallback behavior if data is invalid: close this menu and return to the previous one
+      self:onClickBack()
+
+      if self.owner ~= nil then
+        self.owner:openMenu()
+      end
+    end
+
+
+  end)
+
+  -- Overwrite Vehicle Update Event (REMOVE ONCE SORTED - USED FOR DEBUG)
+  ChangeVehicleConfigEvent.run = Utils.overwrittenFunction(ChangeVehicleConfigEvent.run, function(self, superFunc, connection)
+
+    rcDebug("Change Vehicle Config Event Run")
+
+    if connection:getIsServer() then
+      -- Notify the UI on the server side that the vehicle change result is ready
+      g_workshopScreen:onVehicleChanged(self.successful)
+    else
+      local wasSuccessful = false
+      local vehicle = self.vehicle
+
+      -- Check if the vehicle is valid and if the player has permission to change it
+      if vehicle == nil
+        or (not vehicle.isVehicleSaved
+        or (vehicle.getIsControlled ~= nil and vehicle:getIsControlled()))
+        or not g_currentMission:getHasPlayerPermission("buyVehicle", connection)
+      then
+        connection:sendEvent(ChangeVehicleConfigEvent.newServerToClient(false))
+        return
+      end
+
+      local vehicleSystem = g_currentMission.vehicleSystem
+
+      -- Apply new configurations to the vehicle
+      vehicle:setConfigurations(self.vehicleBuyData.configurations, self.vehicleBuyData.boughtConfigurations, self.vehicleBuyData.configurationData)
+
+      -- Update license plate data if applicable
+      if vehicle.setLicensePlatesData ~= nil and (vehicle.getHasLicensePlates ~= nil and vehicle:getHasLicensePlates()) then
+        vehicle:setLicensePlatesData(self.vehicleBuyData.licensePlateData)
+      end
+
+      -- Detach all non-additional implements
+      local spec = vehicle.spec_attacherJoints
+      if spec ~= nil and spec.attachedImplements ~= nil then
+        for i = #spec.attachedImplements, 1, -1 do
+          local implement = spec.attachedImplements[i]
+          if not implement.object:getIsAdditionalAttachment() then
+            vehicle:detachImplementByObject(implement.object, true)
+          end
+        end
+      end
+
+      -- Begin reconfiguration process
+      vehicle.isReconfigurating = true
+      g_server:broadcastEvent(VehicleSetIsReconfiguratingEvent.new(vehicle), nil, nil, vehicle)
+
+      local xmlFile = vehicle:getReloadXML()
+
+      -- Async callback after attempting to reload vehicle from XML
+      local function asyncCallbackFunction(_, result, _)
+        if #result > 0 then
+          wasSuccessful = true
+
+          vehicle:removeFromPhysics()
+          vehicle:delete(true)
+        else
+          vehicle:addToPhysics()
+          vehicleSystem.vehicleByUniqueId[vehicle:getUniqueId()] = vehicle:getUniqueId()
+        end
+
+        xmlFile:delete()
+        connection:sendEvent(ChangeVehicleConfigEvent.newServerToClient(wasSuccessful))
+      end
+
+      -- Run the XML reload task asynchronously
+      g_asyncTaskManager:addTask(function()
+        vehicleSystem.vehicleByUniqueId[vehicle:getUniqueId()] = nil
+        vehicleSystem:loadFromXMLFile(xmlFile, asyncCallbackFunction, nil, {})
+      end)
+    end
+
+  end)
+
   -- Add more field information to the hud
   PlayerHUDUpdater.fieldAddField = Utils.appendedFunction(PlayerHUDUpdater.fieldAddField, FieldStats.fieldAddField)
 
@@ -570,10 +719,10 @@ function onConnectionFinishedLoading(connection, ...)
 end
 
 ---Run when game stats are getting updated
-function onUpdateGameStatsXML(...)
+function onUpdateStatsPlayers(...)
   -- Nothing returned, no need to call the superFunc
   ---Replaces the base game xml link output
-  onSave.dediStatsUpdate(...)
+  onSave.updateStatsPlayers(...)
   ---Update Save Savegame XML files
   -- onSave.saveSaveGameXmlFiles(...)
 end
@@ -598,6 +747,17 @@ end
 -- Removes button for loans in game
 function hasPlayerLoanPermission()
     return false
+end
+
+-- Limit the color selections shown in the farms page so it looks better
+local oldStoreAvailableColors = EditFarmDialog.storeAvailableColors
+function EditFarmDialog:storeAvailableColors(editingFarmId)
+    oldStoreAvailableColors(self, editingFarmId)
+
+    for i = #self.availableColors, 9, -1 do
+        table.remove(self.availableColors, i)
+        self.availableColorIndexMap[i] = nil
+    end
 end
 
 --- Makes things tick

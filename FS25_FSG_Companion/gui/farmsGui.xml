@@ -1,0 +1,41 @@
+<texture>
+    <meta>
+        <filename>farmsGui.dds</filename>
+        <size width="4096" height="512" />
+    </meta>
+    <slices>
+        <slice id="multiplayer_01" uvs="0px 0px 256px 256px" />
+        <slice id="multiplayer_02" uvs="256px 0px 256px 256px" />
+        <slice id="multiplayer_03" uvs="512px 0px 256px 256px" />
+        <slice id="multiplayer_04" uvs="768px 0px 256px 256px" />
+        <slice id="multiplayer_05" uvs="1024px 0px 256px 256px" />
+        <slice id="multiplayer_06" uvs="1280px 0px 256px 256px" />
+        <slice id="multiplayer_07" uvs="1536px 0px 256px 256px" />
+        <slice id="multiplayer_08" uvs="1792px 0px 256px 256px" />
+        <slice id="multiplayer_09" uvs="2048px 0px 256px 256px" />
+        <slice id="multiplayer_10" uvs="2304px 0px 256px 256px" />
+        <slice id="multiplayer_11" uvs="2560px 0px 256px 256px" />
+        <slice id="multiplayer_12" uvs="2816px 0px 256px 256px" />
+        <slice id="multiplayer_13" uvs="3072px 0px 256px 256px" />
+        <slice id="multiplayer_14" uvs="3328px 0px 256px 256px" />
+        <slice id="multiplayer_15" uvs="3584px 0px 256px 256px" />
+        <slice id="multiplayer_16" uvs="3840px 0px 256px 256px" />
+
+        <slice id="multiplayer_17" uvs="0px 256px 256px 256px" />
+        <slice id="multiplayer_18" uvs="256px 256px 256px 256px" />
+        <slice id="multiplayer_19" uvs="512px 256px 256px 256px" />
+        <slice id="multiplayer_20" uvs="768px 256px 256px 256px" />
+        <slice id="multiplayer_21" uvs="1024px 256px 256px 256px" />
+        <slice id="multiplayer_22" uvs="1280px 256px 256px 256px" />
+        <slice id="multiplayer_23" uvs="1536px 256px 256px 256px" />
+        <slice id="multiplayer_24" uvs="1792px 256px 256px 256px" />
+        <slice id="multiplayer_25" uvs="2048px 256px 256px 256px" />
+        <slice id="multiplayer_26" uvs="2304px 256px 256px 256px" />
+        <slice id="multiplayer_27" uvs="2560px 256px 256px 256px" />
+        <slice id="multiplayer_28" uvs="2816px 256px 256px 256px" />
+        <slice id="multiplayer_29" uvs="3072px 256px 256px 256px" />
+        <slice id="multiplayer_30" uvs="3328px 256px 256px 256px" />
+        <slice id="multiplayer_31" uvs="3584px 256px 256px 256px" />
+        <slice id="multiplayer_32" uvs="3840px 256px 256px 256px" />
+    </slices>
+</texture>
