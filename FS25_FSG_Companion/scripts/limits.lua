@@ -742,6 +742,8 @@ function Limits:setButtonsForState()
   if g_fsgSettings.settings:getValue("disableBorrowEquipment") then
 	  self.leaseButtonInfo.disabled = true
   end
+  -- Disable the ability to cancel contracts
+  self.cancelButtonInfo.disabled = true
 end
 
 function Limits.actionEventPlant(self, actionName, inputValue, callbackState, isAnalog)
