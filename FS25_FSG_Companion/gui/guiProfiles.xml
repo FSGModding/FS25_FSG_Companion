@@ -30,4 +30,20 @@
     <textColor value="$preset_fs25_colorGreyText" />
   </Profile>
 
+  <Profile name="fsg_menuNoItems" extends="textDefault" with="anchorTopCenter">
+      <size value="100% 50px" />
+      <textVerticalAlignment value="middle" />
+      <textAutoWidth value="true" />
+      <position value="0 -50px" />
+  </Profile>
+
+  <Profile name="fsg_settingsLayout" extends="baseReference" with="anchorStretchingYStretchingX pivotTopCenter">
+      <size value="100% 100%" />
+      <absoluteSizeOffset value="0px 0px" />
+      <wrapAround value="false" />
+      <fitFlowToElements value="true" />
+      <flowDirection value="vertical" />
+      <imageColor value="$preset_colorTransparent" />
+  </Profile>
+
 </GUIProfiles>

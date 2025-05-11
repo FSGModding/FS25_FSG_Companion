@@ -11,6 +11,7 @@
 local modDirectory = g_currentModDirectory or ""
 local modName = g_currentModName or "unknown"
 local modEnvironmentChat
+local modEnvironmentGameLogs
 local modEnvironmentonSave
 local modEnvironmentgetAdminLogin
 local modEnvironmentNewJoin
@@ -35,6 +36,7 @@ local sourceFiles = {
 	"scripts/onSave.lua",
   "scripts/chatEventSaver.lua",
   "scripts/chatLogger.lua",
+  "scripts/gameLogs.lua",
 	"scripts/getAdminLogin.lua",
 	"scripts/getNewJoin.lua",
   "scripts/farmManager.lua",
@@ -90,6 +92,10 @@ local function load(mission)
   assert(g_chatLogger == nil)
   modEnvironmentChat = ChatLogger:new(mission, g_i18n, modDirectory, modName)
   getfenv(0)["g_chatLogger"] = modEnvironmentChat
+
+  assert(g_GameLogs == nil)
+  modEnvironmentGameLogs = GameLogs:new(mission, g_i18n, modDirectory, modName)
+  getfenv(0)["g_GameLogs"] = modEnvironmentGameLogs
 
   assert(g_onSave == nil)
   modEnvironmentonSave = onSave:new(mission, g_i18n, modDirectory, modName)
@@ -188,6 +194,13 @@ local function unload()
     modEnvironmentChat = nil
     if g_chatLogger ~= nil then
       getfenv(0)["g_chatLogger"] = nil
+    end
+  end
+  removeModEventListener(modEnvironmentGameLogs)
+  if modEnvironmentGameLogs ~= nil then
+    modEnvironmentGameLogs = nil
+    if g_GameLogs ~= nil then
+      getfenv(0)["g_GameLogs"] = nil
     end
   end
   removeModEventListener(modEnvironmentonSave)
@@ -709,6 +722,9 @@ local function init()
   end)
 
   TreePlanter.actionEventPlant = Utils.overwrittenFunction(TreePlanter.actionEventPlant, Limits.actionEventPlant)
+
+  -- Log every money transaction on the servers
+  FSBaseMission.addMoneyChange = Utils.appendedFunction(FSBaseMission.addMoneyChange, GameLogs.MoneyChange)
 
 end
 

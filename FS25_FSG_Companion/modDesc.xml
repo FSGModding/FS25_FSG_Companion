@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
-<modDesc descVersion="92">
+<modDesc descVersion="98">
     <author>FSG Modding - FSG DaVaR</author>
     <contributors>JTSage</contributors>
-    <version>1.0.0.1</version>
+    <version>1.0.0.3</version>
     <title>
       <en>FSG Companion</en>
     </title>

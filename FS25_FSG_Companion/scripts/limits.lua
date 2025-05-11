@@ -744,6 +744,8 @@ function Limits:setButtonsForState()
   end
   -- Disable the ability to cancel contracts
   self.cancelButtonInfo.disabled = true
+  -- Disable the ability to accept contracts
+  self.acceptButtonInfo.disabled = true
 end
 
 function Limits.actionEventPlant(self, actionName, inputValue, callbackState, isAnalog)

@@ -53,6 +53,9 @@ function onSave.saveToXMLFile()
     -- Copy weather forecast over to savegame
     onSave.getWeatherForecast()
 
+    -- Copy weather forecast over to savegame
+    onSave.copyTransactions()
+
     -- Copy savegame xml files over to outbox for bot to download
     onSave.copySaveFiles()
 
@@ -1473,6 +1476,19 @@ function onSave:getWeatherForecast()
 
   if ( fileExists(weatherForecastFile) ) then
     copyFile(weatherForecastFile, weatherForecastFileSave, true)
+  end
+end
+
+-- Copy transactions file over to savegame
+function onSave:copyTransactions()
+  -- Save weather forecast to xml
+  local savegameFolderPath = getUserProfileAppPath() .. "savegame" .. g_currentMission.missionInfo.savegameIndex
+	local modSettingsFolderPath = getUserProfileAppPath()  .. "modSettings/FS25_FSG_Companion"
+	local moneyTransactionsFile = modSettingsFolderPath .. "/MoneyTransactions.xml"
+	local moneyTransactionsFileSave = savegameFolderPath .. "/MoneyTransactions.xml"
+
+  if ( fileExists(moneyTransactionsFile) ) then
+    copyFile(moneyTransactionsFile, moneyTransactionsFileSave, true)
   end
 end
 

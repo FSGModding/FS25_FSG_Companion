@@ -6,6 +6,7 @@
     <!-- <FrameReference ref="FSGSettingsGuiTools" name="FSGSettingsGuiTools" id="pageFSGTools" /> -->
     <FrameReference ref="FSGSettingsGuiSettings" name="FSGSettingsGuiSettings" id="pageFSGSettings" />
     <FrameReference ref="FSGSettingsGuiTimeSync" name="FSGSettingsGuiTimeSync" id="pageFSGTimeSync" />
+    <FrameReference ref="FSGSettingsFarmTransactions" name="FSGSettingsFarmTransactions" id="pageFarmTransactions" />
   </Paging>
   <Bitmap profile="fs25_tabListContainer" id="header">
     <MultiTextOption profile="uiInGameMenuHeaderSelector" onClick="onClickPageSelection" id="pageSelector" soundDisabled="true" />

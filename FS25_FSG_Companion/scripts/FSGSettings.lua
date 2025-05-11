@@ -78,6 +78,7 @@ function FSGSettings:loadMap(filename)
   -- local FSGToolsFrame = FSGSettingsGuiToolsFrame:new(nil, g_i18n)
   local FSGSettingsFrame = FSGSettingsGuiSettingsFrame:new(nil, g_i18n)
   local FSGTimeSyncFrame = FSGSettingsGuiTimeSyncFrame:new(nil, g_i18n)
+  -- local FSGFarmTransactionsFrame = FSGSettingsFarmTransactionsFrame:new(nil, g_i18n)
 
   g_gui:loadProfiles(FSGSettings.modDirectory .. "gui/guiProfiles.xml")
 
@@ -87,6 +88,7 @@ function FSGSettings:loadMap(filename)
   -- g_gui:loadGui(FSGSettings.modDirectory .. "gui/FSGSettingsGuiToolsFrame.xml", "FSGSettingsGuiToolsFrame", FSGToolsFrame, true)
   g_gui:loadGui(FSGSettings.modDirectory .. "gui/FSGSettingsGuiSettingsFrame.xml", "FSGSettingsGuiSettingsFrame", FSGSettingsFrame, true)
   g_gui:loadGui(FSGSettings.modDirectory .. "gui/FSGSettingsGuiTimeSyncFrame.xml", "FSGSettingsGuiTimeSyncFrame", FSGTimeSyncFrame, true)
+  -- g_gui:loadGui(FSGSettings.modDirectory .. "gui/FSGSettingsFarmTransactionsFrame.xml", "FSGSettingsFarmTransactionsFrame", FSGFarmTransactionsFrame, true)
   g_gui:loadGui(FSGSettings.modDirectory .. "gui/FSGSettingsGui.xml", "FSGSettingsGui", FSGSettings.gui)
 
 end

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+
+<GUI name="FSGSettingsFarmTransactions">
+    <GuiElement type="empty" profile="uiInGameMenuFrame">
+
+        <GuiElement profile="fs25_menuHeaderPanel">
+          <Bitmap profile="fs25_menuHeaderIconBg">
+            <Bitmap profile="fs25_menuHeaderIcon" imageSliceId="gui.icon_ingameMenu_finances" />
+          </Bitmap>
+          <Text profile="fs25_menuHeaderTitle" text="$l10n_ui_settings_info" />
+        </GuiElement>
+
+        <SmoothList profile="fs25_financesList" id="transactionsList">
+            <ListItem profile="fs25_financesListItem">
+                <ThreePartBitmap profile="fs25_financesListItemBg" name="alternating" />
+                <Text profile="fs25_financesListItemName" name="farmId" />
+                <Text profile="fs25_financesListItemToday" name="timestamp" position="-860px 0px" />
+                <Text profile="fs25_financesListItemToday" name="moneyTypeTitle" position="-670px 0px" />
+                <Text profile="fs25_financesListItemToday" name="moneyTypeStat" position="-480px 0px" />
+                <Text profile="fs25_financesListItemToday" name="amount" position="-290px 0px" />
+            </ListItem>
+        </SmoothList>
+
+        <GuiElement profile="fsg_settingsLayout" id="mainBoxEmpty" visible="false">
+            <Text name="descText" text="$l10n_ui_noTransactionsFound" profile="fsg_menuNoItems" />
+        </GuiElement>
+
+    </GuiElement>
+</GUI>

@@ -30,6 +30,7 @@ function FSGSettingsGui:onGuiSetupFinished()
     -- self.pageFSGTools:initialize()
     self.pageFSGSettings:initialize()
     self.pageFSGTimeSync:initialize()
+    -- self.pageFarmTransactions:initialize()
 
     self:initData()
 
@@ -48,6 +49,7 @@ function FSGSettingsGui:setupPages(gui)
         -- {gui.pageFSGTools,      'gui.icon_options_gameSettings2'},
         {gui.pageFSGSettings,   'gui.icon_options_generalSettings2'},
         {gui.pageFSGTimeSync,   'gui.icon_ingameMenu_calendar'},
+        -- {gui.pageFarmTransactions,  'gui.icon_ingameMenu_finances'},
     }
 
     for idx, thisPage in ipairs(pages) do

@@ -147,29 +147,14 @@ end
 function VehicleStorage:loadVehicle(xmlFileVehicle)
   rcDebug("VehicleStorage-storeVehicle")
 
-  local function asyncCallbackFunction(_, vehicle, vehicleLoadState, arguments)
-    rcDebug("vehicleLoadState")
-    rcDebug(vehicleLoadState)
-    if vehicleLoadState == VehicleLoadingState.OK then
-      print("Vehicle Spawned From Storage.  Send Confirmation.")
-      return true
-    else  
-      printf("Warning: corrupt vehicles xml '%s', vehicle '%s' could not be loaded", arguments.xmlFilename, arguments.key)
-      return false
-    end
-  end
-
-  if xmlFileVehicle then
+  if fileExists(xmlFileVehicle) then
 
     local xmlFile = XMLFile.load("VehiclesXML", xmlFileVehicle, Vehicle.xmlSchemaSavegame)
     local i = 1
     local key = string.format("vehicles.vehicle(%d)", i - 1)
-    self.vehiclesToSpawnLoading = true
-    local args = {
-      xmlFilename = xmlFileVehicle,
-      key = key,
-      xmlFile = xmlFile
-    }
+
+    local vehicleUniqueId = xmlFile:getString(key .. "#uniqueId")
+    local storeFilename = xmlFile:getString(key .. "#filename")
 
     -- Get the farmId for vehicle from xml and make sure the farm exists.
     local vehicleFarmId = xmlFile:getValue(key .. "#farmId")
@@ -184,7 +169,45 @@ function VehicleStorage:loadVehicle(xmlFileVehicle)
       return errorMsg
     end
 
-    local vehicle = VehicleSystem:loadFromXMLFile(xmlFile, asyncCallbackFunction, nil, args, true, false)
+    self.vehiclesToSpawnLoading = true
+    local args = {
+      xmlFilename = xmlFileVehicle,
+      key = key,
+      xmlFile = xmlFile,
+      vehicleUniqueId = vehicleUniqueId,
+      storeFilename = storeFilename,
+      farmId = vehicleFarmId,
+    }
+
+    local vehicle = false
+
+    local vehicleSystem = g_currentMission.vehicleSystem
+
+    -- Callback function for the vehicle load
+    local function asyncCallbackFunction(_, vehicle, vehicleLoadState, arguments)
+      
+      -- Make sure we have a vehicle to reset
+      if vehicle ~= nil and arguments.vehicleUniqueId ~= nil then
+        local vehicleToReset = g_currentMission.vehicleSystem:getVehicleByUniqueId(arguments.vehicleUniqueId)
+        if vehicleToReset ~= nil then
+          -- Send the vehicle to spawn area
+          g_client:getServerConnection():sendEvent(ResetVehicleEvent.new(vehicleToReset))
+        end
+      end
+
+      if vehicleLoadState == VehicleLoadingState.OK then
+        print("Vehicle Spawned From Storage.  Send Confirmation.")
+        return true
+      else  
+        printf("Warning: corrupt vehicles xml '%s', vehicle '%s' could not be loaded", arguments.xmlFilename, arguments.key)
+        return false
+      end
+    end
+
+    -- Load the vehicle from storage files
+    g_asyncTaskManager:addTask(function()
+      vehicle = vehicleSystem:loadFromXMLFile(xmlFile, asyncCallbackFunction, nil, args, true, false)
+    end)
 
     if vehicle ~= VehicleLoadingState.OK then
       local transferData = {

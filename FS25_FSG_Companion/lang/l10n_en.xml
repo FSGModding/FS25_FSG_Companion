@@ -98,6 +98,7 @@
     <text name="ui_settings_info"                     text="FSG Companion Info" />
     <text name="ui_settings_settings"                 text="FSG Companion Settings" />
     <text name="ui_settings_tools"                    text="FSG Companion Tools" />
+    <text name="ui_settings_farmTransactions"         text="Farm Transactions" />
     <text name="ui_settings_companion_settings"       text="Companion Settings" />
     <text name="ui_settings_game_limits"              text="Game Limits" />
     <text name="ui_settings_paintAnywhere"            text="Paint Anywhere" />
@@ -141,6 +142,7 @@
     <text name="ui_settings_toolTip_disableSleep"     text="When enabled players will not be able to sleep in game via the sleep triggers." />
     <text name="ui_settings_disableBorrowEquipment"   text="Disable Borrow Equipment" />
     <text name="ui_settings_toolTip_disableBorrowEquipment"   text="Disables the ability to borrow equipment for contracts." /> 
+    <text name="ui_noTransactionsFound"               text="No transactions found for this farm." />
 
     <!-- Info Text -->
     <text name="ui_settings_info_1"                   text="Welcome to FSG Realism!  We are excited that you are a part of this journey in pixel farming!" />
