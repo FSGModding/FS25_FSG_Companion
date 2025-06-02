@@ -29,8 +29,8 @@ end
 
 function VehicleEdit:update(dt)
   if g_updateLoopIndex % self.setValueTimerFrequency == 0 then
-    if g_currentMission.player ~= nil then
-      self.hudUpdater = g_currentMission.hud.player.hudUpdater
+    if g_localPlayer ~= nil then
+      self.hudUpdater = g_localPlayer.hudUpdater
       if type(self.hudUpdater) == "table" and self.hudUpdater ~= nil then
         if type(self.hudUpdater.object) == "table" and self.hudUpdater.object ~= nil and self.hudUpdater.object.isActive ~= nil then
           if self.hudUpdater.isVehicle then
@@ -108,9 +108,8 @@ end
 function VehicleEdit:consoleCommandStoreVehicle()
   rcDebug("Info: ==VehicleEdit:consoleCommandStoreVehicle")
   -- Get vehicle data for current user
-  self.curVeh = g_currentMission.hud.controlledVehicle
-  if self.curVeh ~= nil then 
-    self.currentVehicle = self.curVeh
+  if g_currentMission.hud.controlledVehicle ~= nil then 
+    self.currentVehicle = g_currentMission.hud.controlledVehicle
   elseif self.hudUpdater.object ~= nil and self.hudUpdater.object.isActive ~= nil and self.hudUpdater.isVehicle then
     self.currentVehicle = self.hudUpdater.object
   else

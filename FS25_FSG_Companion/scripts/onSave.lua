@@ -53,8 +53,11 @@ function onSave.saveToXMLFile()
     -- Copy weather forecast over to savegame
     onSave.getWeatherForecast()
 
-    -- Copy weather forecast over to savegame
+    -- Copy MoneyTransactions.xml to savegame for bot
     onSave.copyTransactions()
+
+    -- Copy InboxLog.xml to savegame for bot
+    onSave.copyInboxLog()
 
     -- Copy savegame xml files over to outbox for bot to download
     onSave.copySaveFiles()
@@ -62,7 +65,7 @@ function onSave.saveToXMLFile()
   end
 end
 
--- Create a custom vehicle stats xml for the savegame that contains more details than the origional one
+-- Create a custom vehicle stats xml for the savegame that contains more details than the original one
 function onSave.vehicleStats()
   rcDebug("Building Vehicle Stats for FSG Realism Website to savegame.")
   -- Get all active vehicles data
@@ -1489,6 +1492,21 @@ function onSave:copyTransactions()
 
   if ( fileExists(moneyTransactionsFile) ) then
     copyFile(moneyTransactionsFile, moneyTransactionsFileSave, true)
+    deleteFile(moneyTransactionsFile)
+  end
+end
+
+-- Copy transactions file over to savegame
+function onSave:copyInboxLog()
+  -- Save weather forecast to xml
+  local savegameFolderPath = getUserProfileAppPath() .. "savegame" .. g_currentMission.missionInfo.savegameIndex
+	local modSettingsFolderPath = getUserProfileAppPath()  .. "modSettings/FS25_FSG_Companion"
+	local inboxLogFile = modSettingsFolderPath .. "/InboxLog.xml"
+	local inboxLogFileSave = savegameFolderPath .. "/InboxLog.xml"
+
+  if ( fileExists(inboxLogFile) ) then
+    copyFile(inboxLogFile, inboxLogFileSave, true)
+    -- deleteFile(inboxLogFile)
   end
 end
 
@@ -1498,7 +1516,7 @@ function onSave:copySaveFileToOutbox(filename)
   -- paths where files do things
   local savegameFile = getUserProfileAppPath() .. "savegame" .. g_currentMission.missionInfo.savegameIndex .. "/" .. filename
   local savegameOutboxFile = getUserProfileAppPath()  .. "modSettings/FS25_FSG_Companion/commands/outbox/" .. filename
-  -- check to see if the file exist in the origional folder then copy
+  -- check to see if the file exist in the original folder then copy
   if ( fileExists(savegameFile) ) then
     rcDebug("Copy Savegame Filename: " .. filename)
     copyFile(savegameFile, savegameOutboxFile, true)

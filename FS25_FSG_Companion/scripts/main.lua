@@ -463,6 +463,12 @@ local function init()
     "farmsGui.multiplayer_32",
   }
 
+  -- Increase tree plant limits
+  g_treePlantManager.canPlantTree = function(...) 
+	  local numUnsplit, _ = getNumOfSplitShapes()
+    return numUnsplit < 6840+1000 * 1500
+  end
+
   -- runs when player sends a message in multiplayer chat
   ChatDialog.onSendClick = Utils.overwrittenFunction(ChatDialog.onSendClick, ChatLogger.onSendClick)
 

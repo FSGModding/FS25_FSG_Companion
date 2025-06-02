@@ -123,6 +123,8 @@ function FarmManagerRC:checkFirstFarmer(player,farmId,password)
           local userNickname = user:getNickname()
           self:addFarmManagerLog(userNickname, uniqueUserId, farmId)
           farm:promoteUser(player.userId)
+          -- Trigger a silo update since farm appears to be new
+          g_fillManager:updateStorages()
           -- trigger a save to ensure that if player leaves farm and another player joins it does not give the second user FM
           g_currentMission:saveSavegame()
         end

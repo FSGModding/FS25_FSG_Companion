@@ -131,10 +131,16 @@ function FillManager:updateStorages()
 
                 table.insert(spec.storages, storage)
                 
-                if g_currentMission:getIsServer() then
-                  storage:raiseDirtyFlags(storage.storageDirtyFlag)
-                end
-                storage:updateFillPlanes()
+                -- if g_currentMission:getIsServer() then
+                --   storage:raiseDirtyFlags(storage.storageDirtyFlag)
+                -- end
+                -- storage:updateFillPlanes()
+
+                -- Updated bits to make the storage good.
+                storage:register(true)
+                storage:addFillLevelChangedListeners(function()
+                  thisPlaceable:raiseActive()
+                end)
 
               end
             end
@@ -152,10 +158,16 @@ function FillManager:updateStorages()
                   
                   table.removeElement(spec.storages, storage)
 
-                  if g_currentMission:getIsServer() then
-                    storage:raiseDirtyFlags(storage.storageDirtyFlag)
-                  end
-                  storage:updateFillPlanes()
+                  -- if g_currentMission:getIsServer() then
+                  --   storage:raiseDirtyFlags(storage.storageDirtyFlag)
+                  -- end
+                  -- storage:updateFillPlanes()
+
+                  -- Updated bits to make the storage good.
+                  storage:register(true)
+                  storage:addFillLevelChangedListeners(function()
+                    thisPlaceable:raiseActive()
+                  end)
                   
                 end
               end
