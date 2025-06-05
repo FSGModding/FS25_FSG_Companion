@@ -81,7 +81,7 @@ function VehicleEdit:consoleCommandEditVehicleFarmId(ownerFarmId)
         rcDebug('  Info: ==VehicleEdit:consoleCommandEditVehicleFarmId: user is server.')
         -- Since we are local, go ahead and set the hours for vehicle
         self:setVehicleownerFarmId(self.currentVehicle, ownerFarmId)
-        print(string.format("Info: Vehicle FarmId set to %d", ownerFarmId))
+        print(string.format("  Info: Vehicle FarmId set to %d", ownerFarmId))
       else
         -- Make sure user is a client
         if self.isClient then
@@ -98,15 +98,15 @@ function VehicleEdit:consoleCommandEditVehicleFarmId(ownerFarmId)
         end
       end
     else
-      print("Info: No ownerFarmId given! Usage: editVehicleFarmId [ownerFarmId (#)]")
+      print("  Info: No ownerFarmId given! Usage: editVehicleFarmId [ownerFarmId (#)]")
     end
   else
-    print("Info: No Vehicle Found.  You must be next to vehicle or in it to use this command.")
+    print("  Info: No Vehicle Found.  You must be next to vehicle or in it to use this command.")
   end
 end
 
 function VehicleEdit:consoleCommandStoreVehicle()
-  rcDebug("Info: ==VehicleEdit:consoleCommandStoreVehicle")
+  rcDebug("  Info: ==VehicleEdit:consoleCommandStoreVehicle")
   -- Get vehicle data for current user
   if g_currentMission.hud.controlledVehicle ~= nil then 
     self.currentVehicle = g_currentMission.hud.controlledVehicle
@@ -140,7 +140,7 @@ function VehicleEdit:consoleCommandStoreVehicle()
       end
     end
   else
-    print("Info: No Vehicle Found.  You must be next to vehicle or in it to use this command.")
+    print("  Info: No Vehicle Found.  You must be next to vehicle or in it to use this command.")
   end
 end
 

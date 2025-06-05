@@ -73,6 +73,7 @@ local sourceFiles = {
   "scripts/events/FCTreePlantEvent.lua",
   "scripts/events/FCSettingEvent.lua",
   "scripts/events/addMoneyEvent.lua",
+  "scripts/events/updateStoragesEvent.lua",
 	-- Load all command files
 	"scripts/commands/forgetMe.lua",
 	"scripts/commands/getFarms.lua",

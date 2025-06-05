@@ -104,7 +104,6 @@ function FillManager:updateStorages()
       local thisPlaceable = g_currentMission.placeableSystem.placeables[v]
       if thisPlaceable.spec_silo ~= nil then
         local spec = thisPlaceable.spec_silo
-	      local storageSystem = g_currentMission.storageSystem
 
         if spec.storagePerFarm then
           rcDebug("Silo Has Storage Per Farm Enabled")
@@ -114,6 +113,8 @@ function FillManager:updateStorages()
           for _, storage in ipairs(spec.storages) do
             existingStorageFarmIds[storage.ownerFarmId] = true
           end
+
+          local storageSystem = g_currentMission.storageSystem
 
           -- Check if each farm has a storage
           for _, farmId in ipairs(availableFarmIds) do
@@ -142,6 +143,13 @@ function FillManager:updateStorages()
                   thisPlaceable:raiseActive()
                 end)
 
+                -- Update the unload and load stations 
+                if spec.unloadingStation ~= nil then
+                  storageSystem:addStorageToUnloadingStation(storage, spec.unloadingStation)
+                end
+                if spec.loadingStation ~= nil then
+                  storageSystem:addStorageToLoadingStation(storage, spec.loadingStation)
+                end
               end
             end
           end
@@ -164,14 +172,18 @@ function FillManager:updateStorages()
                   -- storage:updateFillPlanes()
 
                   -- Updated bits to make the storage good.
-                  storage:register(true)
+                  -- storage:register(true)
                   storage:addFillLevelChangedListeners(function()
                     thisPlaceable:raiseActive()
                   end)
-                  
                 end
               end
             end
+          end
+
+          -- Trigger client updates
+          if g_currentMission:getIsServer() then
+            UpdateStoragesEvent.sendEvent(true)
           end
 
         end

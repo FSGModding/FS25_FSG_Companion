@@ -65,7 +65,7 @@ function RemoteCommands:runNewFiles(file)
 
       -- Delete the file if not valid
       if xmlFile == nil then
-        print(string.format("Info: FSG Companion Command File Not Complete or Valid.  File: %s",(tostring(file))))
+        print(string.format("  Info: FSG Companion Command File Not Complete or Valid.  File: %s",(tostring(file))))
         if self:isFileTooOld(file, 600) then
           rcDebug("RemoteCommands: Deleting old invalid file (older than 10 min): " .. tostring(file))
           deleteFile(loadFile)
@@ -333,12 +333,14 @@ function RemoteCommands:runNewFiles(file)
           saveXMLFile(xmlFile)
           delete(xmlFile)
 
+          print(string.format("  Info: FSG Companion Command File Successfully Processed.  File: %s",(tostring(file))))
+
           -- delete the command file
           deleteFile(loadFile)
         end
       else
         -- Command file already accepted.  Delete it.
-        print(string.format("Info: FSG Companion Command File Already Processed.  Deleting file: %s",(tostring(file))))
+        print(string.format("  Info: FSG Companion Command File Already Processed.  Deleting file: %s",(tostring(file))))
         deleteFile(loadFile)
       end
     end 
