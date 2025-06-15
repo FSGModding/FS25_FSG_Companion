@@ -80,6 +80,6 @@ function RememberMeCommand.rememberMe(fromUser, fromUserId)
   g_server:broadcastEvent(ChatEvent.new(fromUser.nickname .. g_i18n:getText("chat_rememberme"),g_currentMission.missionDynamicInfo.serverName,FarmManager.SPECTATOR_FARM_ID,0))
 
   -- Save the game with new admin added
-  g_currentMission:saveSavegame()
+  -- g_currentMission:saveSavegame()
 
 end

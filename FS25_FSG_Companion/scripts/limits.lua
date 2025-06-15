@@ -241,8 +241,8 @@ function Limits:canBuyPlaceable()
   end
 
   -- Checks to see if brand is fsg-coop and only allows admins to place
-  -- rcDebug("Store Item XML Filename")
-  -- rcDebug(self.storeItem.rawXMLFilename)
+  rcDebug("Store Item XML Filename")
+  rcDebug(self.storeItem.rawXMLFilename)
   if self.storeItem.rawXMLFilename == "fsgCoopInbound.xml" 
     or self.storeItem.rawXMLFilename == "fsgCoopOutbound.xml" 
     or self.storeItem.rawXMLFilename == "fsgCoopInboundObjects.xml"

@@ -182,6 +182,9 @@ local function load(mission)
     addModEventListener(modEnvironmentInfoMessages)
   end
 
+  -- Display the join dialog
+  createFirstLoadDialog()
+
 end
 
 ---Unload the mod when the mod is unselected and savegame is (re)loaded or game is closed.
@@ -318,10 +321,6 @@ local function unload()
   end
 end
 
-local function loadedMission(mission, node)
-  -- Do stuff when mission is loaded
-end
-
 ---Init the mod.
 local function init()
 
@@ -348,7 +347,6 @@ local function init()
 
   FSBaseMission.delete = Utils.appendedFunction(FSBaseMission.delete, unload)
   Mission00.load = Utils.prependedFunction(Mission00.load, load)
-  Mission00.loadMission00Finished = Utils.appendedFunction(Mission00.loadMission00Finished, loadedMission)
 
   MissionManager.MAX_MISSIONS_PER_FARM = 10
 
@@ -473,9 +471,9 @@ local function init()
   -- runs when player sends a message in multiplayer chat
   ChatDialog.onSendClick = Utils.overwrittenFunction(ChatDialog.onSendClick, ChatLogger.onSendClick)
 
-  -- run when the game is saved either manualy or auto
-  FSCareerMissionInfo.saveToXMLFile = Utils.appendedFunction(FSCareerMissionInfo.saveToXMLFile, onSave.saveToXMLFile)
-  FSCareerMissionInfo.saveToXMLFile = Utils.appendedFunction(FSCareerMissionInfo.saveToXMLFile, FSGSettings.saveToXMLFile)
+  -- Run before and after game save functions
+  SavegameController.saveSavegame = Utils.prependedFunction(SavegameController.saveSavegame, onSave.saveSavegame)
+  SavegameController.onSaveComplete = Utils.appendedFunction(SavegameController.onSaveComplete, onSave.onSaveComplete)
   
   -- Runs when player becomes an admin
   FSBaseMission.onMasterUserAdded = Utils.appendedFunction(FSBaseMission.onMasterUserAdded, GetAdminLogin.userNowAdminEvent)
@@ -647,78 +645,78 @@ local function init()
   end)
 
   -- Overwrite Vehicle Update Event (REMOVE ONCE SORTED - USED FOR DEBUG)
-  ChangeVehicleConfigEvent.run = Utils.overwrittenFunction(ChangeVehicleConfigEvent.run, function(self, superFunc, connection)
+  -- ChangeVehicleConfigEvent.run = Utils.overwrittenFunction(ChangeVehicleConfigEvent.run, function(self, superFunc, connection)
 
-    rcDebug("Change Vehicle Config Event Run")
+  --   rcDebug("Change Vehicle Config Event Run")
 
-    if connection:getIsServer() then
-      -- Notify the UI on the server side that the vehicle change result is ready
-      g_workshopScreen:onVehicleChanged(self.successful)
-    else
-      local wasSuccessful = false
-      local vehicle = self.vehicle
+  --   if connection:getIsServer() then
+  --     -- Notify the UI on the server side that the vehicle change result is ready
+  --     g_workshopScreen:onVehicleChanged(self.successful)
+  --   else
+  --     local wasSuccessful = false
+  --     local vehicle = self.vehicle
 
-      -- Check if the vehicle is valid and if the player has permission to change it
-      if vehicle == nil
-        or (not vehicle.isVehicleSaved
-        or (vehicle.getIsControlled ~= nil and vehicle:getIsControlled()))
-        or not g_currentMission:getHasPlayerPermission("buyVehicle", connection)
-      then
-        connection:sendEvent(ChangeVehicleConfigEvent.newServerToClient(false))
-        return
-      end
+  --     -- Check if the vehicle is valid and if the player has permission to change it
+  --     if vehicle == nil
+  --       or (not vehicle.isVehicleSaved
+  --       or (vehicle.getIsControlled ~= nil and vehicle:getIsControlled()))
+  --       or not g_currentMission:getHasPlayerPermission("buyVehicle", connection)
+  --     then
+  --       connection:sendEvent(ChangeVehicleConfigEvent.newServerToClient(false))
+  --       return
+  --     end
 
-      local vehicleSystem = g_currentMission.vehicleSystem
+  --     local vehicleSystem = g_currentMission.vehicleSystem
 
-      -- Apply new configurations to the vehicle
-      vehicle:setConfigurations(self.vehicleBuyData.configurations, self.vehicleBuyData.boughtConfigurations, self.vehicleBuyData.configurationData)
+  --     -- Apply new configurations to the vehicle
+  --     vehicle:setConfigurations(self.vehicleBuyData.configurations, self.vehicleBuyData.boughtConfigurations, self.vehicleBuyData.configurationData)
 
-      -- Update license plate data if applicable
-      if vehicle.setLicensePlatesData ~= nil and (vehicle.getHasLicensePlates ~= nil and vehicle:getHasLicensePlates()) then
-        vehicle:setLicensePlatesData(self.vehicleBuyData.licensePlateData)
-      end
+  --     -- Update license plate data if applicable
+  --     if vehicle.setLicensePlatesData ~= nil and (vehicle.getHasLicensePlates ~= nil and vehicle:getHasLicensePlates()) then
+  --       vehicle:setLicensePlatesData(self.vehicleBuyData.licensePlateData)
+  --     end
 
-      -- Detach all non-additional implements
-      local spec = vehicle.spec_attacherJoints
-      if spec ~= nil and spec.attachedImplements ~= nil then
-        for i = #spec.attachedImplements, 1, -1 do
-          local implement = spec.attachedImplements[i]
-          if not implement.object:getIsAdditionalAttachment() then
-            vehicle:detachImplementByObject(implement.object, true)
-          end
-        end
-      end
+  --     -- Detach all non-additional implements
+  --     local spec = vehicle.spec_attacherJoints
+  --     if spec ~= nil and spec.attachedImplements ~= nil then
+  --       for i = #spec.attachedImplements, 1, -1 do
+  --         local implement = spec.attachedImplements[i]
+  --         if not implement.object:getIsAdditionalAttachment() then
+  --           vehicle:detachImplementByObject(implement.object, true)
+  --         end
+  --       end
+  --     end
 
-      -- Begin reconfiguration process
-      vehicle.isReconfigurating = true
-      g_server:broadcastEvent(VehicleSetIsReconfiguratingEvent.new(vehicle), nil, nil, vehicle)
+  --     -- Begin reconfiguration process
+  --     vehicle.isReconfigurating = true
+  --     g_server:broadcastEvent(VehicleSetIsReconfiguratingEvent.new(vehicle), nil, nil, vehicle)
 
-      local xmlFile = vehicle:getReloadXML()
+  --     local xmlFile = vehicle:getReloadXML()
 
-      -- Async callback after attempting to reload vehicle from XML
-      local function asyncCallbackFunction(_, result, _)
-        if #result > 0 then
-          wasSuccessful = true
+  --     -- Async callback after attempting to reload vehicle from XML
+  --     local function asyncCallbackFunction(_, result, _)
+  --       if #result > 0 then
+  --         wasSuccessful = true
 
-          vehicle:removeFromPhysics()
-          vehicle:delete(true)
-        else
-          vehicle:addToPhysics()
-          vehicleSystem.vehicleByUniqueId[vehicle:getUniqueId()] = vehicle:getUniqueId()
-        end
+  --         vehicle:removeFromPhysics()
+  --         vehicle:delete(true)
+  --       else
+  --         vehicle:addToPhysics()
+  --         vehicleSystem.vehicleByUniqueId[vehicle:getUniqueId()] = vehicle:getUniqueId()
+  --       end
 
-        xmlFile:delete()
-        connection:sendEvent(ChangeVehicleConfigEvent.newServerToClient(wasSuccessful))
-      end
+  --       xmlFile:delete()
+  --       connection:sendEvent(ChangeVehicleConfigEvent.newServerToClient(wasSuccessful))
+  --     end
 
-      -- Run the XML reload task asynchronously
-      g_asyncTaskManager:addTask(function()
-        vehicleSystem.vehicleByUniqueId[vehicle:getUniqueId()] = nil
-        vehicleSystem:loadFromXMLFile(xmlFile, asyncCallbackFunction, nil, {})
-      end)
-    end
+  --     -- Run the XML reload task asynchronously
+  --     g_asyncTaskManager:addTask(function()
+  --       vehicleSystem.vehicleByUniqueId[vehicle:getUniqueId()] = nil
+  --       vehicleSystem:loadFromXMLFile(xmlFile, asyncCallbackFunction, nil, {})
+  --     end)
+  --   end
 
-  end)
+  -- end)
 
   -- Add more field information to the hud
   PlayerHUDUpdater.fieldAddField = Utils.appendedFunction(PlayerHUDUpdater.fieldAddField, FieldStats.fieldAddField)
@@ -733,6 +731,11 @@ local function init()
   -- Log every money transaction on the servers
   FSBaseMission.addMoneyChange = Utils.appendedFunction(FSBaseMission.addMoneyChange, GameLogs.MoneyChange)
 
+  -- Overwrite Vehicle Update Event (REMOVE ONCE SORTED - USED FOR DEBUG)
+  ConstructionBrushTree.getPrice = Utils.overwrittenFunction(ConstructionBrushTree.getPrice, function(self, superFunc, connection)
+    return g_currentMission.economyManager:getBuyPrice(self.storeItem) * 5
+  end)
+
 end
 
 ---Run when player is connected to server
@@ -746,8 +749,6 @@ function onUpdateStatsPlayers(...)
   -- Nothing returned, no need to call the superFunc
   ---Replaces the base game xml link output
   onSave.updateStatsPlayers(...)
-  ---Update Save Savegame XML files
-  -- onSave.saveSaveGameXmlFiles(...)
 end
 
 -- Run when a player is starting to connect to server
@@ -770,6 +771,31 @@ end
 -- Removes button for loans in game
 function hasPlayerLoanPermission()
     return false
+end
+
+function createFirstLoadDialog()
+    if g_dedicatedServer ~= nil or g_currentMission.hud == nil or not g_i18n:hasText("fsg_firstLoadInfo", modName) then
+        return
+    end
+
+    local infoText = string.format("\n" .. g_i18n:getText("fsg_firstLoadInfo"))
+
+    local firstLoadDialog = {
+        startUpdateTime = 2500,
+        canDisplayMessage = true,
+
+        update = function(self, dt)
+            self.startUpdateTime = self.startUpdateTime - dt
+
+            if self.startUpdateTime < 0 and self.canDisplayMessage and not g_gui:getIsGuiVisible() and not g_currentMission.hud:isInGameMessageVisible() then
+                g_currentMission.hud:showInGameMessage("FSG Realism", infoText, -1, nil, nil, nil)
+                removeModEventListener(self)
+                self.canDisplayMessage = false
+            end
+        end
+    }
+
+    addModEventListener(firstLoadDialog)
 end
 
 -- Limit the color selections shown in the farms page so it looks better

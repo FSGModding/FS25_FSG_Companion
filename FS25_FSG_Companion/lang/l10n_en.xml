@@ -53,6 +53,18 @@
     <text name="dc_help_page_base_text"               text="FSG Companion is a simple yet advanced dedicated server tool to help admins better manage their servers." />
     <text name="dc_help_page_base_cmds"               text="The following command can be typed directly into the multiplayer chat to be executed." />
 
+    <!-- First Load Text -->
+    <text name="fsg_firstLoadInfo"                    text="Welcome to FSG Realism
+
+By playing on our servers, you acknowledge that you have fully read and understood the rules posted on our website.
+
+Once you begin gameplay, there are no restarts or do-overs — all progress is permanent.
+
+Thank you for playing and being part of the community.
+
+Powered by Farm Sim Game and Fragnet
+www.FSGRealism.com" />
+
     <!-- Warnings -->   
     <text name="rc_max_hire_warn"                     text="Max hired workers reached for this farm." />
     <text name="rc_ss_off"                            text="Super Strength Disabled by Server." />

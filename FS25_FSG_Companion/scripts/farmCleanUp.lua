@@ -402,6 +402,9 @@ function FarmCleanUp:cleanPallets()
       end
     end
 
+    -- rcDebug("palletSpawnPlaces")
+    -- rcDebug(palletSpawnPlaces)
+
     local removedPallets = {}
 
     for i = #g_currentMission.vehicleSystem.vehicles, 1, -1 do
@@ -412,13 +415,14 @@ function FarmCleanUp:cleanPallets()
                 local x, _, z = getWorldTranslation(vehicle.rootNode)
                 -- Check if pallet is in a spawn area, if so then ignore it.
                 local withinRadius = false
-                if #palletSpawnPlaces ~= nil then
+                if #palletSpawnPlaces > 0 then
                     for _, s in pairs(palletSpawnPlaces) do
-                        local radius = s.width
-                        if s.length > s.width then
-                          radius = s.length
+                        local radius = math.max(s.width, s.length)
+                        -- rcDebug(string.format("Checking pallet at (%.2f, %.2f) against spawn at (%.2f, %.2f) radius %.2f", x, z, s.startX, s.startZ, radius))
+                        if FarmCleanUp:isPointWithinRadius(s.startX, s.startZ, x, z, radius) then
+                            withinRadius = true
+                            break -- Exit loop early if inside any spawn area
                         end
-                        withinRadius = FarmCleanUp:isPointWithinRadius(s.startX, s.startZ, x, z, radius)
                     end
                 end
                 if withinRadius == false then
@@ -745,7 +749,8 @@ end
 
 -- Helper function to check if a point is within a range
 function FarmCleanUp:isWithinRange(value, min, max)
-    return value >= min and value <= max
+    local wiggleRoom = 2
+    return value >= (min - wiggleRoom) and value <= (max + wiggleRoom)
 end
 
 -- Run coop limits check

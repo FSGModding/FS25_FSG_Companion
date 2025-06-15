@@ -126,7 +126,7 @@ function FieldStats:getFieldStats()
 end
 
 function FieldStats:clearFieldsFiles(filename, isDirectory)
-  rcDebug("FieldStats:clearFieldsFiles")
+  -- rcDebug("FieldStats:clearFieldsFiles")
   if isDirectory then 
     return
   end

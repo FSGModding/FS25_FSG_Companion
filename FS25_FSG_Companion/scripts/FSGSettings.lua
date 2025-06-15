@@ -356,8 +356,8 @@ function FSGSettings:update(dt)
 end
 
 -- Run on savegame
-function FSGSettings:saveToXMLFile()
-  rcDebug(" Info: FSGS-saveToXMLFile")
+function FSGSettings:onSaveComplete()
+  rcDebug(" Info: FSGS-onSaveComplete")
 
   g_fsgSettings.settings:saveSettings()
 

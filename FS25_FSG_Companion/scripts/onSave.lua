@@ -23,14 +23,23 @@ function onSave.new(mission, i18n, modDirectory, modName)
 	return self
 end
 
--- Called when the game is saved on a server
-function onSave.saveToXMLFile()
-  if g_server ~= nil then
-    rcDebug("========GAMESAVE=START==========")
+-- Send message letting players know that the game is saving
+function onSave.saveSavegame()
+  if g_server ~= nil and g_dedicatedServer ~= nil then
+    Logging.info("Game Save Start")
+
     -- Send chat message letting everyone know we are saving the game.
-    if g_server ~= nil and g_dedicatedServer ~= nil then
-        g_server:broadcastEvent(ChatEvent.new(g_i18n:getText("chat_game_saved"),g_currentMission.missionDynamicInfo.serverName,FarmManager.SPECTATOR_FARM_ID,0))
-    end
+    g_server:broadcastEvent(ChatEvent.new(g_i18n:getText("chat_game_saved"),g_currentMission.missionDynamicInfo.serverName,FarmManager.SPECTATOR_FARM_ID,0))
+  end
+end
+
+-- Called when the game is saved on a server
+function onSave.onSaveComplete()
+  if g_server ~= nil and g_dedicatedServer ~= nil then
+    rcDebug(" Info: Game Save Complete - Update and copy FSG Companion stats and data for bot.")
+
+    -- Save to the companion
+    g_fsgSettings.onSaveComplete()
 
     -- Run the custom vehicles data xml for website
     onSave.vehicleStats()
@@ -61,6 +70,8 @@ function onSave.saveToXMLFile()
 
     -- Copy savegame xml files over to outbox for bot to download
     onSave.copySaveFiles()
+
+    Logging.info("Game Save Complete")
 
   end
 end
@@ -1552,79 +1563,6 @@ function onSave:copyStatsSaveFiles()
   onSave:copySaveFileToOutbox('placeableSiloStats.xml');
   onSave:copySaveFileToOutbox('placeableStats.xml');
   onSave:copySaveFileToOutbox('vehicleStats.xml');
-end
-
--- Save the savegame files
-function onSave:saveSaveGameXmlFiles(superFunc)
-  if g_dedicatedServer ~= nil then
-    -- make sure game is not already saving
-    if g_currentMission.savegameController.isSavingGame then
-      return
-    end
-  
-    rcDebug("onSave:saveSaveGameXmlFiles")
-  
-    local savegameOutbox = getUserProfileAppPath()  .. "modSettings/FS25_FSG_Companion/commands/outbox/"
-
-    self.environmentXML = savegameOutbox .. "/environment.xml"
-    self.economyXML = savegameOutbox .. "/economy.xml"
-    self.farmlandXML = savegameOutbox .. "/farmland.xml"
-    self.fieldsXML = savegameOutbox .. "/fields.xml"
-    self.farmsXML = savegameOutbox .. "/farms.xml"
-
-		local environmentXMLFile = createXMLFile("environmentXMLFile", self.environmentXML, "environment")
-
-		if environmentXMLFile ~= nil then
-			if g_currentMission ~= nil and g_currentMission.environment ~= nil then
-				g_currentMission.environment:saveToXMLFile(environmentXMLFile, "environment")
-				g_currentMission.snowSystem:saveToXMLFile(environmentXMLFile, "environment.snow")
-				g_currentMission.growthSystem:saveToXMLFile(environmentXMLFile, "environment.growth")
-			end
-
-			saveXMLFile(environmentXMLFile)
-			delete(environmentXMLFile)
-		end
-
-    local economyFile = createXMLFile("economyXML", self.economyXML, "economy")
-
-    if economyFile ~= nil then
-      if g_currentMission ~= nil then
-        g_currentMission.economyManager:saveToXMLFile(economyFile, "economy")
-      end
-
-      saveXMLFile(economyFile)
-      delete(economyFile)
-    end
-
-    g_farmlandManager:saveToXMLFile(self.farmlandXML)
-    g_fieldManager:saveToXMLFile(self.fieldsXML)
-    g_farmManager:saveToXMLFile(self.farmsXML)
-
-    -- Run the custom vehicles data xml for website
-    onSave.vehicleStats()
-
-    -- Run the custom placeable silos data xml for website
-    onSave.getPlaceableSiloStats()
-
-    -- Run the custom placeable data xml for website
-    onSave.getPlaceableStats()
-
-    -- Run the custom productions data xml for website
-    onSave.getProductionStats()
-
-    -- Run the custom animal data xml for website
-    onSave.getAnimalStats()
-
-    -- Run the custom field id locations for website
-    onSave.getFieldStats()
-
-    -- Copy weather forecast over to savegame
-    onSave.getWeatherForecast()
-
-    -- Copy savegame xml files over to outbox for bot to download
-    onSave.copyStatsSaveFiles()
-
-  end
 end
 
 -- Update xml link player stats
