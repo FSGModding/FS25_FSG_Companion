@@ -467,7 +467,7 @@ function FarmCleanUp:cleanPallets()
       local key ="removedPallets"
 
       --save data to xml file
-      newxmlFile = XMLFile.create(key, savedFile, key)
+      local newxmlFile = XMLFile.create(key, savedFile, key)
 
       local index = 0
 
@@ -557,7 +557,7 @@ function FarmCleanUp:cleanBales()
       local key ="removedBales"
 
       --save data to xml file
-      newxmlFile = XMLFile.create(key, savedFile, key)
+      local newxmlFile = XMLFile.create(key, savedFile, key)
 
       local index = 0
 

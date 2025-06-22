@@ -484,6 +484,7 @@ function RemoteCommands:loadESL(curFarmId)
           farmIndex = farmIndex + 1
         end
       end
+      delete(xmlFile)
     end
   end
   return 0

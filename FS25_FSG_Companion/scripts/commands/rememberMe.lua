@@ -68,7 +68,7 @@ function RememberMeCommand.rememberMe(fromUser, fromUserId)
 	else 
 
 		rcDebug("No Admins.xml yet.  Creating one.")
-		xmlFile = createXMLFile(key, rememberAdminsFile, key)
+		local xmlFile = createXMLFile(key, rememberAdminsFile, key)
 		setXMLString(xmlFile, key .. ".farmManager#userNickname", tostring(userNickname))
 		setXMLString(xmlFile, key .. ".farmManager#uniqueUserId", tostring(uniqueUserId))
 		saveXMLFile(xmlFile)

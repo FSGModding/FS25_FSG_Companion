@@ -1,6 +1,6 @@
 ---Simple debug function that does stuff with different types of vars.  
 function rcDebug(data)
-  local debug = true
+  local debug = false
   if debug then
     if data ~= nil then
       -- Run if data is table

@@ -553,7 +553,7 @@ function onSave:getPlaceableSiloStats()
       local key ="placeableSiloStats"
 
       --save data to xml file
-      newxmlFile = XMLFile.create(key, savegameFile, key)
+      local newxmlFile = XMLFile.create(key, savegameFile, key)
 
       local index = 0
 
@@ -753,7 +753,7 @@ function onSave:getPlaceableStats()
       local key ="placeableStats"
 
       --save data to xml file
-      newxmlFile = XMLFile.create(key, savegameFile, key)
+      local newxmlFile = XMLFile.create(key, savegameFile, key)
 
       local index = 0
 
@@ -923,7 +923,7 @@ function onSave:getProductionStats()
       local key = "productionStats"
 
       --save data to xml file
-      newxmlFile = XMLFile.create(key, savegameFile, key)
+      local newxmlFile = XMLFile.create(key, savegameFile, key)
 
       local index = 0
 
@@ -1124,7 +1124,7 @@ function onSave:getAnimalStats()
               -- animal is in puberty stage
               repoType = "Puberty"
               -- figure out what percentage of puberty they are in
-              pubertyCalc = (age / animalType.reproductionMinAgeMonth) * 100
+              local pubertyCalc = (age / animalType.reproductionMinAgeMonth) * 100
               puberty = math.floor(pubertyCalc)              
             end
 
@@ -1139,8 +1139,8 @@ function onSave:getAnimalStats()
               local fitness     = cluster.fitness
               local riding      = cluster.riding
               
+              local cleanliness = 100
               if cluster.dirt ~= nil then
-                local cleanliness = 100
                 if cluster.dirt > 0 then 
                   cleanliness = 100 - cluster.dirt
                 end
@@ -1208,7 +1208,7 @@ function onSave:getAnimalStats()
       local key = "animalStats"
 
       --save data to xml file
-      newxmlFile = XMLFile.create(key, savegameFile, key)
+      local newxmlFile = XMLFile.create(key, savegameFile, key)
 
       local i = 0
 
@@ -1449,7 +1449,7 @@ function onSave:getFieldStats()
   local savegameFile       = savegameFolderPath .. "/fieldsStats.xml"
 
   --save data to xml file
-  newxmlFile = XMLFile.create(key, savegameFile, key)
+  local newxmlFile = XMLFile.create(key, savegameFile, key)
 
   local index = 0
 
@@ -1611,4 +1611,5 @@ function onSave:updateStatsPlayers(superFunc)
 			end
 		end
 	end
+  delete(xmlFile)
 end

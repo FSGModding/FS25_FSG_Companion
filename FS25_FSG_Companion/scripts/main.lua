@@ -83,7 +83,7 @@ local sourceFiles = {
 	"scripts/commands/rememberMe.lua",
 }
 
----Load all of the soruce files
+---Load all of the source files
 for _, file in ipairs(sourceFiles) do
   source(modDirectory .. file)
 end

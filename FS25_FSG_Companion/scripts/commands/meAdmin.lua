@@ -35,6 +35,8 @@ function MeAdminCommand.meAdmin(connection, fromUser, fromUserId)
             adminsIds[admin.adminId] = admin
         end)
     
+        delete(xmlFile)
+
         --DebugUtil.printTableRecursively(admins, "*** FSG Realism Companion Debug *** xmlFile.admins : ", 0, 1)
     
         for _, adminLoop in pairs(admins) do
