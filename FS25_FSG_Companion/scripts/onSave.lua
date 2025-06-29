@@ -1611,5 +1611,4 @@ function onSave:updateStatsPlayers(superFunc)
 			end
 		end
 	end
-  delete(xmlFile)
 end
