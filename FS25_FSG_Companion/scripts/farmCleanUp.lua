@@ -19,7 +19,12 @@ function FarmCleanUp.new(mission, i18n, modDirectory, modName)
   g_messageCenter:subscribe(MessageType.MINUTE_CHANGED, self.onMinuteChanged, self)
   g_messageCenter:subscribe(MessageType.DAY_CHANGED, self.onDayChanged, self)
 
-	return self
+        return self
+end
+
+function FarmCleanUp:delete()
+  g_messageCenter:unsubscribe(MessageType.MINUTE_CHANGED, self.onMinuteChanged, self)
+  g_messageCenter:unsubscribe(MessageType.DAY_CHANGED, self.onDayChanged, self)
 end
 
 function FarmCleanUp:onMinuteChanged(currentMinute)

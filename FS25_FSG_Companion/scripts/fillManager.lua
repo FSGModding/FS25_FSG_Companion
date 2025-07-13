@@ -20,7 +20,12 @@ function FillManager.new(mission, i18n, modDirectory, modName)
   g_messageCenter:subscribe(MessageType.FARM_CREATED, self.updateStorages, self)
   g_messageCenter:subscribe(MessageType.FARM_DELETED, self.updateStorages, self)
 
-	return self
+        return self
+end
+
+function FillManager:delete()
+  g_messageCenter:unsubscribe(MessageType.FARM_CREATED, self.updateStorages, self)
+  g_messageCenter:unsubscribe(MessageType.FARM_DELETED, self.updateStorages, self)
 end
 
 

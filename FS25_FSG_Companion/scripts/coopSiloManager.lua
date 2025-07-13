@@ -18,7 +18,11 @@ function CoopSiloManager.new(mission, i18n, modDirectory, modName)
 
   g_messageCenter:subscribe(MessageType.MINUTE_CHANGED, self.onMinuteChanged, self)
 
-	return self
+        return self
+end
+
+function CoopSiloManager:delete()
+  g_messageCenter:unsubscribe(MessageType.MINUTE_CHANGED, self.onMinuteChanged, self)
 end
 
 function CoopSiloManager:update(dt)
