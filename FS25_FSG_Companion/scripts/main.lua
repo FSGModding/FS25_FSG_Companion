@@ -192,6 +192,11 @@ local function unload()
 
   -- Run shutdown stuffs for the mod
   FieldStats:delete()
+  FarmCleanUp:delete()
+  FillManager:delete()
+  FarmPlaceableTax:delete()
+  CoopSiloManager:delete()
+  WeatherForecastStats:delete()
 
   removeModEventListener(modEnvironmentChat)
   if modEnvironmentChat ~= nil then

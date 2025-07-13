@@ -17,7 +17,11 @@ function FarmPlaceableTax.new(mission, i18n, modDirectory, modName)
 
   g_messageCenter:subscribe(MessageType.DAY_CHANGED, self.onDayChanged, self)
 
-	return self
+        return self
+end
+
+function FarmPlaceableTax:delete()
+  g_messageCenter:unsubscribe(MessageType.DAY_CHANGED, self.onDayChanged, self)
 end
 
 function FarmPlaceableTax:onDayChanged(currentDay)

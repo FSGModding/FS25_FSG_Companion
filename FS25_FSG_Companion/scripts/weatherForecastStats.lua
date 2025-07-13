@@ -15,7 +15,11 @@ function WeatherForecastStats.new(mission, i18n, modDirectory, modName)
   
   g_messageCenter:subscribe(MessageType.HOUR_CHANGED, self.onHourChanged, self)
 
-	return self
+        return self
+end
+
+function WeatherForecastStats:delete()
+  g_messageCenter:unsubscribe(MessageType.HOUR_CHANGED, self.onHourChanged, self)
 end
 
 function WeatherForecastStats:onHourChanged(currentHour)
