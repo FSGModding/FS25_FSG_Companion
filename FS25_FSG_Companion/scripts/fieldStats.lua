@@ -63,27 +63,29 @@ function FieldStats:getFieldStats()
 		for _, field in pairs(fields) do
 			if field.farmland ~= nil then
 
-        local fieldState = field:getFieldState()
+        local x, z              = field:getCenterOfFieldWorldPosition()
+        local fruitTypeIndexPos, growthState = FSDensityMapUtil.getFruitTypeIndexAtWorldPos(x, z)
+        local fruitDesc         = g_fruitTypeManager:getFruitTypeByIndex(fruitTypeIndexPos)
+        local fillType          = nil
 
         -- Get the field crop
         local fieldFruitType = g_i18n:getText("text_unknown")
-        if fieldState.fruitTypeIndex ~= nil then
-          fieldFruitType = g_fruitTypeManager:getFruitTypeByIndex(fieldState.fruitTypeIndex)
-        end
-        local fieldFruitName = g_i18n:getText("text_unknown")
-        if fieldFruitType ~= nil and fieldFruitType.fillType ~= nil and fieldFruitType.fillType.title then
-          fieldFruitName = fieldFruitType.fillType.title
-        elseif fieldFruitType ~= nil and fieldFruitType.name ~= nil then
-          fieldFruitName = fieldFruitType.name
+        if fruitDesc ~= nil and fruitDesc.fillType ~= nil then
+            fieldFruitType = fruitDesc.fillType.title
+            fillType = g_fillTypeManager:getFillTypeByIndex(fruitDesc.fillType.index)
+
+            -- if fruitDesc:getIsGrowing(growthState) or fruitDesc:getIsPreparable(growthState) or fruitDesc:getIsHarvestable(growthState) then
+            --     showYieldData = true
+            -- end
         end
 
         -- Get Field Status
-        local getFieldFruitStatus = FieldStats:getFieldFruitStatus(fieldState.fruitTypeIndex,fieldState.growthState)
+        local getFieldFruitStatus = FieldStats:getFieldFruitStatus(fruitTypeIndexPos,growthState)
         if getFieldFruitStatus == nil then
           getFieldFruitStatus = g_i18n:getText("text_unknown")
         end
         -- Get Field Stage
-        local getFieldStage, getWheelsInfo = FieldStats:getFieldFruitStatusStage(fieldState.fruitTypeIndex,fieldState.growthState)
+        local getFieldStage, getWheelsInfo = FieldStats:getFieldFruitStatusStage(fruitTypeIndexPos,growthState)
         if getFieldStage == nil then
           getFieldStage = g_i18n:getText("text_unknown")
         end
@@ -92,11 +94,11 @@ function FieldStats:getFieldStats()
         end
 
         -- Get Field Needs
-        local weedInfo = FieldStats:fieldAddWeed(fieldState)
-        local limeInfo = FieldStats:fieldAddLime(fieldState)
-        local plowingInfo = FieldStats:fieldAddPlowing(fieldState)
-        local rollingInfo = FieldStats:fieldAddRolling(fieldState)
-        local fertilizationInfo = FieldStats:fieldAddFertilization(fieldState)
+        local weedInfo = FieldStats:fieldAddWeed(field.fieldState)
+        local limeInfo = FieldStats:fieldAddLime(field.fieldState)
+        local plowingInfo = FieldStats:fieldAddPlowing(field.fieldState)
+        local rollingInfo = FieldStats:fieldAddRolling(field.fieldState)
+        local fertilizationInfo = FieldStats:fieldAddFertilization(field.fieldState)
 
         -- Not seeing where fields have their own numbers anymore.  Looks like they all use farmland id.
 

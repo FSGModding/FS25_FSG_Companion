@@ -117,6 +117,32 @@ function RemoteCommands:runNewFiles(file)
                   commandComplete = true
                 end
               end
+            -- Command that bands a user based on their unique user id
+            elseif command == "banUser" then 
+              commandData = {
+                id = xmlFile:getInt(commandKey .. "#id"),
+                command = xmlFile:getString(commandKey .. "#command"),
+                userNickname = xmlFile:getString(commandKey .. "#userNickname"),
+                uniqueUserId = xmlFile:getString(commandKey .. "#uniqueUserId"),
+              }
+              if commandData ~= nil then 
+                if RemoteCommands:banUser(commandData) then
+                  commandComplete = true
+                end
+              end
+            -- Command that bands a user based on their unique user id
+            elseif command == "unBanUser" then 
+              commandData = {
+                id = xmlFile:getInt(commandKey .. "#id"),
+                command = xmlFile:getString(commandKey .. "#command"),
+                userNickname = xmlFile:getString(commandKey .. "#userNickname"),
+                uniqueUserId = xmlFile:getString(commandKey .. "#uniqueUserId"),
+              }
+              if commandData ~= nil then 
+                if RemoteCommands:unBanUser(commandData) then
+                  commandComplete = true
+                end
+              end
             -- Command that adds money for farm based on farm id
             elseif command == "moneyTransfer" then
               commandData = {
@@ -406,13 +432,6 @@ function RemoteCommands:moneyTransfer(commandData)
           -- if farm.gameLoan ~= nil then
           --   gameLoan = farm:getLoan()
           -- end
-          -- -- check if server is using enhanced loan system mod
-          -- local eslLoan = self:loadESL(destinationFarmId)
-          -- if eslLoan ~= nil then
-          --   if eslLoan > 0 then
-          --     gameLoan = eslLoan
-          --   end
-          -- end
           -- Get total before Transfer
           local beforeAmount = farm:getBalance()
           -- Make sure amount is not more than the farm has
@@ -446,48 +465,6 @@ function RemoteCommands:moneyTransfer(commandData)
       end
     end
   end
-end
-
--- Check for and load loans for farm for ESL mod
-function RemoteCommands:loadESL(curFarmId)
-  local savegameDirectory = g_currentMission.missionInfo.savegameDirectory
-  if savegameDirectory ~= nil then
-    local filename = savegameDirectory.."/els_loans.xml"
-    if ( fileExists (filename) ) then 
-      local key = "loans"
-      local xmlFile = XMLFile.loadIfExists("els_loans", filename, key)
-      if xmlFile ~= nil then
-        local farmIndex = 0
-        while true do
-          local farmKey = string.format(key..".farmId(%d)", farmIndex)
-          if not xmlFile:hasProperty(farmKey) then
-              break
-          end
-          local farmId = xmlFile:getInt(farmKey.."#farmId")
-          if farmId == curFarmId then
-            local currentFarmLoans = 0
-            local loanIndex = 0
-            while true do
-              local loanKey = string.format(farmKey..".loan(%d)", loanIndex)
-              if not xmlFile:hasProperty(loanKey) then
-                  break
-              end
-              local paidOff = xmlFile:getString(loanKey .. "#paidOff")
-              if paidOff == "false" then
-                local restAmount = xmlFile:getString(loanKey .. "#restAmount")
-                currentFarmLoans = currentFarmLoans + restAmount
-              end 
-              loanIndex = loanIndex + 1
-            end
-            return currentFarmLoans
-          end
-          farmIndex = farmIndex + 1
-        end
-      end
-      delete(xmlFile)
-    end
-  end
-  return 0
 end
 
 -- Function to create or update farm.  
@@ -958,4 +935,73 @@ function RemoteCommands:isFileTooOld(file, ageLimitSeconds)
     return true
   end
   return false
+end
+
+
+function RemoteCommands:banUser(commandData)
+    local uniqueUserId = commandData.uniqueUserId
+    if not uniqueUserId then
+        -- Send data back to website
+        return {
+          info = "Ban Error.",
+          errorMsg = "Unique User Id Missing."
+        }
+    end
+
+    local nickname = commandData.userNickname
+
+    local user = self.mission.userManager:getUserByUniqueId(uniqueUserId)
+
+    if user then
+        nickname = user.nickname
+    else
+        local assignedFarm = self.farmManager:getFarmForUniqueUserId(uniqueUserId)
+        if assignedFarm then
+            for _, member in ipairs(assignedFarm.players) do
+                if member.uniqueUserId == uniqueUserId then
+                    nickname = member.lastNickname
+                    break
+                end
+            end
+        end
+    end
+
+    local targetUser = self.mission.userManager:getUserByUniqueId(uniqueUserId)
+    if targetUser then
+        targetUser:block()
+    else
+        setIsUserBlocked(uniqueUserId, "", 1, true, nickname)
+    end
+
+    -- Prepare and return response
+    return {
+        info = "User Ban Successful."
+    }
+end
+
+function RemoteCommands:unBanUser(commandData)
+    local uniqueUserId = commandData.uniqueUserId
+    if not uniqueUserId then
+        -- Send data back to website
+        return {
+          info = "UnBan Error.",
+          errorMsg = "Unique User Id Missing."
+        }
+    end
+
+    local isBanned = getIsUserBlocked(uniqueUserId, "", 1)
+    if not isBanned then
+        -- Send data back to website
+        return {
+          info = "UnBan Error.",
+          errorMsg = "User not on the ban list to remove them from."
+        }
+    end
+
+    setIsUserBlocked(uniqueUserId, "", 1, false, "")
+
+    -- Prepare and return response
+    return {
+        info = "User UnBan Successful."
+    }
 end
