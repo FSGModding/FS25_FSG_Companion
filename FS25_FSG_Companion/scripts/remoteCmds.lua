@@ -126,7 +126,8 @@ function RemoteCommands:runNewFiles(file)
                 uniqueUserId = xmlFile:getString(commandKey .. "#uniqueUserId"),
               }
               if commandData ~= nil then 
-                if RemoteCommands:banUser(commandData) then
+                transferData = RemoteCommands:banUser(commandData)
+                if transferData ~= nil then
                   commandComplete = true
                 end
               end
@@ -139,7 +140,8 @@ function RemoteCommands:runNewFiles(file)
                 uniqueUserId = xmlFile:getString(commandKey .. "#uniqueUserId"),
               }
               if commandData ~= nil then 
-                if RemoteCommands:unBanUser(commandData) then
+                transferData = RemoteCommands:unBanUser(commandData)
+                if transferData ~= nil then
                   commandComplete = true
                 end
               end
@@ -950,12 +952,12 @@ function RemoteCommands:banUser(commandData)
 
     local nickname = commandData.userNickname
 
-    local user = self.mission.userManager:getUserByUniqueId(uniqueUserId)
+    local user = g_currentMission.userManager:getUserByUniqueId(uniqueUserId)
 
     if user then
         nickname = user.nickname
     else
-        local assignedFarm = self.farmManager:getFarmForUniqueUserId(uniqueUserId)
+        local assignedFarm = g_farmManager:getFarmForUniqueUserId(uniqueUserId)
         if assignedFarm then
             for _, member in ipairs(assignedFarm.players) do
                 if member.uniqueUserId == uniqueUserId then
@@ -966,7 +968,7 @@ function RemoteCommands:banUser(commandData)
         end
     end
 
-    local targetUser = self.mission.userManager:getUserByUniqueId(uniqueUserId)
+    local targetUser = g_currentMission.userManager:getUserByUniqueId(uniqueUserId)
     if targetUser then
         targetUser:block()
     else

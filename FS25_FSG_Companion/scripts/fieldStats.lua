@@ -69,9 +69,9 @@ function FieldStats:getFieldStats()
         local fillType          = nil
 
         -- Get the field crop
-        local fieldFruitType = g_i18n:getText("text_unknown")
+        local fruitName = g_i18n:getText("text_unknown")
         if fruitDesc ~= nil and fruitDesc.fillType ~= nil then
-            fieldFruitType = fruitDesc.fillType.title
+            fruitName = fruitDesc.fillType.title
             fillType = g_fillTypeManager:getFillTypeByIndex(fruitDesc.fillType.index)
 
             -- if fruitDesc:getIsGrowing(growthState) or fruitDesc:getIsPreparable(growthState) or fruitDesc:getIsHarvestable(growthState) then
@@ -116,7 +116,7 @@ function FieldStats:getFieldStats()
           rollingInfo            = rollingInfo,
           fertilizationInfo      = fertilizationInfo,
           fieldAreaFull          = field.farmland.areaInHa,
-          fieldFruitName         = fieldFruitName,
+          fieldFruitName         = fruitName,
           posX                   = field.posX,
           posZ                   = field.posZ,
           farmlandPrice          = field.farmland.price
