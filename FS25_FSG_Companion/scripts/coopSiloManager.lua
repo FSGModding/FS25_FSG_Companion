@@ -69,7 +69,7 @@ end
 function CoopSiloManager:checkCoopSilos()
     -- rcDebug("CoopSiloManager:checkCoopSilos")
 
-    if #self.outboundCoopSilos == 0 then
+    if self.outboundCoopSilos == nil or #self.outboundCoopSilos == 0 then
       self:cacheCoopSilos()
     end
 
@@ -100,7 +100,7 @@ end
 function CoopSiloManager:checkCoopObjectStorage()
     -- rcDebug("CoopSiloManager:checkCoopObjectStorage")
 
-    if #self.inboundCoopSilos == 0 and #self.inboundObjectSilos == 0 then
+    if (self.inboundCoopSilos == nil or #self.inboundCoopSilos == 0) and (self.inboundObjectSilos == nil or #self.inboundObjectSilos == 0) then
       self:cacheCoopSilos()
     end
 
