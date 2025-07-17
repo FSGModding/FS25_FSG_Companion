@@ -26,6 +26,7 @@ function FSGSettings.new(mission, i18n, modDirectory, modName)
   self.ServerMinCleanUTC      = 0
   self.TimeSpeed              = 1
   self.actionEventId          = nil
+  self.settingsLastModTime    = nil
 
   -- Load mod default settings
   self.settings = FS25PrefSaver:new(
@@ -71,8 +72,11 @@ end
 function FSGSettings:loadMap(filename)
   rcDebug(" Info: FSGS-loadMap")
 
-	self.settings:loadSettings()
-	self.settings:saveSettings()
+        self.settings:loadSettings()
+        self.settings:saveSettings()
+  if lfs ~= nil then
+    self.settingsLastModTime = lfs.attributes(self.settings:getXMLFileName(), "modification")
+  end
 
   local FSGInfoFrame = FSGSettingsGuiInfoFrame:new(nil, g_i18n)
   -- local FSGToolsFrame = FSGSettingsGuiToolsFrame:new(nil, g_i18n)
@@ -96,12 +100,21 @@ end
 -- Register Player Interaction
 function FSGSettings:updateActionEvents()
   if g_currentMission:getIsClient() == true then
-    -- rcDebug(" Info: FSGS-updateActionEvents")
-    -- We have to run this often to work in MP
-    local _, actionEventId = g_inputBinding:registerActionEvent('FSG_MENU', self, FSGSettings.actionAdditionalInfo_openGui, false, true, false, true)
-    g_inputBinding:setActionEventTextPriority(actionEventId, GS_PRIO_VERY_LOW)
-    g_inputBinding:setActionEventText(actionEventId, g_i18n:getText("FSG_MENU"))
-    self.actionEventId = actionEventId
+    if self.actionEventId == nil then
+      local _, actionEventId = g_inputBinding:registerActionEvent('FSG_MENU', self, FSGSettings.actionAdditionalInfo_openGui, false, true, false, true)
+      g_inputBinding:setActionEventTextPriority(actionEventId, GS_PRIO_VERY_LOW)
+      g_inputBinding:setActionEventText(actionEventId, g_i18n:getText("FSG_MENU"))
+      self.actionEventId = actionEventId
+    end
+  end
+end
+
+function FSGSettings:removeActionEvents()
+  if self.actionEventId ~= nil then
+    if g_inputBinding ~= nil and g_inputBinding.removeActionEvent ~= nil then
+      g_inputBinding:removeActionEvent(self.actionEventId)
+    end
+    self.actionEventId = nil
   end
 end
 
@@ -126,10 +139,21 @@ function FSGSettings:update(dt)
 
   -- If the game timescale IS NOT 1x then run the time adjustments every 60 milliseconds. -- Myrithis (Catalyzer Industries)
   -- If the game timescale IS     1x then run the time adjustments every 10 minutes. -- Myrithis (Catalyzer Industries)
-  if (g_currentMission.missionInfo.timeScale ~= 1 and g_updateLoopIndex % self.setValueTimerFrequency and FSGSettings:singleServerCheck())
+  if (g_currentMission.missionInfo.timeScale ~= 1 and g_updateLoopIndex % self.setValueTimerFrequency == 0 and FSGSettings:singleServerCheck())
       or (g_updateLoopIndex % ((self.setValueTimerFrequency*60)*10) == 0 and FSGSettings:singleServerCheck()) then
 
-    self.settings:loadSettings()
+    local doReload = true
+    if lfs ~= nil then
+      local modTime = lfs.attributes(self.settings:getXMLFileName(), "modification")
+      if modTime ~= nil then
+        doReload = (self.settingsLastModTime == nil or self.settingsLastModTime ~= modTime)
+        self.settingsLastModTime = modTime
+      end
+    end
+
+    if doReload then
+      self.settings:loadSettings()
+    end
     if self.settings:getValue("timeSyncEnable") == false then
       -- Check to see if just set as false.  if so then set speed to 1
       if self.justSetFalse == true then
