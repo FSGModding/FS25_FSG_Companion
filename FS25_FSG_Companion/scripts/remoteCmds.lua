@@ -10,7 +10,7 @@ function RemoteCommands.new(mission, i18n, modDirectory, modName)
   self.i18n                   = i18n
   self.modDirectory           = modDirectory
   self.modName                = modName
-  self.setValueTimerFrequency = 120
+  self.setValueTimerFrequency = 600
   self.commandInboxDir        = getUserProfileAppPath()  .. "modSettings/FS25_FSG_Companion/commands/inbox/"
   self.commandOutboxDir       = getUserProfileAppPath()  .. "modSettings/FS25_FSG_Companion/commands/outbox/"
   self.files                  = {}

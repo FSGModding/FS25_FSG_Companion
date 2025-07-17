@@ -15,6 +15,11 @@ function CoopSiloManager.new(mission, i18n, modDirectory, modName)
   self.runCurrentMinute = 0
   self.isServer         = g_currentMission:getIsServer()
   self.setValueTimerFrequency = 180
+  self.inboundCoopSilos = {}
+  self.outboundCoopSilos = {}
+  self.inboundObjectSilos = {}
+
+  self:cacheCoopSilos()
 
   g_messageCenter:subscribe(MessageType.MINUTE_CHANGED, self.onMinuteChanged, self)
 
@@ -23,6 +28,21 @@ end
 
 function CoopSiloManager:delete()
   g_messageCenter:unsubscribe(MessageType.MINUTE_CHANGED, self.onMinuteChanged, self)
+end
+
+function CoopSiloManager:cacheCoopSilos()
+  self.inboundCoopSilos = {}
+  self.outboundCoopSilos = {}
+  self.inboundObjectSilos = {}
+  for _, placeable in ipairs(g_currentMission.placeableSystem.placeables) do
+    if placeable.typeName == "FS25_FSG_CoopSilo.siloStorageInbound" then
+      table.insert(self.inboundCoopSilos, placeable)
+    elseif placeable.typeName == "FS25_FSG_CoopSilo.siloStorageOutbound" then
+      table.insert(self.outboundCoopSilos, placeable)
+    elseif placeable.typeName == "FS25_FSG_CoopSilo.siloStorageInboundObjects" then
+      table.insert(self.inboundObjectSilos, placeable)
+    end
+  end
 end
 
 function CoopSiloManager:update(dt)
@@ -49,14 +69,11 @@ end
 function CoopSiloManager:checkCoopSilos()
   -- rcDebug("CoopSiloManager:checkCoopSilos")
 
-  -- Locate any coop silos that exist on the server
+  if #self.outboundCoopSilos == 0 then
+    self:cacheCoopSilos()
+  end
 
-  for v=1, #g_currentMission.placeableSystem.placeables do
-    local thisPlaceable = g_currentMission.placeableSystem.placeables[v]
-
-    -- Check to make sure we are only checking the fsg coop silo
-    if thisPlaceable.typeName == "FS25_FSG_CoopSilo.siloStorageOutbound" then
-
+  for _, thisPlaceable in ipairs(self.outboundCoopSilos) do
       for _, storage in ipairs(thisPlaceable.spec_silo.storages) do
         -- Check if farm owner id exists
         local farm = g_farmManager:getFarmById(storage.ownerFarmId)
@@ -84,13 +101,11 @@ end
 function CoopSiloManager:checkCoopObjectStorage()
   -- rcDebug("CoopSiloManager:checkCoopObjectStorage")
 
-  -- Locate any coop silos that exist on the server
+  if #self.inboundCoopSilos == 0 and #self.inboundObjectSilos == 0 then
+    self:cacheCoopSilos()
+  end
 
-  for v=1, #g_currentMission.placeableSystem.placeables do
-    local thisPlaceable = g_currentMission.placeableSystem.placeables[v]
-
-    -- Object Storage is part of the inbound placeable
-    if thisPlaceable.typeName == "FS25_FSG_CoopSilo.siloStorageInbound" then
+  for _, thisPlaceable in ipairs(self.inboundCoopSilos) do
 
       local productFound = false
 
@@ -248,11 +263,11 @@ function CoopSiloManager:addFillToSilo(farmId,fillTypeName,fillAmount)
     fillTypeIndex = fillType.index
   end
 
-  for v=1, #g_currentMission.placeableSystem.placeables do
-    local thisPlaceable = g_currentMission.placeableSystem.placeables[v]
+  if #self.inboundCoopSilos == 0 then
+    self:cacheCoopSilos()
+  end
 
-    -- Check to make sure we are only checking the fsg coop silo
-    if thisPlaceable.typeName == "FS25_FSG_CoopSilo.siloStorageInbound" then
+  for _, thisPlaceable in ipairs(self.inboundCoopSilos) do
 
       -- Loop though the storages to see if farm owns it, if so then add the fill
       for _, storage in ipairs(thisPlaceable.spec_silo.storages) do
@@ -274,11 +289,11 @@ function CoopSiloManager:addPallet(farmId,configFileName,isBigBag,fillTypeName,f
   -- Get the fillType id by fillName
   local fillType = g_fillTypeManager:getFillTypeByName(fillTypeName).index
 
-  for v=1, #g_currentMission.placeableSystem.placeables do
-    local thisPlaceable = g_currentMission.placeableSystem.placeables[v]
+  if #self.inboundObjectSilos == 0 then
+    self:cacheCoopSilos()
+  end
 
-    -- Check to make sure we are only checking the fsg coop silo
-    if thisPlaceable.typeName == "FS25_FSG_CoopSilo.siloStorageInboundObjects" then
+  for _, thisPlaceable in ipairs(self.inboundObjectSilos) do
 
       -- Loop though the storages to see if farm owns it, if so then add the fill
       local storage = thisPlaceable
@@ -346,11 +361,11 @@ function CoopSiloManager:addBale(farmId,xmlFilename,fillLevel,wrappingState,supp
   -- Get the fillType id by fillName
   local fillType = g_fillTypeManager:getFillTypeByName(fillTypeName).index
 
-  for v=1, #g_currentMission.placeableSystem.placeables do
-    local thisPlaceable = g_currentMission.placeableSystem.placeables[v]
+  if #self.inboundObjectSilos == 0 then
+    self:cacheCoopSilos()
+  end
 
-    -- Check to make sure we are only checking the fsg coop silo
-    if thisPlaceable.typeName == "FS25_FSG_CoopSilo.siloStorageInboundObjects" then
+  for _, thisPlaceable in ipairs(self.inboundObjectSilos) do
 
       -- Loop though the storages to see if farm owns it, if so then add the fill
       local storage = thisPlaceable
