@@ -103,14 +103,14 @@ end
 -- Register Player Interaction
 function FSGSettings:updateActionEvents()
   if g_currentMission:getIsClient() == true and g_inputBinding ~= nil then
-    if self.actionEventId == nil then
+    -- if self.actionEventId == nil then
       local _, actionEventId = g_inputBinding:registerActionEvent('FSG_MENU', self, FSGSettings.actionAdditionalInfo_openGui, false, true, false, true)
       if actionEventId ~= nil then
         g_inputBinding:setActionEventTextPriority(actionEventId, GS_PRIO_VERY_LOW)
         g_inputBinding:setActionEventText(actionEventId, g_i18n:getText("FSG_MENU"))
         self.actionEventId = actionEventId
       end
-    end
+    -- end
   end
 end
 
