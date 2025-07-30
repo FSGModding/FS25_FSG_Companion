@@ -239,8 +239,18 @@ function FSGSettings:update(dt)
     -- Time to set the game to if game is too far ahead of server time
     SetServerTime = ServerTime - 0.03
 
+    -- handle case where the server restarts around midnight. If the server time
+    -- is shortly after midnight but the game time is still late in the
+    -- evening, the normal comparison logic would try to rewind time. Use a
+    -- buffer to treat this as a rollover so the game fast-forwards instead.
+    local rolloverBuffer = 2 -- hours on either side of midnight
+    local CompareServerTime = ServerTime
+    if GameTime > (24 - rolloverBuffer) and ServerTime < rolloverBuffer then
+      CompareServerTime = ServerTime + 24
+    end
+
     -- get the time differance between server time and game time so we can see if we need to speed up or slow down
-    TimeDiff = MathUtil.round(ServerTime - GameTime, 2);
+    TimeDiff = MathUtil.round(CompareServerTime - GameTime, 2);
 
     rcDebug("FSGSettings:SetServerTime: " .. SetServerTime)
     rcDebug("FSGSettings:ServerTime: " .. ServerTime)
@@ -256,7 +266,7 @@ function FSGSettings:update(dt)
     -- Need a 5 minute window to keep it from constantly changing
 
     -- Check if Game time is less than server time by more than 1 hour.  Speed time way up if so.
-    if GameTime < ServerTime and TimeDiff > 1 then
+    if GameTime < CompareServerTime and TimeDiff > 1 then
       rcDebug("FSGSettings:GameTime < ServerTime and time is off by more than an hour - speed up time x240")
       if FSGSettings:isSinglePlayer() then
         g_currentMission.missionInfo.timeScale = 240
@@ -267,7 +277,7 @@ function FSGSettings:update(dt)
       TimeSpeed = 240 -- Time scale speed
 
     -- Check if Game time is less than server time by more than 0.75 hours.  Speed time way up if so.
-    elseif GameTime < ServerTime and TimeDiff > 0.75 then
+    elseif GameTime < CompareServerTime and TimeDiff > 0.75 then
       rcDebug("FSGSettings:GameTime < ServerTime and time is off by more than an hour - speed up time x120")
       if FSGSettings:isSinglePlayer() then
         g_currentMission.missionInfo.timeScale = 120
@@ -278,7 +288,7 @@ function FSGSettings:update(dt)
       TimeSpeed = 120 -- Time scale speed
 
     -- Check if Game time is less than server time by more than 0.5 hours.  Speed time way up if so.
-    elseif GameTime < ServerTime and TimeDiff > 0.5 then
+    elseif GameTime < CompareServerTime and TimeDiff > 0.5 then
       rcDebug("FSGSettings:GameTime < ServerTime and time is off by more than an hour - speed up time x60")
       if FSGSettings:isSinglePlayer() then
         g_currentMission.missionInfo.timeScale = 60
@@ -289,7 +299,7 @@ function FSGSettings:update(dt)
       TimeSpeed = 60 -- Time scale speed
 
     -- Check if Game time is less than server time by more than 0.25 hours.  Speed time way up if so.
-    elseif GameTime < ServerTime and TimeDiff > 0.25 then
+    elseif GameTime < CompareServerTime and TimeDiff > 0.25 then
       rcDebug("FSGSettings:GameTime < ServerTime and time is off by more than an hour - speed up time x30")
       if FSGSettings:isSinglePlayer() then
         g_currentMission.missionInfo.timeScale = 30
@@ -300,7 +310,7 @@ function FSGSettings:update(dt)
       TimeSpeed = 30 -- Time scale speed
 
     -- Check if Game time is less than server time.  Speed time up if so.
-    elseif GameTime < ServerTime and TimeDiff > 0 then
+    elseif GameTime < CompareServerTime and TimeDiff > 0 then
       rcDebug("FSGSettings:GameTime < ServerTime - speed up time x5")
       if FSGSettings:isSinglePlayer() then
         g_currentMission.missionInfo.timeScale = 5
@@ -311,7 +321,7 @@ function FSGSettings:update(dt)
       TimeSpeed = 5 -- Time scale speed
 
     -- Check if Game time is greater than server time and set time is true.  Set the time to match
-    elseif GameTime > ServerTime and TimeDiff < 0 and TimeDiff < -0.8 and setAutoSetTime == true then
+    elseif GameTime > CompareServerTime and TimeDiff < 0 and TimeDiff < -0.8 and setAutoSetTime == true then
       rcDebug("FSGSettings:GameTime > ServerTime - slow way down time")
       -- Looks to be changing both server time and game time
       g_currentMission.environment:consoleCommandSetDayTime(SetServerTime);
@@ -326,7 +336,7 @@ function FSGSettings:update(dt)
       TimeSpeed = 1 -- Time scale speed
 
     -- Check if Game time is greater than server time.  Slow time down if so.
-    elseif GameTime > ServerTime and TimeDiff < -0.03 then
+    elseif GameTime > CompareServerTime and TimeDiff < -0.03 then
       rcDebug("FSGSettings:GameTime > ServerTime - slow way down time")
       if FSGSettings:isSinglePlayer() then
         g_currentMission.missionInfo.timeScale = 0.1
@@ -337,7 +347,7 @@ function FSGSettings:update(dt)
       TimeSpeed = 0.1 -- Time scale speed
 
     -- Check if Game time is greater than server time.  Slow time down if so.
-    elseif GameTime > ServerTime then
+    elseif GameTime > CompareServerTime then
       rcDebug("FSGSettings:GameTime > ServerTime - slow down time")
       if FSGSettings:isSinglePlayer() then
         g_currentMission.missionInfo.timeScale = 0.5
