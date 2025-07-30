@@ -770,85 +770,58 @@ function FarmCleanUp:checkCoopLimits()
     if coopMinCruiseSpeed ~= nil and coopMinCruiseSpeed > 0 then
       coopMinCruiseSpeed = coopMinCruiseSpeed - 1
       coopMinCruiseMin = coopMinCruiseMin - 1
+      -- Clean out stale entries that haven't been seen for five minutes
+      local now = getTime()
+      if self.coopCruiseAbuse ~= nil then
+        for i = #self.coopCruiseAbuse, 1, -1 do
+          local cca = self.coopCruiseAbuse[i]
+          if (now - (cca.lastSeen or now)) > 300 then
+            table.remove(self.coopCruiseAbuse, i)
+          end
+        end
+      else
+        self.coopCruiseAbuse = {}
+      end
+
       -- Loop through all the vehicles and send their data to a table if they are not farm 0
       if g_currentMission.vehicleSystem.vehicles ~= nil then
         for _, vehicle in ipairs(g_currentMission.vehicleSystem.vehicles) do
-          -- Check each vehicle to see if cruise is active
           if vehicle.getCruiseControlState ~= nil and vehicle:getCruiseControlState() == Drivable.CRUISECONTROL_STATE_ACTIVE then
-            -- Check if speed is less than limit
             if vehicle.getCruiseControlSpeed and vehicle:getCruiseControlSpeed() <= coopMinCruiseSpeed then
-              -- Check to see if player has been in this vehicle for more than the set amount of min
               if vehicle.getControllerName ~= nil then
                 rcDebug("Found Player In Vehicle")
                 local playerName = vehicle:getControllerName()
                 local vehicleName = vehicle:getFullName()
                 rcDebug(playerName)
                 rcDebug(vehicleName)
-                local playerUpdated = false
-                -- Check if player is already in array or not
-                if self.coopCruiseAbuse ~= nil then
-                  for _, cca in ipairs(self.coopCruiseAbuse) do
-                    -- Check to see if current vehicle and player has a match
-                    if cca.playerName == playerName and cca.vehicleName == vehicleName then
-                      rcDebug("Existing Entry Found for Player")
-                      -- Player and vehicle found, check to see if they are over the limit
-                      local minutesFound = 1
-                      if cca.minutesFound ~= nil then
-                        minutesFound = tonumber(cca.minutesFound)
-                      end 
-                      local minutesFoundPlus = minutesFound + 1
-                      rcDebug(minutesFoundPlus)
-                      rcDebug(coopMinCruiseMin)
-                      if tonumber(minutesFoundPlus) >= tonumber(coopMinCruiseMin) then
-                        rcDebug("Turn Cruise Off for Player")
-                        print(string.format(" Info: %s detected using cruise below %d kph for %d min.  Cruise control has been turned off on %s", playerName, coopMinCruiseSpeed, coopMinCruiseMin, vehicleName))
-                        -- Turn off cruse for going too slow
-                        vehicle:setCruiseControlState(Drivable.CRUISECONTROL_STATE_OFF)
-                        -- Remove from table
-                        table.removeElement(self.coopCruiseAbuse, cca)
-                        playerUpdated = true
-                      else 
-                        rcDebug("Add Min To Player")
-                        -- Update mins for table entry
-                        cca.minutesFound = minutesFoundPlus
-                        playerUpdated = true
-                      end
-                    else
-                      rcDebug("New Player Found - Add new to table.")
-                      -- Player and vehicle not found, add them to the array
-                      local newData = {
-                        playerName = playerName,
-                        vehicleName = vehicleName,
-                        minutesFound = 1
-                      }
-                      table.insert(self.coopCruiseAbuse, newData)
-                      playerUpdated = true
-                    end
+
+                local entry = nil
+                for _, cca in ipairs(self.coopCruiseAbuse) do
+                  if cca.playerName == playerName and cca.vehicleName == vehicleName then
+                    entry = cca
+                    break
+                  end
+                end
+
+                if entry ~= nil then
+                  local minutesFound = (entry.minutesFound or 0) + 1
+                  if minutesFound >= coopMinCruiseMin then
+                    rcDebug("Turn Cruise Off for Player")
+                    print(string.format(" Info: %s detected using cruise below %d kph for %d min.  Cruise control has been turned off on %s", playerName, coopMinCruiseSpeed, coopMinCruiseMin, vehicleName))
+                    vehicle:setCruiseControlState(Drivable.CRUISECONTROL_STATE_OFF)
+                    table.removeElement(self.coopCruiseAbuse, entry)
+                  else
+                    entry.minutesFound = minutesFound
+                    entry.lastSeen = now
                   end
                 else
-                  self.coopCruiseAbuse = {}
-                  -- Table Empty, add new data to it
                   local newData = {
                     playerName = playerName,
                     vehicleName = vehicleName,
-                    minutesFound = 1
+                    minutesFound = 1,
+                    lastSeen = now
                   }
                   table.insert(self.coopCruiseAbuse, newData)
-                  playerUpdated = true
-                end
-                -- Failsafe to make sure player was added
-                if not playerUpdated then
-                  local newData = {
-                    playerName = playerName,
-                    vehicleName = vehicleName,
-                    minutesFound = 1
-                  }
-                  table.insert(self.coopCruiseAbuse, newData)
-                end
-                -- Debug stuffs
-                if self.coopCruiseAbuse ~= nil then
-                  rcDebug("coopCruiseAbuse Table")
-                  rcDebug(self.coopCruiseAbuse)
                 end
               end
             end
