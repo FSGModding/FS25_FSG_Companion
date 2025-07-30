@@ -16,17 +16,20 @@ function RemoteCommands.new(mission, i18n, modDirectory, modName)
   self.files                  = {}
   self.fileTimestamps         = {}
 
-	return self
+        return self
 end
 
 function RemoteCommands:update(dt)
-	if not g_server and not g_dedicatedServer then
-		return
-	end
+        if not g_server and not g_dedicatedServer then
+                return
+        end
 
-	if g_updateLoopIndex % self.setValueTimerFrequency == 0 then
+        if g_updateLoopIndex % self.setValueTimerFrequency == 0 then
     getFiles(self.commandInboxDir, "checkNewFiles", self)
   end
+
+  -- Periodically clean up stale timestamp entries to avoid memory growth
+  self:cleanOldFileTimestamps(3600)
 end
 
 function RemoteCommands:checkNewFiles(filename, isDirectory)
@@ -937,6 +940,20 @@ function RemoteCommands:isFileTooOld(file, ageLimitSeconds)
     return true
   end
   return false
+end
+
+-- Removes timestamp entries for files that no longer exist or are older than
+-- the provided max age in seconds
+function RemoteCommands:cleanOldFileTimestamps(maxAgeSeconds)
+  if self.fileTimestamps == nil then
+    return
+  end
+  for filename, ts in pairs(self.fileTimestamps) do
+    local filePath = self.commandInboxDir .. filename
+    if not fileExists(filePath) or (getTime() - ts) > maxAgeSeconds then
+      self.fileTimestamps[filename] = nil
+    end
+  end
 end
 
 
