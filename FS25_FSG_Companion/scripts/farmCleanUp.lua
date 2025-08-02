@@ -45,7 +45,7 @@ end
 
 function FarmCleanUp:onDayChanged()
   rcDebug("FarmCleanUp:onDayChanged")
-  if g_server ~= nil and self.isServer and g_dedicatedServer ~= nil then
+  -- if g_server ~= nil and self.isServer and g_dedicatedServer ~= nil then
     -- Run stump clean up
     FarmCleanUp:cleanStumps()
     -- Run log clean up
@@ -54,7 +54,7 @@ function FarmCleanUp:onDayChanged()
     FarmCleanUp:cleanPallets()
     -- Run bale cleanup process
     FarmCleanUp:cleanBales()
-  end
+  -- end
 end
 
 function FarmCleanUp:checkSuperStrength()
@@ -423,6 +423,9 @@ function FarmCleanUp:cleanPallets()
     for i = #g_currentMission.vehicleSystem.vehicles, 1, -1 do
         local vehicle = g_currentMission.vehicleSystem.vehicles[i]
 
+        -- rcDebug("Pallet Vehicle")
+        -- rcDebug(vehicle)
+
         if vehicle.isa ~= nil and vehicle:isa(Vehicle) and vehicle.trainSystem == nil then
             if getVehicleIsPallet(vehicle) then
                 local x, _, z = getWorldTranslation(vehicle.rootNode)
@@ -437,6 +440,7 @@ function FarmCleanUp:cleanPallets()
                         end
                     end
                 end
+                rcDebug(string.format("Pallet within radius: %s",withinRadius))
                 if withinRadius == false then
                     local farmlandId = g_farmlandManager:getFarmlandIdAtWorldPosition(x,z)
                     local baleData = {
@@ -447,7 +451,8 @@ function FarmCleanUp:cleanPallets()
                       x = x,
                       z = z,
                       xmlFilename = vehicle.configFileName,
-                      isMissionBale = false
+                      isMissionBale = false,
+                      uniqueId = vehicle.uniqueId
                     }
                     local checkItem = FarmCleanUp:checkItem(baleData)
                     if checkItem then
@@ -458,7 +463,8 @@ function FarmCleanUp:cleanPallets()
                           farmId = baleData.farmId,
                           farmlandId = baleData.farmlandId,
                           x = baleData.x,
-                          z = baleData.z
+                          z = baleData.z,
+                          uniqueId = baleData.uniqueId
                         })
                         g_currentMission.vehicleSystem:removeVehicle(vehicle)
                         numRemoved = numRemoved + 1
@@ -493,6 +499,7 @@ function FarmCleanUp:cleanPallets()
         newxmlFile:setString(key .. subKey .. "#farmlandId", tostring(p.farmlandId))
         newxmlFile:setString(key .. subKey .. "#x", tostring(p.x))
         newxmlFile:setString(key .. subKey .. "#z", tostring(p.z))
+        newxmlFile:setString(key .. subKey .. "#uniqueId", tostring(p.uniqueId))
 
         index = index + 1
         p = {}
@@ -536,6 +543,7 @@ function FarmCleanUp:cleanBales()
     end
 
     for i = #balesToRemove, 1, -1 do
+        -- rcDebug("Bale Data")
         -- rcDebug(balesToRemove[i])
         if balesToRemove[i].nodeId ~= nil then
             local x, _, z = getWorldTranslation(balesToRemove[i].nodeId)
@@ -549,6 +557,7 @@ function FarmCleanUp:cleanBales()
                     end
                 end
             end
+            rcDebug(string.format("Bale within radius: %s",withinRadius))
             if withinRadius == false then
                 local farmlandId = g_farmlandManager:getFarmlandIdAtWorldPosition(x,z)
                 local baleData = {
@@ -559,7 +568,8 @@ function FarmCleanUp:cleanBales()
                   x = x,
                   z = z,
                   xmlFilename = balesToRemove[i].xmlFilename,
-                  isMissionBale = balesToRemove[i].isMissionBale
+                  isMissionBale = balesToRemove[i].isMissionBale,
+                  uniqueId = balesToRemove[i].uniqueId
                 }
                 local checkItem = FarmCleanUp:checkItem(baleData)
                 if checkItem then
@@ -570,7 +580,8 @@ function FarmCleanUp:cleanBales()
                     farmId = baleData.farmId,
                     farmlandId = baleData.farmlandId,
                     x = baleData.x,
-                    z = baleData.z
+                    z = baleData.z,
+                    uniqueId = baleData.uniqueId
                   })
                   balesToRemove[i]:delete()
                   numRemoved = numRemoved + 1
@@ -604,6 +615,7 @@ function FarmCleanUp:cleanBales()
         newxmlFile:setString(key .. subKey .. "#farmlandId", tostring(p.farmlandId))
         newxmlFile:setString(key .. subKey .. "#x", tostring(p.x))
         newxmlFile:setString(key .. subKey .. "#z", tostring(p.z))
+        newxmlFile:setString(key .. subKey .. "#uniqueId", tostring(p.uniqueId))
 
         index = index + 1
         p = {}
