@@ -346,6 +346,9 @@ end
 function FarmCleanUp:cleanPallets()
     rcDebug("FarmCleanUp - cleanPallets")
 
+    -- Load existing loose items log once so entries can be pruned
+    FarmCleanUp:prepareLooseItems()
+
     local numRemoved = 0
 
     local mission = g_currentMission
@@ -495,12 +498,18 @@ function FarmCleanUp:cleanPallets()
       newxmlFile:delete()
     end
 
+    -- Save updated loose items log excluding removed items
+    FarmCleanUp:saveLooseItems()
+
     rcDebug("Pallets Removed: " .. numRemoved)
 
 end
 
 function FarmCleanUp:cleanBales()
     rcDebug("FarmCleanUp - cleanBales")
+
+    -- Load existing loose items log once so entries can be pruned
+    FarmCleanUp:prepareLooseItems()
 
     local numRemoved = 0
     local removedBales = {}
@@ -585,153 +594,125 @@ function FarmCleanUp:cleanBales()
       newxmlFile:delete()
     end
 
+    -- Save updated loose items log excluding removed items
+    FarmCleanUp:saveLooseItems()
+
     rcDebug("Bales Removed: " .. numRemoved)
 
 end
 
-function FarmCleanUp:checkItem(data)
-    rcDebug("FarmCleanUp - checkItem")
-    -- rcDebug(data)
-
-    local currentDay = g_currentMission.environment.currentDay
-    rcDebug("currentDay: " .. currentDay)
-    -- Check to see if item is already logged, if so then check if the logDay is > than 3 from current day.
-    -- If 3+ days old, then delete the item / return true
-    -- Otherwise return false
-    local removeItem = false
-    local matchFound = false
+-- Load items from LooseItems.xml so we can update and prune them
+function FarmCleanUp:prepareLooseItems()
+    self.looseItems = {}
+    self.looseItemsNextId = 1
 
     local modSettingsFolderPath = getUserProfileAppPath()  .. "modSettings/FS25_FSG_Companion"
-    local modSettingsFile = modSettingsFolderPath .. "/LooseItems.xml"
+    self.looseItemsFile = modSettingsFolderPath .. "/LooseItems.xml"
 
     local key = "items"
 
-    local itemData = {
-      id = tonumber(data.id),
-      type = tostring(data.type),
-      farmId = tonumber(data.farmId),
-      farmlandId = tonumber(data.farmlandId),
-      x = data.x,
-      z = data.z,
-      xmlFilename = tostring(data.xmlFilename),
-      logDay = tonumber(currentDay)
-    }
-
-    -- rcDebug(itemData)
-
-    if ( fileExists(modSettingsFile) ) then
-
-      local xmlFile = XMLFile.load(key, modSettingsFile)
-      local existingItems = {}
-      local updatedItems = {}
-      local newxmlFile
-    
-      if xmlFile == nil then
-        return false
-      end
-        
-      -- Get items from xml file
-      xmlFile:iterate(key .. ".item", function (_, itemKey)
-        --print("itemKey: " .. itemKey)
-        local existingItem = {
-          id = xmlFile:getInt(itemKey .. "#id"),
-          type = xmlFile:getString(itemKey .. "#type"),
-          farmId = xmlFile:getInt(itemKey .. "#farmId"),
-          farmlandId = xmlFile:getInt(itemKey .. "#farmlandId"),
-          x = xmlFile:getFloat(itemKey .. "#x"),
-          z = xmlFile:getFloat(itemKey .. "#z"),
-          xmlFilename = xmlFile:getString(itemKey .. "#xmlFilename"),
-          logDay = xmlFile:getInt(itemKey .. "#logDay"),
-        }
-        table.insert(existingItems, existingItem)
-      end)
-
-      -- Loop through existing items to see if there is a match to current
-      for _, eis in ipairs(existingItems) do
-        rcDebug("Checking for item match.")
-        if eis.type == itemData.type 
-          and eis.farmId == itemData.farmId 
-          and eis.farmlandId == itemData.farmlandId 
-          and MathUtil.round(eis.x,1) == MathUtil.round(itemData.x,1)
-          and MathUtil.round(eis.z,1) == MathUtil.round(itemData.z,1)
-          and eis.xmlFilename == itemData.xmlFilename 
-        then
-          -- Match found
-          rcDebug("Item match found.")
-          matchFound = true
-          -- Get days diff
-          local daysDiff = 0
-          if eis.logDay ~= nil and eis.logDay > 0 and currentDay > 0 then
-            daysDiff = tonumber(currentDay) - tonumber(eis.logDay)
-          end
-          rcDebug("Item days diff: " .. daysDiff)
-          -- Check if mission bale and give them more time
-          local daysAllowed = 3
-          if data.isMissionBale then 
-            daysAllowed = 5
-          end
-          -- Check if days diff is more than allowed for type
-          if daysDiff > daysAllowed then
-            rcDebug("Found Item To Remove")
-            removeItem = true
-            table.removeElement(updatedItems, eis)
-          else
-            -- Age good, keep in file
-            table.insert(updatedItems, eis)
-          end
-        else
-            -- No Match, keep in file
-            table.insert(updatedItems, eis)
+    if fileExists(self.looseItemsFile) then
+        local xmlFile = XMLFile.load(key, self.looseItemsFile)
+        if xmlFile ~= nil then
+            xmlFile:iterate(key .. ".item", function (_, itemKey)
+                local item = {
+                    id = xmlFile:getInt(itemKey .. "#id"),
+                    type = xmlFile:getString(itemKey .. "#type"),
+                    farmId = xmlFile:getInt(itemKey .. "#farmId"),
+                    farmlandId = xmlFile:getInt(itemKey .. "#farmlandId"),
+                    x = xmlFile:getFloat(itemKey .. "#x"),
+                    z = xmlFile:getFloat(itemKey .. "#z"),
+                    xmlFilename = xmlFile:getString(itemKey .. "#xmlFilename"),
+                    logDay = xmlFile:getInt(itemKey .. "#logDay"),
+                }
+                table.insert(self.looseItems, item)
+                if item.id ~= nil and item.id >= self.looseItemsNextId then
+                    self.looseItemsNextId = item.id + 1
+                end
+            end)
+            xmlFile:delete()
         end
-      end
+    end
+end
 
-      -- Check to see if no match, if not then add to file
-      if matchFound == false then 
-          -- No Match, add to file
-          table.insert(updatedItems, itemData)
-      end
+-- Save current loose item list back to xml
+function FarmCleanUp:saveLooseItems()
+    local key = "items"
+    local newxmlFile = XMLFile.create(key, self.looseItemsFile, key)
 
-      --save data to xml file
-      newxmlFile = XMLFile.create(key, modSettingsFile, key)
-
-      local index = 0
-
-      for _, ui in pairs(updatedItems) do
+    local index = 0
+    for _, item in ipairs(self.looseItems) do
         local subKey = string.format(".item(%d)", index)
-
-        newxmlFile:setInt(key .. subKey .. "#id", tonumber(ui.id))
-        newxmlFile:setString(key .. subKey .. "#type", tostring(ui.type))
-        newxmlFile:setInt(key .. subKey .. "#farmId", tonumber(ui.farmId))
-        newxmlFile:setInt(key .. subKey .. "#farmlandId", tonumber(ui.farmlandId))
-        newxmlFile:setFloat(key .. subKey .. "#x", tonumber(ui.x))
-        newxmlFile:setFloat(key .. subKey .. "#z", tonumber(ui.z))
-        newxmlFile:setString(key .. subKey .. "#xmlFilename", tostring(ui.xmlFilename))
-        newxmlFile:setInt(key .. subKey .. "#logDay", tonumber(ui.logDay))
+        newxmlFile:setInt(key .. subKey .. "#id", tonumber(item.id))
+        newxmlFile:setString(key .. subKey .. "#type", tostring(item.type))
+        newxmlFile:setInt(key .. subKey .. "#farmId", tonumber(item.farmId))
+        newxmlFile:setInt(key .. subKey .. "#farmlandId", tonumber(item.farmlandId))
+        newxmlFile:setFloat(key .. subKey .. "#x", tonumber(item.x))
+        newxmlFile:setFloat(key .. subKey .. "#z", tonumber(item.z))
+        newxmlFile:setString(key .. subKey .. "#xmlFilename", tostring(item.xmlFilename))
+        newxmlFile:setInt(key .. subKey .. "#logDay", tonumber(item.logDay))
 
         index = index + 1
-      end
+    end
 
-      newxmlFile:save()
-      newxmlFile:delete()
+    newxmlFile:save()
+    newxmlFile:delete()
+end
 
-    else 
+function FarmCleanUp:checkItem(data)
+    rcDebug("FarmCleanUp - checkItem")
 
-      rcDebug("No LooseItems.xml yet.  Creating one.")
+    local currentDay = g_currentMission.environment.currentDay
+    rcDebug("currentDay: " .. currentDay)
 
-      local xmlFile = createXMLFile(key, modSettingsFile, key)
+    -- Prepare item data with current day for new entries
+    local itemData = {
+        type = tostring(data.type),
+        farmId = tonumber(data.farmId),
+        farmlandId = tonumber(data.farmlandId),
+        x = data.x,
+        z = data.z,
+        xmlFilename = tostring(data.xmlFilename),
+        logDay = tonumber(currentDay)
+    }
 
-      setXMLInt(xmlFile, key .. ".item#id",tonumber(itemData.id))
-      setXMLString(xmlFile, key .. ".item#type",tostring(itemData.type))
-      setXMLInt(xmlFile, key .. ".item#farmId",tonumber(itemData.farmId))
-      setXMLInt(xmlFile, key .. ".item#farmlandId",tonumber(itemData.farmlandId))
-      setXMLFloat(xmlFile, key .. ".item#x",tonumber(itemData.x))
-      setXMLFloat(xmlFile, key .. ".item#z",tonumber(itemData.z))
-      setXMLString(xmlFile, key .. ".item#xmlFilename",tostring(itemData.xmlFilename))
-      setXMLInt(xmlFile, key .. ".item#logDay",tonumber(itemData.logDay))
+    local removeItem = false
 
-      saveXMLFile(xmlFile)
-      delete(xmlFile)
+    -- Search existing table for a match (ignore position to track movement)
+    local matchIndex = nil
+    for i, eis in ipairs(self.looseItems) do
+        if eis.type == itemData.type
+            and eis.farmId == itemData.farmId
+            and eis.farmlandId == itemData.farmlandId
+            and eis.xmlFilename == itemData.xmlFilename then
+            matchIndex = i
+            break
+        end
+    end
 
+    if matchIndex ~= nil then
+        local eis = table.remove(self.looseItems, matchIndex)
+        local daysDiff = 0
+        if eis.logDay ~= nil and eis.logDay > 0 and currentDay > 0 then
+            daysDiff = tonumber(currentDay) - tonumber(eis.logDay)
+        end
+        rcDebug("Item days diff: " .. daysDiff)
+        local daysAllowed = data.isMissionBale and 5 or 3
+        if daysDiff > daysAllowed then
+            rcDebug("Found Item To Remove")
+            removeItem = true
+        else
+            -- Update item position and day and keep it
+            eis.x = itemData.x
+            eis.z = itemData.z
+            eis.logDay = currentDay
+            table.insert(self.looseItems, eis)
+        end
+    else
+        -- New item, assign next id and add
+        itemData.id = self.looseItemsNextId
+        self.looseItemsNextId = self.looseItemsNextId + 1
+        table.insert(self.looseItems, itemData)
     end
 
     return removeItem
