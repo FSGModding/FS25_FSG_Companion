@@ -67,6 +67,11 @@ function GameLogs:InboxLog(filename, xmlFile)
       command = xmlFile:getString(commandKey .. "#command");
     end)
 
+    -- Ignore logging for sendChat commands
+    if command ~= nil and command == "sendChat" then
+      return true
+    end
+
     -- Ok for us to accept duplicates for the following commands
     if command ~= nil and (command == "createFarm" or command == "makeFarmManager") then
       return true
@@ -75,22 +80,22 @@ function GameLogs:InboxLog(filename, xmlFile)
     local modSettingsFolderPath = getUserProfileAppPath() .. "modSettings/FS25_FSG_Companion"
     local modSettingsFile = modSettingsFolderPath .. "/InboxLog.xml"
 
-    local xmlFile
+    local logXmlFile
 
     -- Load if it exists, otherwise create new
     if fileExists(modSettingsFile) then
-        xmlFile = loadXMLFile("transactions", modSettingsFile)
+        logXmlFile = loadXMLFile("transactions", modSettingsFile)
     else
-        xmlFile = createXMLFile("transactions", modSettingsFile, "transactions")
+        logXmlFile = createXMLFile("transactions", modSettingsFile, "transactions")
     end
 
     -- Check if filename already exists
     local index = 0
-    while hasXMLProperty(xmlFile, string.format("transactions.transaction(%d)", index)) do
+    while hasXMLProperty(logXmlFile, string.format("transactions.transaction(%d)", index)) do
         local entryKey = string.format("transactions.transaction(%d)", index)
-        local existingFilename = getXMLString(xmlFile, entryKey .. "#filename")
+        local existingFilename = getXMLString(logXmlFile, entryKey .. "#filename")
         if existingFilename == filename then
-            delete(xmlFile)
+            delete(logXmlFile)
             return false -- Filename already logged
         end
         index = index + 1
@@ -100,12 +105,21 @@ function GameLogs:InboxLog(filename, xmlFile)
     local baseKey = string.format("transactions.transaction(%d)", index)
     local timestamp = getDate("%Y-%m-%d %H:%M:%S")
 
-    setXMLString(xmlFile, baseKey .. "#timestamp", timestamp)
-    setXMLString(xmlFile, baseKey .. "#filename", filename)
+    setXMLString(logXmlFile, baseKey .. "#timestamp", timestamp)
+    setXMLString(logXmlFile, baseKey .. "#filename", filename)
+
+    -- Prune log to last 100 entries
+    local totalEntries = index + 1
+    if totalEntries > 100 then
+        local removeCount = totalEntries - 100
+        for i = 1, removeCount do
+            removeXMLProperty(logXmlFile, "transactions.transaction(0)")
+        end
+    end
 
     -- Save and clean up
-    saveXMLFile(xmlFile)
-    delete(xmlFile)
+    saveXMLFile(logXmlFile)
+    delete(logXmlFile)
 
     return true -- New filename added
 end
