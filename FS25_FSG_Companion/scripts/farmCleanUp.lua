@@ -45,7 +45,7 @@ end
 
 function FarmCleanUp:onDayChanged()
   rcDebug("FarmCleanUp:onDayChanged")
-  -- if g_server ~= nil and self.isServer and g_dedicatedServer ~= nil then
+  if g_server ~= nil and self.isServer and g_dedicatedServer ~= nil then
     -- Run stump clean up
     FarmCleanUp:cleanStumps()
     -- Run log clean up
@@ -54,7 +54,7 @@ function FarmCleanUp:onDayChanged()
     FarmCleanUp:cleanPallets()
     -- Run bale cleanup process
     FarmCleanUp:cleanBales()
-  -- end
+  end
 end
 
 function FarmCleanUp:checkSuperStrength()
@@ -376,7 +376,7 @@ function FarmCleanUp:getSpawnAreas()
                 local centerX = spawnPlace.startX + (spawnPlace.width / 2)
                 local centerZ = spawnPlace.startZ + (spawnPlace.length / 2)
                 -- Expand radius slightly to give spawned pallets more space
-                local radius = math.max(spawnPlace.width, spawnPlace.length) / 2 + 3
+                local radius = math.max(spawnPlace.width, spawnPlace.length) / 2 + 5
                 table.insert(spawnAreas, {x = centerX, z = centerZ, radius = radius})
             end
         end
