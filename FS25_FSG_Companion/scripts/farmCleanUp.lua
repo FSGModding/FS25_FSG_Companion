@@ -712,7 +712,10 @@ function FarmCleanUp:checkItem(data)
 
     local removeItem = false
 
-    -- Search existing table for a match (ignore position to track movement)
+    -- Search existing table for a match.
+    -- Use uniqueId when available, otherwise include position so that
+    -- multiple loose items with the same type and farm data are tracked
+    -- individually rather than lumped together.
     local matchIndex = nil
     for i, eis in ipairs(self.looseItems) do
         if itemData.uniqueId ~= nil and itemData.uniqueId ~= "" then
@@ -721,13 +724,18 @@ function FarmCleanUp:checkItem(data)
                 break
             end
         end
+
         if matchIndex == nil then
             if eis.type == itemData.type
                 and eis.farmId == itemData.farmId
                 and eis.farmlandId == itemData.farmlandId
                 and eis.xmlFilename == itemData.xmlFilename then
-                matchIndex = i
-                break
+                local dx = math.abs((eis.x or 0) - itemData.x)
+                local dz = math.abs((eis.z or 0) - itemData.z)
+                if dx < 0.5 and dz < 0.5 then
+                    matchIndex = i
+                    break
+                end
             end
         end
     end
