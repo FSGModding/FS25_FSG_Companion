@@ -376,7 +376,7 @@ function FarmCleanUp:getSpawnAreas()
                 local centerX = spawnPlace.startX + (spawnPlace.width / 2)
                 local centerZ = spawnPlace.startZ + (spawnPlace.length / 2)
                 -- Expand radius slightly to give spawned pallets more space
-                local radius = math.max(spawnPlace.width, spawnPlace.length) / 2 + 1
+                local radius = math.max(spawnPlace.width, spawnPlace.length) / 2 + 3
                 table.insert(spawnAreas, {x = centerX, z = centerZ, radius = radius})
             end
         end
