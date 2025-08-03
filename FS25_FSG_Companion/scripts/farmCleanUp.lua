@@ -648,6 +648,7 @@ function FarmCleanUp:prepareLooseItems()
             xmlFile:iterate(key .. ".item", function (_, itemKey)
                 local item = {
                     id = xmlFile:getInt(itemKey .. "#id"),
+                    uniqueId = xmlFile:getString(itemKey .. "#uniqueId"),
                     type = xmlFile:getString(itemKey .. "#type"),
                     farmId = xmlFile:getInt(itemKey .. "#farmId"),
                     farmlandId = xmlFile:getInt(itemKey .. "#farmlandId"),
@@ -675,6 +676,7 @@ function FarmCleanUp:saveLooseItems()
     for _, item in ipairs(self.looseItems) do
         local subKey = string.format(".item(%d)", index)
         newxmlFile:setInt(key .. subKey .. "#id", tonumber(item.id))
+        newxmlFile:setString(key .. subKey .. "#uniqueId", tostring(item.uniqueId or ""))
         newxmlFile:setString(key .. subKey .. "#type", tostring(item.type))
         newxmlFile:setInt(key .. subKey .. "#farmId", tonumber(item.farmId))
         newxmlFile:setInt(key .. subKey .. "#farmlandId", tonumber(item.farmlandId))
@@ -698,6 +700,7 @@ function FarmCleanUp:checkItem(data)
 
     -- Prepare item data with current day for new entries
     local itemData = {
+        uniqueId = data.uniqueId ~= nil and tostring(data.uniqueId) or nil,
         type = tostring(data.type),
         farmId = tonumber(data.farmId),
         farmlandId = tonumber(data.farmlandId),
@@ -712,32 +715,53 @@ function FarmCleanUp:checkItem(data)
     -- Search existing table for a match (ignore position to track movement)
     local matchIndex = nil
     for i, eis in ipairs(self.looseItems) do
-        if eis.type == itemData.type
-            and eis.farmId == itemData.farmId
-            and eis.farmlandId == itemData.farmlandId
-            and eis.xmlFilename == itemData.xmlFilename then
-            matchIndex = i
-            break
+        if itemData.uniqueId ~= nil and itemData.uniqueId ~= "" then
+            if eis.uniqueId == itemData.uniqueId then
+                matchIndex = i
+                break
+            end
+        end
+        if matchIndex == nil then
+            if eis.type == itemData.type
+                and eis.farmId == itemData.farmId
+                and eis.farmlandId == itemData.farmlandId
+                and eis.xmlFilename == itemData.xmlFilename then
+                matchIndex = i
+                break
+            end
         end
     end
 
     if matchIndex ~= nil then
         local eis = table.remove(self.looseItems, matchIndex)
-        local daysDiff = 0
-        if eis.logDay ~= nil and eis.logDay > 0 and currentDay > 0 then
-            daysDiff = tonumber(currentDay) - tonumber(eis.logDay)
+        eis.uniqueId = itemData.uniqueId or eis.uniqueId
+        local moved = false
+        if eis.x ~= nil and eis.z ~= nil then
+            local dx = math.abs(eis.x - itemData.x)
+            local dz = math.abs(eis.z - itemData.z)
+            if dx > 0.5 or dz > 0.5 then
+                moved = true
+            end
         end
-        rcDebug("Item days diff: " .. daysDiff)
-        local daysAllowed = data.isMissionBale and 5 or 3
-        if daysDiff > daysAllowed then
-            rcDebug("Found Item To Remove")
-            removeItem = true
-        else
-            -- Update item position and day and keep it
+        if moved then
+            rcDebug("Item moved, resetting day")
             eis.x = itemData.x
             eis.z = itemData.z
             eis.logDay = currentDay
             table.insert(self.looseItems, eis)
+        else
+            local daysDiff = 0
+            if eis.logDay ~= nil and eis.logDay > 0 and currentDay > 0 then
+                daysDiff = tonumber(currentDay) - tonumber(eis.logDay)
+            end
+            rcDebug("Item days diff: " .. daysDiff)
+            local daysAllowed = data.isMissionBale and 5 or 3
+            if daysDiff > daysAllowed then
+                rcDebug("Found Item To Remove")
+                removeItem = true
+            else
+                table.insert(self.looseItems, eis)
+            end
         end
     else
         -- New item, assign next id and add
