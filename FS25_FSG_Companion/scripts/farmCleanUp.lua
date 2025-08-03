@@ -467,7 +467,8 @@ function FarmCleanUp:cleanPallets()
                           z = baleData.z,
                           uniqueId = baleData.uniqueId
                         })
-                        g_currentMission.vehicleSystem:removeVehicle(vehicle)
+                        -- g_currentMission.vehicleSystem:removeVehicle(vehicle)
+                        vehicle:delete()
                         numRemoved = numRemoved + 1
                     end
                 end
