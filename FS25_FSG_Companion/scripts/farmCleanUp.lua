@@ -511,6 +511,9 @@ function FarmCleanUp:cleanPallets()
       newxmlFile:delete()
     end
 
+    -- Remove unseen pallet entries before saving
+    FarmCleanUp:pruneLooseItems("pallet")
+
     -- Save updated loose items log excluding removed items
     FarmCleanUp:saveLooseItems()
 
@@ -627,6 +630,9 @@ function FarmCleanUp:cleanBales()
       newxmlFile:delete()
     end
 
+    -- Remove unseen bale entries before saving
+    FarmCleanUp:pruneLooseItems("bale")
+
     -- Save updated loose items log excluding removed items
     FarmCleanUp:saveLooseItems()
 
@@ -658,6 +664,7 @@ function FarmCleanUp:prepareLooseItems()
                     z = xmlFile:getFloat(itemKey .. "#z"),
                     xmlFilename = xmlFile:getString(itemKey .. "#xmlFilename"),
                     logDay = xmlFile:getInt(itemKey .. "#logDay"),
+                    seen = false
                 }
                 table.insert(self.looseItems, item)
                 if item.id ~= nil and item.id >= self.looseItemsNextId then
@@ -692,6 +699,18 @@ function FarmCleanUp:saveLooseItems()
 
     newxmlFile:save()
     newxmlFile:delete()
+end
+
+-- Remove items that were not seen during this run
+function FarmCleanUp:pruneLooseItems(itemType)
+    for i = #self.looseItems, 1, -1 do
+        local item = self.looseItems[i]
+        if (itemType == nil or item.type == itemType) and not item.seen then
+            table.remove(self.looseItems, i)
+        else
+            item.seen = nil
+        end
+    end
 end
 
 function FarmCleanUp:checkItem(data)
@@ -758,6 +777,7 @@ function FarmCleanUp:checkItem(data)
             eis.x = itemData.x
             eis.z = itemData.z
             eis.logDay = currentDay
+            eis.seen = true
             table.insert(self.looseItems, eis)
         else
             local daysDiff = 0
@@ -770,6 +790,7 @@ function FarmCleanUp:checkItem(data)
                 rcDebug("Found Item To Remove")
                 removeItem = true
             else
+                eis.seen = true
                 table.insert(self.looseItems, eis)
             end
         end
@@ -777,6 +798,7 @@ function FarmCleanUp:checkItem(data)
         -- New item, assign next id and add
         itemData.id = self.looseItemsNextId
         self.looseItemsNextId = self.looseItemsNextId + 1
+        itemData.seen = true
         table.insert(self.looseItems, itemData)
     end
 
