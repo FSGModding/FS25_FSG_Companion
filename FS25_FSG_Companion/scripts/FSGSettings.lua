@@ -102,7 +102,7 @@ end
 
 -- Register Player Interaction
 function FSGSettings:updateActionEvents()
-  if g_currentMission:getIsClient() == true and g_inputBinding ~= nil then
+  if not g_currentMission:getIsServer() and g_currentMission:getIsClient() == true and g_inputBinding ~= nil then
     -- if self.actionEventId == nil then
       local _, actionEventId = g_inputBinding:registerActionEvent('FSG_MENU', self, FSGSettings.actionAdditionalInfo_openGui, false, true, false, true)
       if actionEventId ~= nil then
