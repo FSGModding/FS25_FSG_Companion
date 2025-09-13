@@ -117,27 +117,32 @@ function VehicleEdit:consoleCommandStoreVehicle()
   end
   -- Do stuff with vehicle
   if self.currentVehicle ~= nil then
-    -- Check if is server or host.  If host, let the user do what is needed.
-    if self.isServer then
-      -- User is server or host
-      rcDebug('  Info: ==VehicleEdit:consoleCommandStoreVehicle: user is server.')
-      -- Since we are local, go ahead store vehicle
-      VehicleStorageEvent.sendEvent(self.currentVehicle)
-      rcDebug("Selected Vehicle was sent to storage.")
-    else
-      -- Make sure user is a client
-      if self.isClient then
-        -- User is client.  Make sure they are admin then broadcast to server
-        if g_currentMission.isMasterUser then
-          rcDebug('  Info: ==VehicleEdit:consoleCommandStoreVehicle: user is client and admin.')
-          -- Send event data to server
-          VehicleStorageEvent.sendEvent(self.currentVehicle)
-          rcDebug("Selected Vehicle was sent to storage.")
-        else
-          rcDebug('  Info: ==VehicleEdit:consoleCommandStoreVehicle: user is client and not admin.')
-          print('Info: Must be logged in as admin to run that command.')
+    local isProperty = self.currentVehicle.propertyState == VehiclePropertyState.OWNED or self.currentVehicle.propertyState == VehiclePropertyState.LEASED or self.currentVehicle.propertyState == VehiclePropertyState.MISSION
+    if isProperty then
+      -- Check if is server or host.  If host, let the user do what is needed.
+      if self.isServer then
+        -- User is server or host
+        rcDebug('  Info: ==VehicleEdit:consoleCommandStoreVehicle: user is server.')
+        -- Since we are local, go ahead store vehicle
+        VehicleStorageEvent.sendEvent(self.currentVehicle)
+        rcDebug("Selected Vehicle was sent to storage.")
+      else
+        -- Make sure user is a client
+        if self.isClient then
+          -- User is client.  Make sure they are admin then broadcast to server
+          if g_currentMission.isMasterUser then
+            rcDebug('  Info: ==VehicleEdit:consoleCommandStoreVehicle: user is client and admin.')
+            -- Send event data to server
+            VehicleStorageEvent.sendEvent(self.currentVehicle)
+            rcDebug("Selected Vehicle was sent to storage.")
+          else
+            rcDebug('  Info: ==VehicleEdit:consoleCommandStoreVehicle: user is client and not admin.')
+            print('Info: Must be logged in as admin to run that command.')
+          end
         end
       end
+    else
+      print("  Info: Vehicle is not owned.  You can not transfer leased or mission vehicles.")
     end
   else
     print("  Info: No Vehicle Found.  You must be next to vehicle or in it to use this command.")
