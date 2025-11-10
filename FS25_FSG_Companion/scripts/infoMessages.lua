@@ -16,6 +16,7 @@ function InfoMessages.new()
     "Welcome to Farm Sim Game Realism Servers",
     "Powered By Fragnet.net/FSG",
     "Powered By FSGRealism.com",
+    "Powered By FarmSimGame.com",
     "Thank you for playing on FSG Realism"
   }
 

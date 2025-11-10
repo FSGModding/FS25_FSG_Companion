@@ -328,7 +328,7 @@ function CoopSiloManager:addPallet(farmId,configFileName,isBigBag,fillTypeName,f
 end
 
 -- Add bale to object storage
-function CoopSiloManager:addBale(farmId,xmlFilename,fillLevel,wrappingState,supportsWrapping,baleValueScale,wrappingColor,fillTypeName,isFermenting,fermentationTime)
+function CoopSiloManager:addBale(farmId,xmlFilename,fillLevel,wrappingState,supportsWrapping,baleValueScale,wrappingColor,fillTypeName,isFermenting,fermentationTime,variationIndex)
   rcDebug("CoopSiloManager - addBale")
 
   -- Split up the wrapping colors
@@ -385,6 +385,11 @@ function CoopSiloManager:addBale(farmId,xmlFilename,fillLevel,wrappingState,supp
         else
           abstractBale.baleAttributes.fermentationTime = 0
         end
+      end
+      if variationIndex ~= nil then
+        abstractBale.baleAttributes.variationIndex = variationIndex
+      else
+        abstractBale.baleAttributes.variationIndex = "1"
       end
 
       g_farmManager:updateFarmStats(storage:getOwnerFarmId(), "storedBales", 1)
