@@ -117,8 +117,10 @@ function VehicleEdit:consoleCommandStoreVehicle()
   end
   -- Do stuff with vehicle
   if self.currentVehicle ~= nil then
-    local isProperty = self.currentVehicle.propertyState == VehiclePropertyState.OWNED or self.currentVehicle.propertyState == VehiclePropertyState.LEASED or self.currentVehicle.propertyState == VehiclePropertyState.MISSION
-    if isProperty then
+    local isOwned     = self.currentVehicle.propertyState == VehiclePropertyState.OWNED
+    local isLeased    = self.currentVehicle.propertyState == VehiclePropertyState.LEASED
+    local isMission   = self.currentVehicle.propertyState == VehiclePropertyState.MISSION
+    if isOwned and not isLeased and not isMission then
       -- Check if is server or host.  If host, let the user do what is needed.
       if self.isServer then
         -- User is server or host
@@ -173,4 +175,77 @@ function VehicleEdit:setVehicleOwnerFarmId(vehicle, ownerFarmId)
       rcDebug("No Vehicle Found.  You must be next to vehicle or in it to use this command.")
     end
   end
+end
+
+-- Anything in here true will not load in game.
+VehicleEdit.blockedStoreItems = {
+    ["$data/objects/shippingContainer/shippingContainer.xml"] = true, -- Container
+    ["$data/vehicles/fliegl/varioV2/varioV2.xml"] = true, -- Container Trailer
+    -- Block easy money stuff
+    ["$data/placeables/brandless/electricityGenerators/level05/electricityGenerator05.xml"] = true,
+    ["$data/placeables/brandless/productionPointsGeneric/stoneQuarry/stoneQuarry.xml"] = true,
+    ["$data/placeables/mapEU/cementFactoryEU/cementFactoryPlaceable.xml"] = true,
+    ["$data/placeables/brandless/productionPointsSmall/cementFactory/cementFactory.xml"] = true,
+    -- add more exact items here...
+}
+
+function VehicleEdit:loadItemsFromXML(superFunc, filename, baseDirectory, customEnvironment)
+    rcDebug("VehicleEdit:loadItemsFromXML")
+    local xmlFile = XMLFile.load("storeItemsXML", filename)
+
+    if xmlFile == nil then
+        return
+    end
+
+    xmlFile:iterate("storeItems.storeItem", function(_, itemKey)
+        local itemXmlFilename   = xmlFile:getString(itemKey .. "#xmlFilename")
+        local extraContentId    = xmlFile:getString(itemKey .. "#extraContentId")
+
+        rcDebug(tostring(itemXmlFilename))
+
+        if itemXmlFilename ~= nil and VehicleEdit.blockedStoreItems[itemXmlFilename] then
+            print(("Info: Blocked store item: %s"):format(itemXmlFilename))
+        else
+
+            g_asyncTaskManager:addSubtask(function()
+                local modTitle = ""
+
+                -- Resolve full path to the store item XML
+                local resolvedFilename = Utils.getFilename(itemXmlFilename, baseDirectory)
+
+                -- Detect if the item comes from a mod
+                local modName, _ = Utils.getModNameAndBaseDirectory(resolvedFilename)
+
+                local allowScripts
+                if modName == nil then
+                    -- Basegame item
+                    allowScripts = false
+                else
+                    local mod = g_modManager:getModByName(modName)
+                    if mod ~= nil then
+                        modTitle = mod.title
+                    end
+
+                    -- Scripts allowed only for non-DLC mods
+                    allowScripts = not mod.isDLC
+                end
+
+                -- Load the store item into the shop
+                self:loadItem(
+                    itemXmlFilename,
+                    baseDirectory,
+                    customEnvironment,
+                    allowScripts,
+                    false,
+                    modTitle,
+                    extraContentId
+                )
+            end, string.format(
+                "StoreManager - Load store item '%s'",
+                itemXmlFilename
+            ))
+        end
+    end)
+
+    xmlFile:delete()
 end

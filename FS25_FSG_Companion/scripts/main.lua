@@ -741,6 +741,8 @@ local function init()
     return g_currentMission.economyManager:getBuyPrice(self.storeItem) * 5
   end)
 
+  StoreManager.loadItemsFromXML = Utils.overwrittenFunction(StoreManager.loadItemsFromXML, VehicleEdit.loadItemsFromXML)
+
 end
 
 ---Run when player is connected to server

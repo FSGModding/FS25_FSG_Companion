@@ -1551,6 +1551,7 @@ function onSave:copySaveFiles()
   onSave:copySaveFileToOutbox('placeableSiloStats.xml');
   onSave:copySaveFileToOutbox('placeableStats.xml');
   onSave:copySaveFileToOutbox('vehicleStats.xml');
+  onSave:copySaveFileToOutbox('MoneyTransactions.xml');
 end
 
 -- Copy savegame xml files from savegame over to outbox
@@ -1563,6 +1564,7 @@ function onSave:copyStatsSaveFiles()
   onSave:copySaveFileToOutbox('placeableSiloStats.xml');
   onSave:copySaveFileToOutbox('placeableStats.xml');
   onSave:copySaveFileToOutbox('vehicleStats.xml');
+  onSave:copySaveFileToOutbox('MoneyTransactions.xml');
 end
 
 -- Update xml link player stats

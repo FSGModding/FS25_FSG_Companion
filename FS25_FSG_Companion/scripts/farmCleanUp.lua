@@ -237,6 +237,7 @@ function FarmCleanUp:cleanLogs()
   rcDebug("Scanning for logs to clean up.")
 
   local newxmlFile
+  local logThreshold = 20
   local removedLogs = {}
   local farmTreeCount = {}
   local numRemoved = 1
@@ -246,8 +247,6 @@ function FarmCleanUp:cleanLogs()
   local _, numSplit = getNumOfSplitShapes()
 
   if numSplit > 0 then
-      local densityManager = g_densityMapHeightManager
-      local aiSystem = g_currentMission.aiSystem
       local splitSplitShapes = {}
 
 
@@ -260,12 +259,10 @@ function FarmCleanUp:cleanLogs()
           local farmlandId = g_farmlandManager:getFarmlandIdAtWorldPosition(x,z)
           local farmId = g_farmlandManager:getFarmlandOwner(farmlandId)
 
-          if farmTreeCount[farmId] == nil then
-            farmTreeCount[farmId] = 1
-          end
+          farmTreeCount[farmId] = (farmTreeCount[farmId] or 0) + 1
 
-          -- Check if farm has over 20 trees
-          if farmTreeCount[farmId] < 20 then
+          -- Check if farm has over logThreshold trees
+          if farmTreeCount[farmId] > logThreshold then
 
               -- save the stump to table
               table.insert(removedLogs, {
@@ -344,46 +341,53 @@ function FarmCleanUp:findAllSplitSplitShapes(node, findLogs, findStumps, splitSp
 end
 
 function FarmCleanUp:getSpawnAreas()
-    local spawnAreas = {}
+    local spawnPlaces = {}
 
-    -- Loop through all placeables and collect pallet/bale spawn points
-    for v = 1, #g_currentMission.placeableSystem.placeables do
-        local thisPlaceable = g_currentMission.placeableSystem.placeables[v]
-        local typeName = tostring(thisPlaceable.typeName)
-        local palletSpawner = nil
-
-        -- Check if pallet spawner data is in placeable by type
-        if string.find(typeName, "Husbandry") then
-            local specHusbandryPallets = thisPlaceable.spec_husbandryPallets
-            if specHusbandryPallets ~= nil then
-                palletSpawner = specHusbandryPallets.palletSpawner
-            end
-        elseif typeName == "productionPoint" or typeName == "productionPointWardrobe" or typeName == "greenhouse" then
-            local specProductionPoint = thisPlaceable.spec_productionPoint.productionPoint
-            if specProductionPoint ~= nil then
-                palletSpawner = specProductionPoint.palletSpawner
-            end
-        elseif typeName == "beehivePalletSpawner" then
-            local specBeehiveSpawner = thisPlaceable.spec_beehivePalletSpawner
-            if specBeehiveSpawner ~= nil then
-                palletSpawner = specBeehiveSpawner.palletSpawner
+    for _, placeable in ipairs(g_currentMission.placeableSystem.placeables) do
+        -- Animal husbandry pallet spawners (FS25: list of entries)
+        local specHusbandryPallets = placeable.spec_husbandryPallets
+        if specHusbandryPallets ~= nil and specHusbandryPallets.palletSpawner ~= nil then
+            -- specHusbandryPallets.palletSpawner is an array of entries:
+            -- { palletSpawner = PalletSpawner, maxNumPallets = ..., palletTriggers = ... }
+            for _, entry in ipairs(specHusbandryPallets.palletSpawner) do
+                if entry ~= nil
+                    and entry.palletSpawner ~= nil
+                    and entry.palletSpawner.spawnPlaces ~= nil then
+                    for _, place in ipairs(entry.palletSpawner.spawnPlaces) do
+                        table.insert(spawnPlaces, place)
+                    end
+                end
             end
         end
 
-        -- Add the pallet spawner locations to table if found
-        if palletSpawner ~= nil and palletSpawner.spawnPlaces ~= nil and #palletSpawner.spawnPlaces > 0 then
-            for _, spawnPlace in pairs(palletSpawner.spawnPlaces) do
-                local centerX = spawnPlace.startX + (spawnPlace.width / 2)
-                local centerZ = spawnPlace.startZ + (spawnPlace.length / 2)
-                -- Expand radius slightly to give spawned pallets more space
-                local radius = math.max(spawnPlace.width, spawnPlace.length) / 2 + 5
-                table.insert(spawnAreas, {x = centerX, z = centerZ, radius = radius})
+        -- Productions + greenhouses (ProductionPoint object with a single PalletSpawner)
+        local specProduction = placeable.spec_productionPoint
+        if specProduction ~= nil
+            and specProduction.productionPoint ~= nil
+            and specProduction.productionPoint.palletSpawner ~= nil
+            and specProduction.productionPoint.palletSpawner.spawnPlaces ~= nil then
+            for _, place in ipairs(specProduction.productionPoint.palletSpawner.spawnPlaces) do
+                table.insert(spawnPlaces, place)
+            end
+        end
+
+        -- Beehive pallet spawners
+        local specBeehive = placeable.spec_beehivePalletSpawner
+        if specBeehive ~= nil
+            and specBeehive.palletSpawner ~= nil
+            and specBeehive.palletSpawner.spawnPlaces ~= nil then
+            for _, place in ipairs(specBeehive.palletSpawner.spawnPlaces) do
+                table.insert(spawnPlaces, place)
             end
         end
     end
 
-    return spawnAreas
+    rcDebug(("Found %d pallet spawn places on map"):format(#spawnPlaces))
+
+    return spawnPlaces
 end
+
+
 
 function FarmCleanUp:cleanPallets()
     rcDebug("FarmCleanUp - cleanPallets")
@@ -392,8 +396,6 @@ function FarmCleanUp:cleanPallets()
     FarmCleanUp:prepareLooseItems()
 
     local numRemoved = 0
-
-    local mission = g_currentMission
 
     local function getVehicleIsPallet(vehicle)
 
@@ -417,7 +419,7 @@ function FarmCleanUp:cleanPallets()
         return false
     end
 
-    local spawnAreas = FarmCleanUp:getSpawnAreas()
+    local spawnPlaces = FarmCleanUp:getSpawnAreas()
 
     local removedPallets = {}
 
@@ -429,22 +431,16 @@ function FarmCleanUp:cleanPallets()
 
         if vehicle.isa ~= nil and vehicle:isa(Vehicle) and vehicle.trainSystem == nil then
             if getVehicleIsPallet(vehicle) then
-                local x, _, z = getWorldTranslation(vehicle.rootNode)
+                local x, y, z = getWorldTranslation(vehicle.rootNode)
                 -- Check if pallet is in a spawn area, if so then ignore it.
-                local withinRadius = false
-                if #spawnAreas > 0 then
-                    for _, s in pairs(spawnAreas) do
-                        -- rcDebug(string.format("Checking pallet at (%.2f, %.2f) against spawn at (%.2f, %.2f) radius %.2f", x, z, s.x, s.z, s.radius))
-                        if FarmCleanUp:isPointWithinRadius(s.x, s.z, x, z, s.radius) then
-                            withinRadius = true
-                            break -- Exit loop early if inside any spawn area
-                        end
-                    end
+                local withinSpawn = false
+                if #spawnPlaces > 0 then
+                    withinSpawn = PlacementUtil.isInsidePlacementPlaces(spawnPlaces, x, y, z)
                 end
-                rcDebug(string.format("Pallet within radius: %s",withinRadius))
-                if withinRadius == false then
+                rcDebug(string.format("Pallet inside spawn place: %s", tostring(withinSpawn)))
+                if not withinSpawn then
                     local farmlandId = g_farmlandManager:getFarmlandIdAtWorldPosition(x,z)
-                    local baleData = {
+                    local palletData = {
                       id = numRemoved,
                       type = "pallet",
                       farmId = vehicle.ownerFarmId,
@@ -455,17 +451,17 @@ function FarmCleanUp:cleanPallets()
                       isMissionBale = false,
                       uniqueId = vehicle.uniqueId
                     }
-                    local checkItem = FarmCleanUp:checkItem(baleData)
+                    local checkItem = FarmCleanUp:checkItem(palletData)
                     if checkItem then
                         rcDebug("Removing Pallet: " .. vehicle.configFileName)
                         -- save the pallet to table
                         table.insert(removedPallets, {
-                          id = baleData.id,
-                          farmId = baleData.farmId,
-                          farmlandId = baleData.farmlandId,
-                          x = baleData.x,
-                          z = baleData.z,
-                          uniqueId = baleData.uniqueId
+                          id = palletData.id,
+                          farmId = palletData.farmId,
+                          farmlandId = palletData.farmlandId,
+                          x = palletData.x,
+                          z = palletData.z,
+                          uniqueId = palletData.uniqueId
                         })
                         -- g_currentMission.vehicleSystem:removeVehicle(vehicle)
                         vehicle:delete()
@@ -531,7 +527,7 @@ function FarmCleanUp:cleanBales()
     local removedBales = {}
 
     -- Gather spawn areas to ignore bales within them
-    local spawnAreas = FarmCleanUp:getSpawnAreas()
+    local spawnPlaces = FarmCleanUp:getSpawnAreas()
 
     local itemsToSave = g_currentMission.itemSystem.itemsToSave
     local balesToRemove = {}
@@ -551,19 +547,20 @@ function FarmCleanUp:cleanBales()
         -- rcDebug("Bale Data")
         -- rcDebug(balesToRemove[i])
         if balesToRemove[i].nodeId ~= nil then
-            local x, _, z = getWorldTranslation(balesToRemove[i].nodeId)
+            local x, y, z = getWorldTranslation(balesToRemove[i].nodeId)
             -- Check if bale is in a spawn area; if so, ignore it
-            local withinRadius = false
-            if #spawnAreas > 0 then
-                for _, s in pairs(spawnAreas) do
-                    if FarmCleanUp:isPointWithinRadius(s.x, s.z, x, z, s.radius) then
-                        withinRadius = true
-                        break
-                    end
-                end
+            local withinSpawn = false
+            if #spawnPlaces > 0 then
+                withinSpawn = PlacementUtil.isInsidePlacementPlaces(spawnPlaces, x, y, z)
+                -- for _, s in pairs(spawnPlaces) do
+                --     if FarmCleanUp:isPointWithinRadius(s.x, s.z, x, z, s.radius) then
+                --         withinSpawn = true
+                --         break
+                --     end
+                -- end
             end
-            rcDebug(string.format("Bale within radius: %s",withinRadius))
-            if withinRadius == false then
+            rcDebug(string.format("Bale inside spawn place: %s", tostring(withinSpawn)))
+            if not withinSpawn then
                 local farmlandId = g_farmlandManager:getFarmlandIdAtWorldPosition(x,z)
                 local baleData = {
                   id = numRemoved,

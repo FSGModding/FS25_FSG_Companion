@@ -102,26 +102,48 @@ end
 
 -- Register Player Interaction
 function FSGSettings:updateActionEvents()
-  if not g_currentMission:getIsServer() and g_currentMission:getIsClient() == true and g_inputBinding ~= nil then
-    -- if self.actionEventId == nil then
-      local _, actionEventId = g_inputBinding:registerActionEvent('FSG_MENU', self, FSGSettings.actionAdditionalInfo_openGui, false, true, false, true)
-      if actionEventId ~= nil then
+    -- Only clients, never dedi
+    if g_isDedicatedServer or g_inputBinding == nil then
+        return
+    end
+
+    if g_currentMission == nil or not g_currentMission:getIsClient() then
+        return
+    end
+
+    -- If we had a previous action event, remove it first
+    if self.actionEventId ~= nil and g_inputBinding.removeActionEvent ~= nil then
+        g_inputBinding:removeActionEvent(self.actionEventId)
+        self.actionEventId = nil
+    end
+
+    local _, actionEventId = g_inputBinding:registerActionEvent(
+        "FSG_MENU",
+        self,
+        FSGSettings.actionAdditionalInfo_openGui,
+        false,  -- triggerDown
+        true,   -- triggerUp
+        false,  -- triggerAlways
+        true    -- startActive
+    )
+
+    if actionEventId ~= nil then
         g_inputBinding:setActionEventTextPriority(actionEventId, GS_PRIO_VERY_LOW)
         g_inputBinding:setActionEventText(actionEventId, g_i18n:getText("FSG_MENU"))
         self.actionEventId = actionEventId
-      end
-    -- end
-  end
+    end
 end
 
+
 function FSGSettings:removeActionEvents()
-  if self.actionEventId ~= nil then
-    if g_inputBinding ~= nil and g_inputBinding.removeActionEvent ~= nil then
-      g_inputBinding:removeActionEvent(self.actionEventId)
+    if self.actionEventId ~= nil then
+        if g_inputBinding ~= nil and g_inputBinding.removeActionEvent ~= nil then
+            g_inputBinding:removeActionEvent(self.actionEventId)
+        end
+        self.actionEventId = nil
     end
-    self.actionEventId = nil
-  end
 end
+
 
 -- Load the gui
 function FSGSettings:actionAdditionalInfo_openGui(actionName, keyStatus, arg3, arg4, arg5)
@@ -401,6 +423,14 @@ function FSGSettings:onSaveComplete()
   g_fsgSettings.settings:saveSettings()
 
 end
+
+function FSGSettings:delete()
+    if self.actionEventId ~= nil and g_inputBinding ~= nil then
+        g_inputBinding:removeActionEvent(self.actionEventId)
+        self.actionEventId = nil
+    end
+end
+
 
 -- Disable the sleep stuffs
 function FSGSettings:disableSleep()

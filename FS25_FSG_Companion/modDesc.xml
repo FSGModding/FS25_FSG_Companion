@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
-<modDesc descVersion="104">
+<modDesc descVersion="105">
     <author>FSG Modding - FSG DaVaR</author>
     <contributors>JTSage</contributors>
-    <version>1.5.0.0</version>
+    <version>1.9.0.1</version>
     <title>
       <en>FSG Companion</en>
     </title>
@@ -16,10 +16,7 @@ FSG Modding
 https://www.fsgmodding.com
 
 FSG Realism
-https://www.fsgrealism.com
-
-Hardcore Realistic Farming
-https://www.playhrf.com]]></en>
+https://www.fsgrealism.com]]></en>
     </description>
     <iconFilename>icon_FSGCompanion.dds</iconFilename>
     <multiplayer supported="true" />
