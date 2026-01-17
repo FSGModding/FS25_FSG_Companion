@@ -480,6 +480,9 @@ function RemoteCommands:moneyTransfer(commandData)
             amount = amount,
             after  = afterAmount,
           }
+          if g_currentMission ~= nil and g_currentMission:getIsServer() then
+            g_currentMission:saveSavegame()
+          end
           return transferData
         else 
           -- Return the transfer data
@@ -621,6 +624,9 @@ function RemoteCommands:createFarm(commandData)
 
         local confirmData = {}
         if newFarmId ~= nil then 
+          if g_currentMission ~= nil and g_currentMission:getIsServer() then
+            g_currentMission:saveSavegame()
+          end
           -- Send new farm data back to website log
           confirmData = {
             farmId = newFarmId,
@@ -875,6 +881,9 @@ function RemoteCommands:purchaseFarmland(commandData)
   if g_farmlandManager:setLandOwnership(commandData.farmlandId, commandData.farmId) then
     rcDebug("Farmland Ownership Set.  Update Clients.")
     FarmlandUpdateEvent.sendEvent(commandData.farmlandId, commandData.farmId)
+    if g_currentMission ~= nil and g_currentMission:getIsServer() then
+      g_currentMission:saveSavegame()
+    end
     -- Send data back to website
     local confirmData = {
       farmlandId = commandData.farmlandId,
