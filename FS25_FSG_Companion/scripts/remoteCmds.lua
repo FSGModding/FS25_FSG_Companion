@@ -29,7 +29,7 @@ function RemoteCommands.new(mission, i18n, modDirectory, modName)
   self.files                  = {}
   self.fileTimestamps         = {}
 
-        return self
+  return self
 end
 
 function RemoteCommands:update(dt)
