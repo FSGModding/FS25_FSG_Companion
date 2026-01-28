@@ -90,7 +90,6 @@ end
 
 function FCSettingEvent:run(connection)
 	if not connection:getIsServer() then
-    print("FCSettingEvent:run:g_server:broadcastEvent - data being sent from client to server - Update server then update all clients.")
 		FCSettingEvent.sendEvent(self.valueType, self.valueName, self.valueData)
   end
   -- Save data to xml file if global var is set
