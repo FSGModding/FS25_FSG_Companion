@@ -33,11 +33,11 @@ function RemoteCommands.new(mission, i18n, modDirectory, modName)
 end
 
 function RemoteCommands:update(dt)
-        if not g_server and not g_dedicatedServer then
-                return
-        end
+  if not g_server and not g_dedicatedServer then
+    return
+  end
 
-        if g_updateLoopIndex % self.setValueTimerFrequency == 0 then
+  if g_updateLoopIndex % self.setValueTimerFrequency == 0 then
     getFiles(self.commandInboxDir, "checkNewFiles", self)
   end
 
@@ -345,37 +345,37 @@ function RemoteCommands:runNewFiles(file)
           -- create confirmation command
           rcDebug("Creating confirmation file.")
           local confirmationFile = self.commandOutboxDir .. "confirm-" .. commandData.id .. "-" .. tostring(commandData.command) .. "-" .. math.random(9999) .. math.random(9999) .. ".xml"
-          xmlFile = createXMLFile(key, confirmationFile, key)
-          setXMLInt(xmlFile, key .. ".command#id", tonumber(commandData.id))
-          setXMLString(xmlFile, key .. ".command#command", tostring(commandData.command))
+          local xmlFileConf = createXMLFile(key, confirmationFile, key)
+          setXMLInt(xmlFileConf, key .. ".command#id", tonumber(commandData.id))
+          setXMLString(xmlFileConf, key .. ".command#command", tostring(commandData.command))
           if transferData ~= nil then
             if transferData.before ~= nil then 
-              setXMLString(xmlFile, key .. ".command#before", tostring(transferData.before))
+              setXMLString(xmlFileConf, key .. ".command#before", tostring(transferData.before))
             end 
             if transferData.amount ~= nil then
-              setXMLInt(xmlFile, key .. ".command#amount", tonumber(transferData.amount))
+              setXMLInt(xmlFileConf, key .. ".command#amount", tonumber(transferData.amount))
             end 
             if transferData.after ~= nil then
-              setXMLInt(xmlFile, key .. ".command#after", tonumber(transferData.after))
+              setXMLInt(xmlFileConf, key .. ".command#after", tonumber(transferData.after))
             end
             if transferData.errorMsg ~= nil then
-              setXMLString(xmlFile, key .. ".command#errorMsg", tostring(transferData.errorMsg))
+              setXMLString(xmlFileConf, key .. ".command#errorMsg", tostring(transferData.errorMsg))
             end
             if transferData.info ~= nil then
-              setXMLString(xmlFile, key .. ".command#info", tostring(transferData.info))
+              setXMLString(xmlFileConf, key .. ".command#info", tostring(transferData.info))
             end
             if transferData.farmlandId ~= nil then
-              setXMLString(xmlFile, key .. ".command#farmlandId", tostring(transferData.farmlandId))
+              setXMLString(xmlFileConf, key .. ".command#farmlandId", tostring(transferData.farmlandId))
             end
           end
           if commandData.farmId ~= nil and tonumber(commandData.farmId) ~= nil then
-            setXMLInt(xmlFile, key .. ".command#farmId", tonumber(commandData.farmId))
+            setXMLInt(xmlFileConf, key .. ".command#farmId", tonumber(commandData.farmId))
           elseif transferData ~= nil and transferData.farmId ~= nil and tonumber(transferData.farmId) ~= nil then
-            setXMLInt(xmlFile, key .. ".command#farmId", tonumber(transferData.farmId))
+            setXMLInt(xmlFileConf, key .. ".command#farmId", tonumber(transferData.farmId))
           end 
-          setXMLString(xmlFile, key .. ".command#confirmation", "true")
-          saveXMLFile(xmlFile)
-          delete(xmlFile)
+          setXMLString(xmlFileConf, key .. ".command#confirmation", "true")
+          saveXMLFile(xmlFileConf)
+          delete(xmlFileConf)
 
           print(string.format("  Info: FSG Companion Command File Successfully Processed.  File: %s",(tostring(file))))
 
@@ -387,13 +387,15 @@ function RemoteCommands:runNewFiles(file)
             deleteFile(loadFile)
             self.fileTimestamps[file] = nil
           end
-          delete(xmlFile)
         end
       else
         -- Command file already accepted.  Delete it.
         print(string.format("  Info: FSG Companion Command File Already Processed.  Deleting file: %s",(tostring(file))))
         deleteFile(loadFile)
-        delete(xmlFile)
+      end
+      if xmlFile ~= nil then
+        xmlFile:delete()
+        xmlFile = nil
       end
     end 
   end
