@@ -23,393 +23,429 @@ function RemoteCommands.new(mission, i18n, modDirectory, modName)
   self.i18n                   = i18n
   self.modDirectory           = modDirectory
   self.modName                = modName
-  self.setValueTimerFrequency = 600
+  self.scanIntervalMs         = 5000
+  self.scanTimerMs            = 0
   self.commandInboxDir        = getUserProfileAppPath()  .. "modSettings/FS25_FSG_Companion/commands/inbox/"
   self.commandOutboxDir       = getUserProfileAppPath()  .. "modSettings/FS25_FSG_Companion/commands/outbox/"
   self.files                  = {}
   self.fileTimestamps         = {}
+  self.saveCoolDownMs         = 60000
+  self.saveQueued             = false
+  self.saveTimerMs            = 0
+  self.processingFiles        = {}
 
   return self
 end
 
 function RemoteCommands:update(dt)
-  if not g_server and not g_dedicatedServer then
+  if g_currentMission == nil or not g_currentMission:getIsServer() then
     return
   end
 
-  if g_updateLoopIndex % self.setValueTimerFrequency == 0 then
+  self.scanTimerMs = self.scanTimerMs + dt
+  if self.scanTimerMs >= self.scanIntervalMs then
+    self.scanTimerMs = self.scanTimerMs - self.scanIntervalMs
     getFiles(self.commandInboxDir, "checkNewFiles", self)
   end
 
   -- Periodically clean up stale timestamp entries to avoid memory growth
-  self:cleanOldFileTimestamps(3600)
+  self.cleanupTimerMs = (self.cleanupTimerMs or 0) + dt
+  if self.cleanupTimerMs >= 60000 then
+    self.cleanupTimerMs = 0
+    self:cleanOldFileTimestamps(3600)
+  end
+
+  if self.saveQueued then
+    self.saveTimerMs = self.saveTimerMs + dt
+    if self.saveTimerMs >= self.saveCoolDownMs then
+      self.saveTimerMs = 0
+      self.saveQueued = false
+      g_currentMission:saveSavegame()
+    end
+  end
+end
+
+function RemoteCommands:queueSave()
+  if not self.saveQueued then
+    self.saveQueued = true
+    self.saveTimerMs = 0
+  end
 end
 
 function RemoteCommands:checkNewFiles(filename, isDirectory)
-  rcDebug("RC-checkNewFiles")
-  if isDirectory then 
-    return
-  end
-  if filename ~= nil then
-    -- Check to see if inbox is enabled
-    local inboxActive = g_fsgSettings.settings:getValue("inboxActive")
-	  if inboxActive then
-      self:runNewFiles(filename)
-    end
+  if filename == nil or isDirectory then return end
+  if filename:sub(-4) ~= ".xml" then return end
+  -- Check to see if inbox is enabled
+  if g_fsgSettings == nil or g_fsgSettings.settings == nil then return end
+  local inboxActive = g_fsgSettings.settings:getValue("inboxActive")
+  if inboxActive then
+    self:runNewFiles(filename)
   end
 end
 
 -- Checks for incoming new commands from bot to server
 function RemoteCommands:runNewFiles(file)
-  rcDebug("RC-runNewFiles")
-  rcDebug(file)
+  if file == nil then return end
+  if self.processingFiles[file] then return end
+  self.processingFiles[file] = true
 
-  if file ~= nil then
-
-    -- make sure file exists
+  local ok, err = pcall(function()
     local loadFile = self.commandInboxDir .. file
-    if ( fileExists (loadFile) ) then
+    if not fileExists(loadFile) then
+      return
+    end
 
-      local key = "commands"
+    local key = "commands"
 
-      local xmlFile = XMLFile.load(key, loadFile)
+    local xmlFile = XMLFile.load(key, loadFile)
 
-      local commandData = {}
-      local commandComplete = false
-      local transferData = nil
-      local command = nil
+    local commandData = {}
+    local commandComplete = false
+    local transferData = nil
+    local command = nil
 
-      -- Delete the file if not valid
-      if xmlFile == nil then
-        print(string.format("  Info: FSG Companion Command File Not Complete or Valid.  File: %s",(tostring(file))))
-        if self:isFileTooOld(file, 600) then
-          rcDebug("RemoteCommands: Deleting old invalid file (older than 10 min): " .. tostring(file))
-          deleteFile(loadFile)
-          self.fileTimestamps[file] = nil
-        else
-          rcDebug("RemoteCommands: Skipping file, not a valid XML yet: " .. tostring(file))
-        end
-        return false
+    -- Delete the file if not valid
+    if xmlFile == nil then
+      print(string.format("  Info: FSG Companion Command File Not Complete or Valid.  File: %s",(tostring(file))))
+      if self:isFileTooOld(file, 600) then
+        rcDebug("RemoteCommands: Deleting old invalid file (older than 10 min): " .. tostring(file))
+        deleteFile(loadFile)
+        self.fileTimestamps[file] = nil
+      else
+        rcDebug("RemoteCommands: Skipping file, not a valid XML yet: " .. tostring(file))
       end
+      return false
+    end
 
-      -- File valid - Remove from log
-      self.fileTimestamps[file] = nil
+    -- File valid - Remove from log
+    self.fileTimestamps[file] = nil
 
-      -- Check if file has already been processed
-      if g_GameLogs:InboxLog(file, xmlFile) then
+    -- Check if file has already been processed
+    if g_GameLogs:InboxLog(file, xmlFile) then
 
-        -- Get command data
-        xmlFile:iterate(key .. ".command", function (_, commandKey)
-          command = xmlFile:getString(commandKey .. "#command");
+      -- Get command data
+      xmlFile:iterate(key .. ".command", function (_, commandKey)
+        if commandComplete then
+          return
+        end
+        command = xmlFile:getString(commandKey .. "#command");
 
-          if command ~= nil then 
-            -- Start commands loop
-            rcDebug("Process Remote Command")
+        if command ~= nil then 
+          -- Start commands loop
+          rcDebug("Process Remote Command")
 
-            -- Send Chat command 
-            if command == "sendChat" then 
-              commandData = readCommandData(xmlFile, commandKey, {
-                id = "int",
-                command = "string",
-                fromUser = "string",
-                content = "string"
-              })
-              if commandData ~= nil then 
-                if RemoteCommands:runChatCommand(commandData) then
-                  commandComplete = true
-                end
-              end
-            -- Command that makes a user farm manager based on their farm id and unique user id
-            elseif command == "makeFarmManager" then 
-              commandData = readCommandData(xmlFile, commandKey, {
-                id = "int",
-                command = "string",
-                userNickname = "string",
-                farmId = "int",
-                uniqueUserId = "string"
-              })
-              if commandData ~= nil then 
-                if RemoteCommands:makeFarmManager(commandData) then
-                  commandComplete = true
-                end
-              end
-            -- Command that bands a user based on their unique user id
-            elseif command == "banUser" then 
-              commandData = readCommandData(xmlFile, commandKey, {
-                id = "int",
-                command = "string",
-                userNickname = "string",
-                uniqueUserId = "string"
-              })
-              if commandData ~= nil then 
-                transferData = RemoteCommands:banUser(commandData)
-                if transferData ~= nil then
-                  commandComplete = true
-                end
-              end
-            -- Command that bands a user based on their unique user id
-            elseif command == "unBanUser" then 
-              commandData = readCommandData(xmlFile, commandKey, {
-                id = "int",
-                command = "string",
-                userNickname = "string",
-                uniqueUserId = "string"
-              })
-              if commandData ~= nil then 
-                transferData = RemoteCommands:unBanUser(commandData)
-                if transferData ~= nil then
-                  commandComplete = true
-                end
-              end
-            -- Command that adds money for farm based on farm id
-            elseif command == "moneyTransfer" then
-              commandData = readCommandData(xmlFile, commandKey, {
-                id = "int",
-                command = "string",
-                farmId = "int",
-                amount = "int"
-              })
-              if commandData ~= nil then
-                transferData = RemoteCommands:moneyTransfer(commandData)
-                if transferData ~= nil then
-                  commandComplete = true
-                end
-              end
-            -- Command that triggers a savegame
-            elseif command == "saveGame" then
-              commandData = readCommandData(xmlFile, commandKey, {
-                id = "int",
-                command = "string"
-              })
-              if commandData ~= nil then
-                g_currentMission:saveSavegame()
+          -- Send Chat command 
+          if command == "sendChat" then 
+            commandData = readCommandData(xmlFile, commandKey, {
+              id = "int",
+              command = "string",
+              fromUser = "string",
+              content = "string"
+            })
+            if commandData ~= nil then 
+              if RemoteCommands:runChatCommand(commandData) then
                 commandComplete = true
               end
-            -- Commaand that creates a new farm
-            elseif command == "createFarm" then
-              commandData = readCommandData(xmlFile, commandKey, {
-                id = "int",
-                command = "string",
-                name = "string",
-                color = "int",
-                password = "string",
-                farmId = "int",
-                startMoney = "int"
-              })
-              if commandData ~= nil then
-                transferData = RemoteCommands:createFarm(commandData)
-                if transferData ~= nil then
-                  commandComplete = true
-                end
-              end
-            -- Commaand that creates a new farm
-            elseif command == "deleteFarm" then
-              commandData = readCommandData(xmlFile, commandKey, {
-                id = "int",
-                command = "string",
-                farmId = "int"
-              })
-              if commandData ~= nil then
-                transferData = RemoteCommands:deleteFarm(commandData)
-                if transferData ~= nil then
-                  commandComplete = true
-                end
-              end
-            -- Command that adds fill to coop silo
-            elseif command == "coopSiloStore" then
-              commandData = readCommandData(xmlFile, commandKey, {
-                id = "int",
-                command = "string",
-                farmId = "int",
-                fillType = "string",
-                amount = "int"
-              })
-              if commandData ~= nil then
-                transferData = RemoteCommands:coopSiloStore(commandData)
-                if transferData ~= nil then
-                  commandComplete = true
-                end
-              end
-            -- Command that adds pallet to coop silo
-            elseif command == "coopPalletStore" then
-              commandData = readCommandData(xmlFile, commandKey, {
-                id = "int",
-                command = "string",
-                farmId = "int",
-                configFileName = "string",
-                isBigBag = "string",
-                fillTypeName = "string",
-                fillLevel = "int",
-                configFillUnit = "int",
-                configFillVolume = "int",
-                ConfigTreeSaplingType = "int"
-              })
-              if commandData ~= nil then
-                transferData = RemoteCommands:coopPalletStore(commandData)
-                if transferData ~= nil then
-                  commandComplete = true
-                end
-              end
-            -- Command that adds bale to coop silo
-            elseif command == "coopBaleStore" then
-              commandData = readCommandData(xmlFile, commandKey, {
-                id = "int",
-                command = "string",
-                farmId = "int",
-                xmlFilename = "string",
-                fillLevel = "string",
-                wrappingState = "string",
-                supportsWrapping = "string",
-                baleValueScale = "string",
-                wrappingColor = "string",
-                fillTypeName = "string",
-                isFermenting = "string",
-                fermentationTime = "string"
-              })
-              if commandData ~= nil then
-                transferData = RemoteCommands:coopBaleStore(commandData)
-                if transferData ~= nil then
-                  commandComplete = true
-                end
-              end
-            -- Commaand that sets ownership of farmland
-            elseif command == "purchaseFarmland" then
-              commandData = readCommandData(xmlFile, commandKey, {
-                id = "int",
-                command = "string",
-                farmlandId = "int",
-                farmId = "int"
-              })
-              if commandData ~= nil then
-                transferData = RemoteCommands:purchaseFarmland(commandData)
-                if transferData ~= nil then
-                  commandComplete = true
-                end
-              end
-            -- Commaand that removes ownership of farmland
-            elseif command == "sellFarmland" then
-              commandData = readCommandData(xmlFile, commandKey, {
-                id = "int",
-                command = "string",
-                farmlandId = "int",
-                farmId = "int"
-              })
-              if commandData ~= nil then
-                transferData = RemoteCommands:sellFarmland(commandData)
-                if transferData ~= nil then
-                  commandComplete = true
-                end
-              end
-            -- Add elseif above here for another command
-            -- End of command watch
             end
-            -- End Commands loop
-          end
-
-        end) -- end xmlFile:iterate
-
-        -- Check to see if not a direct command file
-        if command == nil then
-          rcDebug("Getting Command From Filename")
-          local fileSplit = string.split(file, "-")
-          if fileSplit ~= nil and fileSplit[2] ~= nil then 
-            local id = 0
-            if fileSplit[6] ~= nil then 
-              id = fileSplit[6]
+          -- Command that makes a user farm manager based on their farm id and unique user id
+          elseif command == "makeFarmManager" then 
+            commandData = readCommandData(xmlFile, commandKey, {
+              id = "int",
+              command = "string",
+              userNickname = "string",
+              farmId = "int",
+              uniqueUserId = "string"
+            })
+            if commandData ~= nil then 
+              if RemoteCommands:makeFarmManager(commandData) then
+                commandComplete = true
+              end
             end
-            command = fileSplit[2]
-            commandData = {
-              serverId = fileSplit[1],
-              command = fileSplit[2],
-              vehicleId = fileSplit[3],
-              randomNum = fileSplit[4],
-              farmId = fileSplit[5],
-              id = id,
-            }
-          end
-          -- Command that add vehicle to game from website
-          if command == "storeVehicle" then
-            -- Run the vehicleStorage load function
-            rcDebug("Command: storeVehicle")
-            transferData = VehicleStorage:loadVehicle(loadFile)
-            commandData.id = commandData.vehicleId
-            if transferData ~= nil then
+          -- Command that bands a user based on their unique user id
+          elseif command == "banUser" then 
+            commandData = readCommandData(xmlFile, commandKey, {
+              id = "int",
+              command = "string",
+              userNickname = "string",
+              uniqueUserId = "string"
+            })
+            if commandData ~= nil then 
+              transferData = RemoteCommands:banUser(commandData)
+              if transferData ~= nil then
+                commandComplete = true
+              end
+            end
+          -- Command that bands a user based on their unique user id
+          elseif command == "unBanUser" then 
+            commandData = readCommandData(xmlFile, commandKey, {
+              id = "int",
+              command = "string",
+              userNickname = "string",
+              uniqueUserId = "string"
+            })
+            if commandData ~= nil then 
+              transferData = RemoteCommands:unBanUser(commandData)
+              if transferData ~= nil then
+                commandComplete = true
+              end
+            end
+          -- Command that adds money for farm based on farm id
+          elseif command == "moneyTransfer" then
+            commandData = readCommandData(xmlFile, commandKey, {
+              id = "int",
+              command = "string",
+              farmId = "int",
+              amount = "int"
+            })
+            if commandData ~= nil then
+              transferData = RemoteCommands:moneyTransfer(commandData)
+              if transferData ~= nil then
+                commandComplete = true
+              end
+            end
+          -- Command that triggers a savegame
+          elseif command == "saveGame" then
+            commandData = readCommandData(xmlFile, commandKey, {
+              id = "int",
+              command = "string"
+            })
+            if commandData ~= nil then
+              self:queueSave()
               commandComplete = true
             end
-          -- Add elseif here for another command
+          -- Commaand that creates a new farm
+          elseif command == "createFarm" then
+            commandData = readCommandData(xmlFile, commandKey, {
+              id = "int",
+              command = "string",
+              name = "string",
+              color = "int",
+              password = "string",
+              farmId = "int",
+              startMoney = "int"
+            })
+            if commandData ~= nil then
+              transferData = RemoteCommands:createFarm(commandData)
+              if transferData ~= nil then
+                commandComplete = true
+              end
+            end
+          -- Commaand that creates a new farm
+          elseif command == "deleteFarm" then
+            commandData = readCommandData(xmlFile, commandKey, {
+              id = "int",
+              command = "string",
+              farmId = "int"
+            })
+            if commandData ~= nil then
+              transferData = RemoteCommands:deleteFarm(commandData)
+              if transferData ~= nil then
+                commandComplete = true
+              end
+            end
+          -- Command that adds fill to coop silo
+          elseif command == "coopSiloStore" then
+            commandData = readCommandData(xmlFile, commandKey, {
+              id = "int",
+              command = "string",
+              farmId = "int",
+              fillType = "string",
+              amount = "int"
+            })
+            if commandData ~= nil then
+              transferData = RemoteCommands:coopSiloStore(commandData)
+              if transferData ~= nil then
+                commandComplete = true
+              end
+            end
+          -- Command that adds pallet to coop silo
+          elseif command == "coopPalletStore" then
+            commandData = readCommandData(xmlFile, commandKey, {
+              id = "int",
+              command = "string",
+              farmId = "int",
+              configFileName = "string",
+              isBigBag = "string",
+              fillTypeName = "string",
+              fillLevel = "int",
+              configFillUnit = "int",
+              configFillVolume = "int",
+              ConfigTreeSaplingType = "int"
+            })
+            if commandData ~= nil then
+              transferData = RemoteCommands:coopPalletStore(commandData)
+              if transferData ~= nil then
+                commandComplete = true
+              end
+            end
+          -- Command that adds bale to coop silo
+          elseif command == "coopBaleStore" then
+            commandData = readCommandData(xmlFile, commandKey, {
+              id = "int",
+              command = "string",
+              farmId = "int",
+              xmlFilename = "string",
+              fillLevel = "string",
+              wrappingState = "string",
+              supportsWrapping = "string",
+              baleValueScale = "string",
+              wrappingColor = "string",
+              fillTypeName = "string",
+              isFermenting = "string",
+              fermentationTime = "string"
+            })
+            if commandData ~= nil then
+              transferData = RemoteCommands:coopBaleStore(commandData)
+              if transferData ~= nil then
+                commandComplete = true
+              end
+            end
+          -- Commaand that sets ownership of farmland
+          elseif command == "purchaseFarmland" then
+            commandData = readCommandData(xmlFile, commandKey, {
+              id = "int",
+              command = "string",
+              farmlandId = "int",
+              farmId = "int"
+            })
+            if commandData ~= nil then
+              transferData = RemoteCommands:purchaseFarmland(commandData)
+              if transferData ~= nil then
+                commandComplete = true
+              end
+            end
+          -- Commaand that removes ownership of farmland
+          elseif command == "sellFarmland" then
+            commandData = readCommandData(xmlFile, commandKey, {
+              id = "int",
+              command = "string",
+              farmlandId = "int",
+              farmId = "int"
+            })
+            if commandData ~= nil then
+              transferData = RemoteCommands:sellFarmland(commandData)
+              if transferData ~= nil then
+                commandComplete = true
+              end
+            end
+          -- Add elseif above here for another command
+          -- End of command watch
           end
+          -- End Commands loop
         end
 
-        -- check if the command completed
-        if commandComplete then
-          -- create confirmation command
-          rcDebug("Creating confirmation file.")
-          local confirmationFile = self.commandOutboxDir .. "confirm-" .. commandData.id .. "-" .. tostring(commandData.command) .. "-" .. math.random(9999) .. math.random(9999) .. ".xml"
-          local xmlFileConf = createXMLFile(key, confirmationFile, key)
-          setXMLInt(xmlFileConf, key .. ".command#id", tonumber(commandData.id))
-          setXMLString(xmlFileConf, key .. ".command#command", tostring(commandData.command))
+      end) -- end xmlFile:iterate
+
+      -- Check to see if not a direct command file
+      if command == nil then
+        rcDebug("Getting Command From Filename")
+        local fileSplit = string.split(file, "-")
+        if fileSplit ~= nil and fileSplit[2] ~= nil then 
+          local id = 0
+          if fileSplit[6] ~= nil then 
+            id = fileSplit[6]
+          end
+          command = fileSplit[2]
+          commandData = {
+            serverId = fileSplit[1],
+            command = fileSplit[2],
+            vehicleId = fileSplit[3],
+            randomNum = fileSplit[4],
+            farmId = fileSplit[5],
+            id = id,
+          }
+        end
+        -- Command that add vehicle to game from website
+        if command == "storeVehicle" then
+          -- Run the vehicleStorage load function
+          rcDebug("Command: storeVehicle")
+          transferData = VehicleStorage:loadVehicle(loadFile)
+          commandData.id = commandData.vehicleId
           if transferData ~= nil then
-            if transferData.before ~= nil then 
-              setXMLString(xmlFileConf, key .. ".command#before", tostring(transferData.before))
-            end 
-            if transferData.amount ~= nil then
-              setXMLInt(xmlFileConf, key .. ".command#amount", tonumber(transferData.amount))
-            end 
-            if transferData.after ~= nil then
-              setXMLInt(xmlFileConf, key .. ".command#after", tonumber(transferData.after))
-            end
-            if transferData.errorMsg ~= nil then
-              setXMLString(xmlFileConf, key .. ".command#errorMsg", tostring(transferData.errorMsg))
-            end
-            if transferData.info ~= nil then
-              setXMLString(xmlFileConf, key .. ".command#info", tostring(transferData.info))
-            end
-            if transferData.farmlandId ~= nil then
-              setXMLString(xmlFileConf, key .. ".command#farmlandId", tostring(transferData.farmlandId))
-            end
+            commandComplete = true
           end
-          if commandData.farmId ~= nil and tonumber(commandData.farmId) ~= nil then
-            setXMLInt(xmlFileConf, key .. ".command#farmId", tonumber(commandData.farmId))
-          elseif transferData ~= nil and transferData.farmId ~= nil and tonumber(transferData.farmId) ~= nil then
-            setXMLInt(xmlFileConf, key .. ".command#farmId", tonumber(transferData.farmId))
+        -- Add elseif here for another command
+        end
+      end
+
+      -- check if the command completed
+      if commandComplete then
+        -- create confirmation command
+        rcDebug("Creating confirmation file.")
+        local cmdId = tonumber(commandData.id) or 0
+        local cmdName = tostring(commandData.command or "unknown")
+        local confirmationFile = self.commandOutboxDir .. "confirm-" .. cmdId .. "-" .. tostring(cmdName) .. "-" .. math.random(9999) .. math.random(9999) .. ".xml"
+        local xmlFileConf = createXMLFile(key, confirmationFile, key)
+        setXMLInt(xmlFileConf, key .. ".command#id", tonumber(cmdId))
+        setXMLString(xmlFileConf, key .. ".command#command", tostring(cmdName))
+        if transferData ~= nil then
+          if transferData.before ~= nil then 
+            setXMLString(xmlFileConf, key .. ".command#before", tostring(transferData.before))
           end 
-          setXMLString(xmlFileConf, key .. ".command#confirmation", "true")
-          saveXMLFile(xmlFileConf)
-          delete(xmlFileConf)
-
-          print(string.format("  Info: FSG Companion Command File Successfully Processed.  File: %s",(tostring(file))))
-
-          -- delete the command file
-          deleteFile(loadFile)
-        else
-          if self:isFileTooOld(file, 600) then
-            rcDebug("RemoteCommands: Deleting stale command file (older than 10 min): " .. tostring(file))
-            deleteFile(loadFile)
-            self.fileTimestamps[file] = nil
+          if transferData.amount ~= nil then
+            setXMLInt(xmlFileConf, key .. ".command#amount", tonumber(transferData.amount))
+          end 
+          if transferData.after ~= nil then
+            setXMLInt(xmlFileConf, key .. ".command#after", tonumber(transferData.after))
+          end
+          if transferData.errorMsg ~= nil then
+            setXMLString(xmlFileConf, key .. ".command#errorMsg", tostring(transferData.errorMsg))
+          end
+          if transferData.info ~= nil then
+            setXMLString(xmlFileConf, key .. ".command#info", tostring(transferData.info))
+          end
+          if transferData.farmlandId ~= nil then
+            setXMLString(xmlFileConf, key .. ".command#farmlandId", tostring(transferData.farmlandId))
           end
         end
-      else
-        -- Command file already accepted.  Delete it.
-        print(string.format("  Info: FSG Companion Command File Already Processed.  Deleting file: %s",(tostring(file))))
+        if commandData.farmId ~= nil and tonumber(commandData.farmId) ~= nil then
+          setXMLInt(xmlFileConf, key .. ".command#farmId", tonumber(commandData.farmId))
+        elseif transferData ~= nil and transferData.farmId ~= nil and tonumber(transferData.farmId) ~= nil then
+          setXMLInt(xmlFileConf, key .. ".command#farmId", tonumber(transferData.farmId))
+        end 
+        setXMLString(xmlFileConf, key .. ".command#confirmation", "true")
+        saveXMLFile(xmlFileConf)
+        delete(xmlFileConf)
+
+        print(string.format("  Info: FSG Companion Command File Successfully Processed.  File: %s",(tostring(file))))
+
+        -- delete the command file
         deleteFile(loadFile)
+      else
+        if self:isFileTooOld(file, 600) then
+          rcDebug("RemoteCommands: Deleting stale command file (older than 10 min): " .. tostring(file))
+          deleteFile(loadFile)
+          self.fileTimestamps[file] = nil
+        end
       end
-      if xmlFile ~= nil then
-        xmlFile:delete()
-        xmlFile = nil
-      end
-    end 
+    else
+      -- Command file already accepted.  Delete it.
+      print(string.format("  Info: FSG Companion Command File Already Processed.  Deleting file: %s",(tostring(file))))
+      deleteFile(loadFile)
+    end
+    if xmlFile ~= nil then
+      xmlFile:delete()
+      xmlFile = nil
+    end
+
+  end)
+
+  if not ok then
+    print(("RemoteCommands: error processing %s: %s"):format(tostring(file), tostring(err)))
   end
+
+  self.processingFiles[file] = nil
 end
 
 
--- chat command funciton 
+-- chat command function 
 function RemoteCommands:runChatCommand(commandData)
   rcDebug("RemoteCommands:runChatCommand")
   -- Send chat message to multiplayer chat
   if commandData ~= nil then
     local fromUser = commandData.fromUser
     local content = commandData.content
-    if g_server ~= nil and g_dedicatedServer ~= nil and fromUser ~= nil and content ~= nil then
+    if g_currentMission:getIsServer() and fromUser ~= nil and content ~= nil then
         g_server:broadcastEvent(ChatEvent.new(content,"Discord: " .. fromUser,FarmManager.SPECTATOR_FARM_ID,0))
         return true
     end
@@ -483,7 +519,7 @@ function RemoteCommands:moneyTransfer(commandData)
             after  = afterAmount,
           }
           if g_currentMission ~= nil and g_currentMission:getIsServer() then
-            g_currentMission:saveSavegame()
+            self:queueSave()
           end
           return transferData
         else 
@@ -627,7 +663,7 @@ function RemoteCommands:createFarm(commandData)
         local confirmData = {}
         if newFarmId ~= nil then 
           if g_currentMission ~= nil and g_currentMission:getIsServer() then
-            g_currentMission:saveSavegame()
+            self:queueSave()
           end
           -- Send new farm data back to website log
           confirmData = {
@@ -884,7 +920,7 @@ function RemoteCommands:purchaseFarmland(commandData)
     rcDebug("Farmland Ownership Set.  Update Clients.")
     FarmlandUpdateEvent.sendEvent(commandData.farmlandId, commandData.farmId)
     if g_currentMission ~= nil and g_currentMission:getIsServer() then
-      g_currentMission:saveSavegame()
+      self:queueSave()
     end
     -- Send data back to website
     local confirmData = {
