@@ -857,8 +857,8 @@ function RemoteCommands:coopBaleStore(commandData)
       if commandData.wrappingColor == nil or commandData.wrappingColor == '' then
         commandData.wrappingColor = "1-1-1"
       end
-      if commandData.variationIndex == nil or commandData.variationIndex == '' then
-        commandData.variationIndex = "1"
+      if not commandData.variationIndex or tostring(commandData.variationIndex) == "" then
+          commandData.variationIndex = 1
       end
       g_coopSiloManager:addBale(commandData.farmId,commandData.xmlFilename,commandData.fillLevel,commandData.wrappingState,commandData.supportsWrapping,commandData.baleValueScale,commandData.wrappingColor,commandData.fillTypeName,commandData.isFermenting,commandData.fermentationTime,commandData.variationIndex)
       -- Send data back to website

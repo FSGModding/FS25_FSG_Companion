@@ -386,10 +386,10 @@ function CoopSiloManager:addBale(farmId,xmlFilename,fillLevel,wrappingState,supp
           abstractBale.baleAttributes.fermentationTime = 0
         end
       end
-      if variationIndex ~= nil then
-        abstractBale.baleAttributes.variationIndex = variationIndex
+      if variationIndex ~= nil and variationIndex ~= "" then
+        abstractBale.baleAttributes.variationIndex = tonumber(variationIndex)
       else
-        abstractBale.baleAttributes.variationIndex = "1"
+        abstractBale.baleAttributes.variationIndex = 1
       end
 
       g_farmManager:updateFarmStats(storage:getOwnerFarmId(), "storedBales", 1)
