@@ -458,33 +458,37 @@ function CoopSiloManager:setObjectInfos(superFunc, objectInfos, maxUnloadAmount)
   rcDebug("farmId")
   rcDebug(farmId)
 
-	self.objectInfos = objectInfos
 	self.maxUnloadAmount = maxUnloadAmount or self.maxUnloadAmount
 	local objectInfoTable = {}
+  local filteredObjectInfos = {}
 
 	for _, objectInfo in pairs(objectInfos) do
-    -- Remove ojbects that are not owned by current farm
-    -- rcDebug("objectInfo")
-    -- rcDebug(objectInfo)
+    local filteredObjects = {}
 
-    -- rcDebug("objectInfo.objects Table")
-    -- rcDebug(objectInfo.objects)
     for i = 1, #objectInfo.objects do
-      rcDebug("objectInfo.objects Single")
-      rcDebug(objectInfo.objects[i])
-      if (objectInfo.objects[i] ~= nil and objectInfo.objects[i].palletAttributes ~= nil and objectInfo.objects[i].palletAttributes.ownerFarmId ~= nil and objectInfo.objects[i].palletAttributes.ownerFarmId ~= farmId)
-      or (objectInfo.objects[i] ~= nil and objectInfo.objects[i].baleAttributes~= nil and objectInfo.objects[i].baleAttributes.ownerFarmId ~= nil and objectInfo.objects[i].baleAttributes.ownerFarmId ~= farmId)
-      or (objectInfo.objects[i] ~= nil and objectInfo.objects[i].palletAttributes ~= nil and objectInfo.objects[i].palletAttributes.farmId ~= nil and objectInfo.objects[i].palletAttributes.farmId ~= farmId)
-      or (objectInfo.objects[i] ~= nil and objectInfo.objects[i].baleAttributes~= nil and objectInfo.objects[i].baleAttributes.farmId ~= nil and objectInfo.objects[i].baleAttributes.farmId ~= farmId) then
-        table.remove(objectInfo.objects, i)
+      local object = objectInfo.objects[i]
+      if object ~= nil then
+        local objectFarmId = nil
+        if object.palletAttributes ~= nil then
+          objectFarmId = object.palletAttributes.ownerFarmId or object.palletAttributes.farmId
+        elseif object.baleAttributes ~= nil then
+          objectFarmId = object.baleAttributes.ownerFarmId or object.baleAttributes.farmId
+        end
+
+        if objectFarmId ~= nil and objectFarmId == farmId then
+          table.insert(filteredObjects, object)
+        end
       end
     end
 
-		if objectInfo.objects[1] ~= nil then
-			table.insert(objectInfoTable, objectInfo.objects[1]:getDialogText())
-		end
+    if #filteredObjects > 0 then
+      objectInfo.objects = filteredObjects
+      table.insert(filteredObjectInfos, objectInfo)
+      table.insert(objectInfoTable, objectInfo.objects[1]:getDialogText())
+    end
 	end
 
+  self.objectInfos = filteredObjectInfos
 	self.itemsElement:setTexts(objectInfoTable)
 	self.itemsElement:setState(1, true)
 
