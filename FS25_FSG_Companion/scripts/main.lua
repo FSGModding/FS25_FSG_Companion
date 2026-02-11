@@ -532,9 +532,6 @@ local function init()
   -- This one still needs work.  It allows player to pull out all players products.
   PlaceableObjectStorageActivatable.getIsActivatable = Utils.overwrittenFunction(PlaceableObjectStorageActivatable.getIsActivatable, CoopSiloManager.getIsActivatable)
 
-  -- Overwrite how object storage selection is displayed.  Limit to farm only stuffs.
-  ObjectStorageDialog.setObjectInfos = Utils.overwrittenFunction(ObjectStorageDialog.setObjectInfos, CoopSiloManager.setObjectInfos)
-
   -- Disable the ability to purchase land
   InGameMenuMapFrame.setMapInputContext = Utils.appendedFunction(InGameMenuMapFrame.setMapInputContext, Limits.setMapInputContext)
   InGameMenuMapFrame.onClickBuyFarmland = Utils.overwrittenFunction(InGameMenuMapFrame.onClickBuyFarmland, Limits.blockFarmland)
@@ -667,7 +664,45 @@ local function init()
     return g_currentMission.economyManager:getBuyPrice(self.storeItem) * 5
   end)
 
+  -- Overwrite how store items are loaded so we can remove base game items from the shop menus.
   StoreManager.loadItemsFromXML = Utils.overwrittenFunction(StoreManager.loadItemsFromXML, VehicleEdit.loadItemsFromXML)
+
+  -- Overwrite bales and pallets to include farmId ownership for each so that we can limit who can see what at the coop.
+  PlaceableObjectStorage.ABSTRACT_OBJECTS_BY_CLASS_NAME["Bale"].readStream = Utils.overwrittenFunction(PlaceableObjectStorage.ABSTRACT_OBJECTS_BY_CLASS_NAME["Bale"].readStream, CoopSiloManager.PlaceableObjectStorageBaleReadStream)
+  PlaceableObjectStorage.ABSTRACT_OBJECTS_BY_CLASS_NAME["Vehicle"].readStream = Utils.overwrittenFunction(PlaceableObjectStorage.ABSTRACT_OBJECTS_BY_CLASS_NAME["Vehicle"].readStream, CoopSiloManager.PlaceableObjectStorageVehicleReadStream)
+  PlaceableObjectStorage.ABSTRACT_OBJECTS_BY_CLASS_NAME["Bale"].writeStream = Utils.overwrittenFunction(PlaceableObjectStorage.ABSTRACT_OBJECTS_BY_CLASS_NAME["Bale"].writeStream, CoopSiloManager.PlaceableObjectStorageBaleWriteStream)
+  PlaceableObjectStorage.ABSTRACT_OBJECTS_BY_CLASS_NAME["Vehicle"].writeStream = Utils.overwrittenFunction(PlaceableObjectStorage.ABSTRACT_OBJECTS_BY_CLASS_NAME["Vehicle"].writeStream, CoopSiloManager.PlaceableObjectStorageVehicleWriteStream)
+
+  StoreItemUtil.getCosts = Utils.overwrittenFunction(StoreItemUtil.getCosts, function(storeItem, superFunc, configurations, costType)
+    rcDebug("StoreItemUtil.getCosts")
+    rcDebug(storeItem)
+    rcDebug(configurations)
+    rcDebug(costType)
+    if storeItem == nil then
+      return 0
+    end
+    local costs = storeItem[costType]
+    local costs = costs == nil and 0 or costs
+    if storeItem.configurations ~= nil then
+      for name, value in pairs(configurations) do
+        rcDebug(name)
+        rcDebug(value)
+        local nameConfig = storeItem.configurations[name]
+        if nameConfig ~= nil then
+          local valueConfig = nameConfig[value]
+          if valueConfig ~= nil then
+            local costTypeConfig = valueConfig[costType]
+            if costTypeConfig ~= nil then
+              rcDebug(costTypeConfig)
+              costs = costs + tonumber(costTypeConfig)
+            end
+          end
+        end
+      end
+    end
+    rcDebug(costs)
+    return costs
+  end)
 
 end
 

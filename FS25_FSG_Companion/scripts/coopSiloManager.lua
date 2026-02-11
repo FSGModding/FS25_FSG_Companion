@@ -435,7 +435,7 @@ function CoopSiloManager:createFillXml(farm,fillData)
 end
 
 function CoopSiloManager:getIsActivatable()
-  rcDebug("CoopSiloManager - getIsActivatable")
+  -- rcDebug("CoopSiloManager - getIsActivatable")
 
 	if self.objectStorage.spec_objectStorage.objectSpawn.isActive then
 		return false
@@ -444,52 +444,75 @@ function CoopSiloManager:getIsActivatable()
 	return true
 end
 
+function CoopSiloManager.PlaceableObjectStorageBaleReadStream(streamId, superFunc, connection)
+    rcDebug("CoopSiloManager.PlaceableObjectStorageBaleReadStream")
+    local bale = PlaceableObjectStorage.ABSTRACT_OBJECTS_BY_CLASS_NAME["Bale"].new()
+    bale.baleAttributes = {}
+    bale.baleAttributes.xmlFilename = NetworkUtil.convertFromNetworkFilename(streamReadString(streamId))
+    bale.baleAttributes.fillLevel = streamReadFloat32(streamId)
+    bale.baleAttributes.fillType = streamReadUIntN(streamId, FillTypeManager.SEND_NUM_BITS)
+    bale.baleAttributes.wrappingState = streamReadBool(streamId) and 1 or 0
+    bale.baleAttributes.variationIndex = streamReadUIntN(streamId, Bale.NUM_BITS_VARIATION) + 1
+    bale.baleAttributes.farmId = streamReadUIntN(streamId, FarmManager.FARM_ID_SEND_NUM_BITS)
+    return bale
+end
 
--- Overwrite the basegame function to only show objects that are owned by current farm.
-function CoopSiloManager:setObjectInfos(superFunc, objectInfos, maxUnloadAmount)
-  rcDebug("CoopSiloManager - getIsActivatable")
-	local farmId = FarmManager.SINGLEPLAYER_FARM_ID
-  if g_localPlayer and g_localPlayer.farmId ~= nil then
-    farmId = g_localPlayer.farmId
-  else
-    farmId = g_currentMission:getFarmId()
-  end
+function CoopSiloManager.PlaceableObjectStorageVehicleReadStream(streamId, superFunc, connection)
+    rcDebug("CoopSiloManager:PlaceableObjectStorageVehicleReadStream")
+    local pallet = PlaceableObjectStorage.ABSTRACT_OBJECTS_BY_CLASS_NAME["Vehicle"].new()
+    pallet.palletAttributes = {}
+    pallet.palletAttributes.configFileName = NetworkUtil.convertFromNetworkFilename(streamReadString(streamId))
+    pallet.palletAttributes.isBigBag = streamReadBool(streamId)
+    pallet.palletAttributes.ownerFarmId = streamReadUIntN(streamId, FarmManager.FARM_ID_SEND_NUM_BITS)
+    if streamReadBool(streamId) then
+      pallet.palletAttributes.fillLevel = streamReadFloat32(streamId)
+      pallet.palletAttributes.fillType = streamReadUIntN(streamId, FillTypeManager.SEND_NUM_BITS)
+      return pallet
+    else
+      pallet.palletAttributes.fillLevel = 0
+      pallet.palletAttributes.fillType = nil
+      return pallet
+    end
+end
 
-  rcDebug("farmId")
-  rcDebug(farmId)
-
-	self.maxUnloadAmount = maxUnloadAmount or self.maxUnloadAmount
-	local objectInfoTable = {}
-  local filteredObjectInfos = {}
-
-	for _, objectInfo in pairs(objectInfos) do
-    local filteredObjects = {}
-
-    for i = 1, #objectInfo.objects do
-      local object = objectInfo.objects[i]
-      if object ~= nil then
-        local objectFarmId = nil
-        if object.palletAttributes ~= nil then
-          objectFarmId = object.palletAttributes.ownerFarmId or object.palletAttributes.farmId
-        elseif object.baleAttributes ~= nil then
-          objectFarmId = object.baleAttributes.ownerFarmId or object.baleAttributes.farmId
-        end
-
-        if objectFarmId ~= nil and objectFarmId == farmId then
-          table.insert(filteredObjects, object)
-        end
+function CoopSiloManager.PlaceableObjectStorageBaleWriteStream(self, superFunc, streamId, connection)
+    rcDebug("CoopSiloManager:PlaceableObjectStorageBaleWriteStream")
+    if self.baleObject == nil then
+      streamWriteString(streamId, NetworkUtil.convertToNetworkFilename(self.baleAttributes.xmlFilename))
+      streamWriteFloat32(streamId, self.baleAttributes.fillLevel)
+      streamWriteUIntN(streamId, self.baleAttributes.fillType, FillTypeManager.SEND_NUM_BITS)
+      streamWriteBool(streamId, self.baleAttributes.wrappingState ~= 0)
+      streamWriteUIntN(streamId, self.baleAttributes.variationIndex - 1, Bale.NUM_BITS_VARIATION)
+      if self.baleAttributes.ownerFarmId ~= nil then
+        streamWriteUIntN(streamId, self.baleAttributes.ownerFarmId , FarmManager.FARM_ID_SEND_NUM_BITS)
+      else
+        streamWriteUIntN(streamId, self.baleAttributes.farmId , FarmManager.FARM_ID_SEND_NUM_BITS)
+      end
+    else
+      streamWriteString(streamId, NetworkUtil.convertToNetworkFilename(self.baleObject.xmlFilename))
+      streamWriteFloat32(streamId, self.baleObject:getFillLevel())
+      streamWriteUIntN(streamId, self.baleObject:getFillType(), FillTypeManager.SEND_NUM_BITS)
+      streamWriteBool(streamId, self.baleObject.wrappingState ~= 0)
+      streamWriteUIntN(streamId, self.baleObject.variationIndex - 1, Bale.NUM_BITS_VARIATION)
+      if self.baleObject.ownerFarmId ~= nil then
+        streamWriteUIntN(streamId, self.baleObject.ownerFarmId , FarmManager.FARM_ID_SEND_NUM_BITS)
+      else
+        streamWriteUIntN(streamId, self.baleObject.farmId , FarmManager.FARM_ID_SEND_NUM_BITS)
       end
     end
+end
 
-    if #filteredObjects > 0 then
-      objectInfo.objects = filteredObjects
-      table.insert(filteredObjectInfos, objectInfo)
-      table.insert(objectInfoTable, objectInfo.objects[1]:getDialogText())
+function CoopSiloManager.PlaceableObjectStorageVehicleWriteStream(self, superFunc, streamId, connection)
+    rcDebug("CoopSiloManager:PlaceableObjectStorageVehicleWriteStream")
+    streamWriteString(streamId, NetworkUtil.convertToNetworkFilename(self.palletAttributes.configFileName))
+    streamWriteBool(streamId, self.palletAttributes.isBigBag)
+    if self.palletAttributes.ownerFarmId ~= nil then
+      streamWriteUIntN(streamId, self.palletAttributes.ownerFarmId , FarmManager.FARM_ID_SEND_NUM_BITS)
+    else
+      streamWriteUIntN(streamId, self.palletAttributes.farmId , FarmManager.FARM_ID_SEND_NUM_BITS)
     end
-	end
-
-  self.objectInfos = filteredObjectInfos
-	self.itemsElement:setTexts(objectInfoTable)
-	self.itemsElement:setState(1, true)
-
+    if streamWriteBool(streamId, self.palletAttributes.fillType ~= nil) then
+      streamWriteFloat32(streamId, self.palletAttributes.fillLevel)
+      streamWriteUIntN(streamId, self.palletAttributes.fillType, FillTypeManager.SEND_NUM_BITS)
+    end
 end

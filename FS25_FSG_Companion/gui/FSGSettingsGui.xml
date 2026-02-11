@@ -23,9 +23,4 @@
       <Bitmap profile="fs25_buttonBoxSeparator" name="separator" />
     </Button>
   </BoxLayout>
-  <GUIProfiles>
-    <Profile name="uiInGameMenuHeaderDark" extends="uiInGameMenuHeader">
-      <imageColor value="$preset_colorGlass" />
-    </Profile>
-  </GUIProfiles>
 </GUI>

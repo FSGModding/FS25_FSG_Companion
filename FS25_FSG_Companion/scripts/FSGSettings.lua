@@ -69,7 +69,7 @@ end
 
 -- Run on map load
 -- FS25 - There is a new way to load menus.  Will have to come back to this.
-function FSGSettings:loadMap(filename)
+function FSGSettings:loadMap()
   rcDebug(" Info: FSGS-loadMap")
 
         self.settings:loadSettings()
@@ -79,20 +79,16 @@ function FSGSettings:loadMap(filename)
   end
 
   local FSGInfoFrame = FSGSettingsGuiInfoFrame:new(nil, g_i18n)
-  -- local FSGToolsFrame = FSGSettingsGuiToolsFrame:new(nil, g_i18n)
   local FSGSettingsFrame = FSGSettingsGuiSettingsFrame:new(nil, g_i18n)
   local FSGTimeSyncFrame = FSGSettingsGuiTimeSyncFrame:new(nil, g_i18n)
-  -- local FSGFarmTransactionsFrame = FSGSettingsFarmTransactionsFrame:new(nil, g_i18n)
 
   g_gui:loadProfiles(FSGSettings.modDirectory .. "gui/guiProfiles.xml")
 
   FSGSettings.gui = FSGSettingsGui:new(g_messageCenter, g_i18n, g_inputBinding)
 
   g_gui:loadGui(FSGSettings.modDirectory .. "gui/FSGSettingsGuiInfoFrame.xml", "FSGSettingsGuiInfoFrame", FSGInfoFrame, true)
-  -- g_gui:loadGui(FSGSettings.modDirectory .. "gui/FSGSettingsGuiToolsFrame.xml", "FSGSettingsGuiToolsFrame", FSGToolsFrame, true)
   g_gui:loadGui(FSGSettings.modDirectory .. "gui/FSGSettingsGuiSettingsFrame.xml", "FSGSettingsGuiSettingsFrame", FSGSettingsFrame, true)
   g_gui:loadGui(FSGSettings.modDirectory .. "gui/FSGSettingsGuiTimeSyncFrame.xml", "FSGSettingsGuiTimeSyncFrame", FSGTimeSyncFrame, true)
-  -- g_gui:loadGui(FSGSettings.modDirectory .. "gui/FSGSettingsFarmTransactionsFrame.xml", "FSGSettingsFarmTransactionsFrame", FSGFarmTransactionsFrame, true)
   g_gui:loadGui(FSGSettings.modDirectory .. "gui/FSGSettingsGui.xml", "FSGSettingsGui", FSGSettings.gui)
 
   -- Register the FSG menu action once the GUI files are loaded
