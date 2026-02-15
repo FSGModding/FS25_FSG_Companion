@@ -673,35 +673,16 @@ local function init()
   PlaceableObjectStorage.ABSTRACT_OBJECTS_BY_CLASS_NAME["Bale"].writeStream = Utils.overwrittenFunction(PlaceableObjectStorage.ABSTRACT_OBJECTS_BY_CLASS_NAME["Bale"].writeStream, CoopSiloManager.PlaceableObjectStorageBaleWriteStream)
   PlaceableObjectStorage.ABSTRACT_OBJECTS_BY_CLASS_NAME["Vehicle"].writeStream = Utils.overwrittenFunction(PlaceableObjectStorage.ABSTRACT_OBJECTS_BY_CLASS_NAME["Vehicle"].writeStream, CoopSiloManager.PlaceableObjectStorageVehicleWriteStream)
 
-  StoreItemUtil.getCosts = Utils.overwrittenFunction(StoreItemUtil.getCosts, function(storeItem, superFunc, configurations, costType)
-    rcDebug("StoreItemUtil.getCosts")
-    rcDebug(storeItem)
-    rcDebug(configurations)
-    rcDebug(costType)
-    if storeItem == nil then
-      return 0
-    end
-    local costs = storeItem[costType]
-    local costs = costs == nil and 0 or costs
-    if storeItem.configurations ~= nil then
-      for name, value in pairs(configurations) do
-        rcDebug(name)
-        rcDebug(value)
-        local nameConfig = storeItem.configurations[name]
-        if nameConfig ~= nil then
-          local valueConfig = nameConfig[value]
-          if valueConfig ~= nil then
-            local costTypeConfig = valueConfig[costType]
-            if costTypeConfig ~= nil then
-              rcDebug(costTypeConfig)
-              costs = costs + tonumber(costTypeConfig)
-            end
-          end
-        end
+  -- Show correct cost on placeables when in placement mode
+  ConstructionBrushPlaceable.getPrice = Utils.overwrittenFunction(ConstructionBrushPlaceable.getPrice, function (self, superFunc)
+      if self == nil or self.storeItem == nil then
+          return superFunc(self)
       end
-    end
-    rcDebug(costs)
-    return costs
+
+      local configs = self.configurations or {}
+      local buyPrice = g_currentMission.economyManager:getBuyPrice(self.storeItem, configs, nil)
+
+      return buyPrice + (self:getDisplacementCost() or 0)
   end)
 
 end
