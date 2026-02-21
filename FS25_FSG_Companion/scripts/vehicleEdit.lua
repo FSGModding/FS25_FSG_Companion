@@ -181,6 +181,7 @@ end
 VehicleEdit.blockedStoreItems = {
     ["$data/objects/shippingContainer/shippingContainer.xml"] = true, -- Container
     ["$data/vehicles/fliegl/varioV2/varioV2.xml"] = true, -- Container Trailer
+    ["$data/vehicles/andersonGroup/hybridX/hybridX.xml"] = true, -- Inline Bailer
     -- Block easy money stuff
     ["$data/placeables/brandless/electricityGenerators/level05/electricityGenerator05.xml"] = true,
     ["$data/placeables/brandless/productionPointsGeneric/stoneQuarry/stoneQuarry.xml"] = true,
