@@ -250,3 +250,89 @@ function VehicleEdit:loadItemsFromXML(superFunc, filename, baseDirectory, custom
 
     xmlFile:delete()
 end
+
+function VehicleEdit:onVehicleWillSell(suerFunc, vehicle)
+  rcDebug("VehicleEdit:onVehicleWillSell")
+	if self.isEnabled then
+		if self.mission.missionDynamicInfo.isMultiplayer then
+			if self.numMultiplayerItems >= VehicleSaleSystem.MAX_MULTIPLAYER_ITEMS then
+				return
+			elseif math.random() >= VehicleSaleSystem.MULTIPLAYER_ACCEPT_CHANCE then
+				return
+			elseif g_storeManager:getItemByXMLFilename(vehicle.configFileName).price < VehicleSaleSystem.MINIMUM_ITEM_VALUE then
+				return
+			elseif vehicle.getCanBeAddedToSales == nil or vehicle:getCanBeAddedToSales() then
+        local configurations, boughtConfigurations, configurationData = VehicleEdit:getSaleConfigurations(vehicle)
+				local item = {
+					["timeLeft"] = math.random(VehicleSaleSystem.MIN_MULTIPLAYER_ITEM_DURATION, VehicleSaleSystem.MAX_MULTIPLAYER_ITEM_DURATION),
+					["isGenerated"] = false,
+					["xmlFilename"] = vehicle.configFileName,
+          ["configurations"] = configurations,
+					["boughtConfigurations"] = boughtConfigurations,
+          ["configurationData"] = configurationData,
+					["age"] = vehicle.age,
+					["price"] = vehicle:getSellPrice() * VehicleSaleSystem.BUYPRICE_FACTOR,
+					["damage"] = 0,
+					["wear"] = 0,
+					["operatingTime"] = vehicle.operatingTime
+				}
+				if vehicle.getDamageAmount ~= nil then
+					item.damage = vehicle:getDamageAmount()
+				end
+				if vehicle.getWearTotalAmount ~= nil then
+					item.wear = vehicle:getWearTotalAmount()
+				end
+				self:addSale(item)
+			end
+		else
+			return
+		end
+	else
+		return
+	end
+end
+
+function VehicleEdit:getSaleConfigurations(vehicle)
+  local configurations = table.clone(vehicle.configurations or {}, 3)
+  local boughtConfigurations = table.clone(vehicle.boughtConfigurations or {}, 3)
+  local configurationData = table.clone(vehicle.configurationData or {}, 3)
+
+  local storeItem = g_storeManager:getItemByXMLFilename(vehicle.configFileName)
+  if storeItem == nil or storeItem.configurations == nil then
+    return configurations, boughtConfigurations, configurationData
+  end
+
+  for configName, configIds in pairs(boughtConfigurations) do
+    local configItems = storeItem.configurations[configName]
+    if configItems ~= nil then
+      for configId, _ in pairs(configIds) do
+        local configItem = configItems[configId]
+        if configItem ~= nil and configItem.saveId == "CUSTOM_COLOR" then
+          boughtConfigurations[configName][configId] = nil
+
+          if configurationData[configName] ~= nil then
+            configurationData[configName][configId] = nil
+            if next(configurationData[configName]) == nil then
+              configurationData[configName] = nil
+            end
+          end
+
+          if configurations[configName] == configId then
+            configurations[configName] = ConfigurationUtil.getDefaultConfigIdFromItems(configItems)
+          end
+        end
+      end
+
+      if next(boughtConfigurations[configName]) == nil then
+        local defaultConfigId = ConfigurationUtil.getDefaultConfigIdFromItems(configItems)
+        boughtConfigurations[configName][defaultConfigId] = true
+
+        if configurations[configName] == nil then
+          configurations[configName] = defaultConfigId
+        end
+      end
+    end
+  end
+
+  return configurations, boughtConfigurations, configurationData
+end

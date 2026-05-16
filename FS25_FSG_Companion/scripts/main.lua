@@ -733,6 +733,50 @@ local function init()
       return buyPrice + (self:getDisplacementCost() or 0)
   end)
 
+  -- When server looses connection to Giants servers, it saves before it shuts down.
+  FSBaseMission.onMasterServerConnectionFailed = Utils.overwrittenFunction(
+    FSBaseMission.onMasterServerConnectionFailed,
+    function(mission, superFunc, reason)
+      -- Client: keep vanilla behavior.
+      if g_dedicatedServer == nil then
+        return superFunc(mission, reason)
+      end
+
+      local text = ""
+      if MasterServerConnection.FAILED_UNKNOWN == reason then
+        text = g_i18n:getText("ui_connectionFailed")
+      elseif MasterServerConnection.FAILED_MAINTENANCE == reason then
+        text = g_i18n:getText("ui_serverMaintenance")
+      elseif MasterServerConnection.FAILED_TEMPORARY_BAN == reason then
+        text = g_i18n:getText("ui_temporaryBan")
+      elseif MasterServerConnection.FAILED_CONNECTION_LOST == reason then
+        text = g_i18n:getText("ui_masterServerConnectionLost")
+      elseif MasterServerConnection.FAILED_WRONG_PASSWORD == reason then
+        text = g_i18n:getText("ui_wrongPassword")
+      elseif MasterServerConnection.FAILED_CONSOLE_USER_FAILED_AUTHENTICATION == reason then
+        text = g_i18n:getText("ui_connectionFailed")
+      else
+        text = tostring(reason)
+      end
+
+      printError(("Error: Lost connection to master server. Reason: %s"):format(tostring(text)))
+      printWarning("Warning: Saving savegame before shutdown...")
+
+      if g_currentMission ~= nil and g_currentMission.saveSavegame ~= nil then
+        g_currentMission:saveSavegame(true)
+      else
+        printWarning("Warning: Unable to save mission state before shutdown.")
+      end
+
+      printError("Error: Shutting down dedicated server now.")
+      doExit()
+      return
+    end
+  )
+
+  -- Fix issue when buying used vehicles that had custom colors
+  VehicleSaleSystem.onVehicleWillSell = Utils.overwrittenFunction(VehicleSaleSystem.onVehicleWillSell, VehicleEdit.onVehicleWillSell)
+
 end
 
 ---Run when player is connected to server
