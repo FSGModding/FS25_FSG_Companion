@@ -88,6 +88,7 @@ function RemoteCommands:runNewFiles(file)
   if file == nil then return end
   if self.processingFiles[file] then return end
   self.processingFiles[file] = true
+  local commandPending = false
 
   local ok, err = pcall(function()
     local loadFile = self.commandInboxDir .. file
@@ -359,10 +360,20 @@ function RemoteCommands:runNewFiles(file)
         if command == "storeVehicle" then
           -- Run the vehicleStorage load function
           rcDebug("Command: storeVehicle")
-          transferData = VehicleStorage:loadVehicle(loadFile)
           commandData.id = commandData.vehicleId
+          transferData = VehicleStorage:loadVehicle(loadFile, function(callbackTransferData)
+            local callbackOk, callbackErr = pcall(function()
+              self:writeConfirmationFile(file, loadFile, key, commandData, callbackTransferData)
+            end)
+            if not callbackOk then
+              print(("RemoteCommands: error writing async confirmation for %s: %s"):format(tostring(file), tostring(callbackErr)))
+            end
+            self.processingFiles[file] = nil
+          end)
           if transferData ~= nil then
             commandComplete = true
+          else
+            commandPending = true
           end
         -- Add elseif here for another command
         end
@@ -370,49 +381,9 @@ function RemoteCommands:runNewFiles(file)
 
       -- check if the command completed
       if commandComplete then
-        -- create confirmation command
-        rcDebug("Creating confirmation file.")
-        local cmdId = tonumber(commandData.id) or 0
-        local cmdName = tostring(commandData.command or "unknown")
-        local confirmationFile = self.commandOutboxDir .. "confirm-" .. cmdId .. "-" .. tostring(cmdName) .. "-" .. math.random(9999) .. math.random(9999) .. ".xml"
-        local xmlFileConf = createXMLFile(key, confirmationFile, key)
-        setXMLInt(xmlFileConf, key .. ".command#id", tonumber(cmdId))
-        setXMLString(xmlFileConf, key .. ".command#command", tostring(cmdName))
-        if transferData ~= nil then
-          if transferData.before ~= nil then 
-            setXMLString(xmlFileConf, key .. ".command#before", tostring(transferData.before))
-          end 
-          if transferData.amount ~= nil then
-            setXMLInt(xmlFileConf, key .. ".command#amount", tonumber(transferData.amount))
-          end 
-          if transferData.after ~= nil then
-            setXMLInt(xmlFileConf, key .. ".command#after", tonumber(transferData.after))
-          end
-          if transferData.errorMsg ~= nil then
-            setXMLString(xmlFileConf, key .. ".command#errorMsg", tostring(transferData.errorMsg))
-          end
-          if transferData.info ~= nil then
-            setXMLString(xmlFileConf, key .. ".command#info", tostring(transferData.info))
-          end
-          if transferData.farmlandId ~= nil then
-            setXMLString(xmlFileConf, key .. ".command#farmlandId", tostring(transferData.farmlandId))
-          end
-        end
-        if commandData.farmId ~= nil and tonumber(commandData.farmId) ~= nil then
-          setXMLInt(xmlFileConf, key .. ".command#farmId", tonumber(commandData.farmId))
-        elseif transferData ~= nil and transferData.farmId ~= nil and tonumber(transferData.farmId) ~= nil then
-          setXMLInt(xmlFileConf, key .. ".command#farmId", tonumber(transferData.farmId))
-        end 
-        setXMLString(xmlFileConf, key .. ".command#confirmation", "true")
-        saveXMLFile(xmlFileConf)
-        delete(xmlFileConf)
-
-        print(string.format("  Info: FSG Companion Command File Successfully Processed.  File: %s",(tostring(file))))
-
-        -- delete the command file
-        deleteFile(loadFile)
+        self:writeConfirmationFile(file, loadFile, key, commandData, transferData)
       else
-        if self:isFileTooOld(file, 600) then
+        if not commandPending and self:isFileTooOld(file, 600) then
           rcDebug("RemoteCommands: Deleting stale command file (older than 10 min): " .. tostring(file))
           deleteFile(loadFile)
           self.fileTimestamps[file] = nil
@@ -432,9 +403,54 @@ function RemoteCommands:runNewFiles(file)
 
   if not ok then
     print(("RemoteCommands: error processing %s: %s"):format(tostring(file), tostring(err)))
+    self.processingFiles[file] = nil
+  elseif not commandPending then
+    self.processingFiles[file] = nil
   end
+end
 
-  self.processingFiles[file] = nil
+function RemoteCommands:writeConfirmationFile(file, loadFile, key, commandData, transferData)
+  -- create confirmation command
+  rcDebug("Creating confirmation file.")
+  local cmdId = tonumber(commandData.id) or 0
+  local cmdName = tostring(commandData.command or "unknown")
+  local confirmationFile = self.commandOutboxDir .. "confirm-" .. cmdId .. "-" .. tostring(cmdName) .. "-" .. math.random(9999) .. math.random(9999) .. ".xml"
+  local xmlFileConf = createXMLFile(key, confirmationFile, key)
+  setXMLInt(xmlFileConf, key .. ".command#id", tonumber(cmdId))
+  setXMLString(xmlFileConf, key .. ".command#command", tostring(cmdName))
+  if transferData ~= nil then
+    if transferData.before ~= nil then
+      setXMLString(xmlFileConf, key .. ".command#before", tostring(transferData.before))
+    end
+    if transferData.amount ~= nil then
+      setXMLInt(xmlFileConf, key .. ".command#amount", tonumber(transferData.amount))
+    end
+    if transferData.after ~= nil then
+      setXMLInt(xmlFileConf, key .. ".command#after", tonumber(transferData.after))
+    end
+    if transferData.errorMsg ~= nil then
+      setXMLString(xmlFileConf, key .. ".command#errorMsg", tostring(transferData.errorMsg))
+    end
+    if transferData.info ~= nil then
+      setXMLString(xmlFileConf, key .. ".command#info", tostring(transferData.info))
+    end
+    if transferData.farmlandId ~= nil then
+      setXMLString(xmlFileConf, key .. ".command#farmlandId", tostring(transferData.farmlandId))
+    end
+  end
+  if commandData.farmId ~= nil and tonumber(commandData.farmId) ~= nil then
+    setXMLInt(xmlFileConf, key .. ".command#farmId", tonumber(commandData.farmId))
+  elseif transferData ~= nil and transferData.farmId ~= nil and tonumber(transferData.farmId) ~= nil then
+    setXMLInt(xmlFileConf, key .. ".command#farmId", tonumber(transferData.farmId))
+  end
+  setXMLString(xmlFileConf, key .. ".command#confirmation", "true")
+  saveXMLFile(xmlFileConf)
+  delete(xmlFileConf)
+
+  print(string.format("  Info: FSG Companion Command File Successfully Processed.  File: %s",(tostring(file))))
+
+  -- delete the command file
+  deleteFile(loadFile)
 end
 
 

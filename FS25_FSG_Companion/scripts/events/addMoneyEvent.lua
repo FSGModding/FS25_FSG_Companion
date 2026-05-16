@@ -43,10 +43,9 @@ function AddMoneyEvent:run(connection)
 
   if not connection:getIsServer() then
     -- rcDebug(' Info: AddMoneyEvent:run:notServer')
-    g_server:broadcastEvent(AddMoneyEvent.new(self.amount, self.farmId, self.moneyType))
+    -- g_server:broadcastEvent(AddMoneyEvent.new(self.amount, self.farmId, self.moneyType))
+    g_currentMission:addMoney(-self.amount, self.farmId, self.moneyType, true)
   end
-
-  g_currentMission:addMoney(-self.amount, self.farmId, self.moneyType, true)
 end
 
 function AddMoneyEvent.sendEvent(self, amount, farmId, moneyType)

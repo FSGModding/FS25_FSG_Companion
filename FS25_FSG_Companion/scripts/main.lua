@@ -68,8 +68,6 @@ local sourceFiles = {
   "scripts/events/vehicleEditEvent.lua",
   "scripts/events/superStrengthEvent.lua",
   "scripts/events/farmlandUpdateEvent.lua",
-  "scripts/events/FCAIJobStartRequestEvent.lua",
-  "scripts/events/FCAIJobStartEvent.lua",
   "scripts/events/FCTreePlantEvent.lua",
   "scripts/events/FCSettingEvent.lua",
   "scripts/events/addMoneyEvent.lua",
@@ -557,9 +555,59 @@ local function init()
   -- Disables Sleeping in Game
   SleepManager.getCanSleep = Utils.overwrittenFunction(SleepManager.getCanSleep, FSGSettings.disableSleep)
 
-  -- Overwrite AI Job Start Event to use new farm Id bits settings
-  AIJobStartEvent.new = Utils.overwrittenFunction(AIJobStartEvent.new, FCAIJobStartEvent.new)
-  AIJobStartRequestEvent.new = Utils.overwrittenFunction(AIJobStartRequestEvent.new, FCAIJobStartRequestEvent.new)
+  -- Overwrite AI Job Start Run Event
+  AIJobStartRequestEvent.run = Utils.overwrittenFunction(AIJobStartRequestEvent.run, function(self, superFunc, connection)
+    -- Server: keep vanilla publish
+    if connection:getIsServer() then
+        return superFunc(self, connection)
+    end
+
+		local jobTypeIndex = g_currentMission.aiJobTypeManager:getJobTypeIndex(self.job)
+		local startable, state = self.job:getIsStartable(connection)
+
+    -- Start custom bits to make sure within our settings
+    -- rcDebug(self.startFarmId)
+
+    -- If starterFarmId nil then use default
+    local newStarterFarmId = FarmManager.SINGLEPLAYER_FARM_ID
+    if self.startFarmId ~= nil then
+      newStarterFarmId = self.startFarmId
+    end
+
+    -- Check if farm is at limit
+    -- Get number of active jobs for farm
+    local activeJobVehicles = 0
+    for _, job in ipairs(g_currentMission.aiSystem:getActiveJobs()) do
+      if job.startedFarmId == newStarterFarmId then
+        activeJobVehicles = activeJobVehicles + 1
+      end
+    end
+
+    local hireLimit = math.floor(g_fsgSettings.settings:getValue("hireLimit")) - 1 or 2
+    -- rcDebug("Hire Limit")
+    -- rcDebug(hireLimit)
+
+    -- If there are multipe missions, loop through them to check what farms they belong to
+    if activeJobVehicles ~= nil then
+      -- Check to see how many AI are hired for current farmId
+      if activeJobVehicles >= hireLimit then
+        rcDebug("Max AI Hired For Farm")
+        startable = false
+        if g_client then
+          g_currentMission:showBlinkingWarning(g_i18n:getText("rc_max_hire_warn"), 5000)
+        end        
+      end
+    end
+    -- End custom Bits to make sure within our settings
+
+
+		if startable then
+			connection:sendEvent(AIJobStartRequestEvent.newServerToClient(0, jobTypeIndex))
+			g_currentMission.aiSystem:startJob(self.job, newStarterFarmId)
+		else
+			connection:sendEvent(AIJobStartRequestEvent.newServerToClient(state, jobTypeIndex))
+		end
+  end)
 
   -- Overwrite Tree Plant Event to use new farm Id bits settings
   TreePlantEvent.new = Utils.overwrittenFunction(TreePlantEvent.new, FCTreePlantEvent.new)

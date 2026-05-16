@@ -130,7 +130,7 @@ function Limits:toggleAIVehicleSecond(selfData, ownerFarmId, activeJobVehicles, 
     end
 
 		if startableJob then
-			g_client:getServerConnection():sendEvent(FCAIJobStartRequestEvent.new(startableJob, nil, currentOwnerFarmId))
+			g_client:getServerConnection():sendEvent(AIJobStartRequestEvent.new(startableJob, currentOwnerFarmId))
 			return
 		end
 

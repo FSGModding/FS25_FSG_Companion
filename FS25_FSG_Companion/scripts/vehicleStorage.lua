@@ -144,12 +144,18 @@ function VehicleStorage:storeVehicle(vehicle)
 end
 
 -- Load vehicle from xml file
-function VehicleStorage:loadVehicle(xmlFileVehicle)
+function VehicleStorage:loadVehicle(xmlFileVehicle, callback)
   rcDebug("VehicleStorage-storeVehicle")
 
   if fileExists(xmlFileVehicle) then
 
     local xmlFile = XMLFile.load("VehiclesXML", xmlFileVehicle, Vehicle.xmlSchemaSavegame)
+    if xmlFile == nil then
+      return {
+        errorMsg = "Vehicle Load Error - Invalid Vehicle XML"
+      }
+    end
+
     local i = 1
     local key = string.format("vehicles.vehicle(%d)", i - 1)
 
@@ -162,10 +168,13 @@ function VehicleStorage:loadVehicle(xmlFileVehicle)
     rcDebug(vehicleFarmId)
     if g_farmManager:getFarmById(vehicleFarmId) == nil and vehicleFarmId ~= 0 then
       -- Return the error data
-      local errorMsg = { 
+      local errorMsg = {
         farmId = vehicleFarmId,
         errorMsg = "Vehicle Load Error - Farm Not Found"
       }
+      if xmlFile ~= nil then
+        xmlFile:delete()
+      end
       return errorMsg
     end
 
@@ -179,15 +188,14 @@ function VehicleStorage:loadVehicle(xmlFileVehicle)
       farmId = vehicleFarmId,
     }
 
-    local vehicle = false
-
     local vehicleSystem = g_currentMission.vehicleSystem
 
     -- Callback function for the vehicle load
-    local function asyncCallbackFunction(_, vehicle, vehicleLoadState, arguments)
-      
+    local function asyncCallbackFunction(_, vehicles, vehicleLoadState, arguments)
+      local transferData = nil
+
       -- Make sure we have a vehicle to reset
-      if vehicle ~= nil and arguments.vehicleUniqueId ~= nil then
+      if vehicles ~= nil and #vehicles > 0 and arguments.vehicleUniqueId ~= nil then
         local vehicleToReset = g_currentMission.vehicleSystem:getVehicleByUniqueId(arguments.vehicleUniqueId)
         if vehicleToReset ~= nil then
           -- Send the vehicle to spawn area
@@ -195,34 +203,55 @@ function VehicleStorage:loadVehicle(xmlFileVehicle)
         end
       end
 
-      if vehicleLoadState == VehicleLoadingState.OK then
+      if vehicleLoadState == VehicleLoadingState.OK and vehicles ~= nil and #vehicles > 0 then
         print("Vehicle Spawned From Storage.  Send Confirmation.")
-        return true
-      else  
+        transferData = {
+          farmId = arguments.farmId,
+          info = "Vehicle Transfer Successful"
+        }
+      elseif vehicleLoadState == VehicleLoadingState.NO_SPACE then
+        transferData = {
+          farmId = arguments.farmId,
+          info = "Vehicle Transfer Unsuccessful.",
+          errorMsg = "Vehicle Load Error - No Space at Vehicle Shop"
+        }
+      else
         printf("Warning: corrupt vehicles xml '%s', vehicle '%s' could not be loaded", arguments.xmlFilename, arguments.key)
-        return false
+        transferData = {
+          farmId = arguments.farmId,
+          info = "Vehicle Transfer Unsuccessful.",
+          errorMsg = "Vehicle Load Error"
+        }
+      end
+
+      if arguments.xmlFile ~= nil then
+        arguments.xmlFile:delete()
+      end
+
+      self.vehiclesToSpawnLoading = false
+
+      if callback ~= nil then
+        callback(transferData)
       end
     end
 
     -- Load the vehicle from storage files
     g_asyncTaskManager:addTask(function()
-      vehicle = vehicleSystem:loadFromXMLFile(xmlFile, asyncCallbackFunction, nil, args, true, false)
+      vehicleSystem:loadFromXMLFile(xmlFile, asyncCallbackFunction, nil, args, true, false)
     end)
 
-    if vehicle ~= VehicleLoadingState.OK then
-      local transferData = {
+    if callback == nil then
+      return {
         farmId = vehicleFarmId,
-        info = "Vehicle Transfer Successful"
+        info = "Vehicle Transfer Pending"
       }
-      return transferData
-    else
-      -- Return the error data
-      local errorMsg = { 
-        farmId = vehicleFarmId,
-        errorMsg = "Vehicle Load Error"
-      }
-      return errorMsg
     end
-    
+
+    return nil
+
   end
+
+  return {
+    errorMsg = "Vehicle Load Error - Vehicle File Not Found"
+  }
 end
