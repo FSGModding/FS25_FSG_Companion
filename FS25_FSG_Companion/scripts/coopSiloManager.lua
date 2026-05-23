@@ -252,26 +252,45 @@ function CoopSiloManager:addFillToSilo(farmId,fillTypeName,fillAmount)
     -- Get the fillType id by fillName
     local fillType = g_fillTypeManager:getFillTypeByName(fillTypeName)
     local fillTypeIndex = nil
+    local amount = tonumber(fillAmount)
+    local destinationFarmId = tonumber(farmId)
 
     if fillType ~= nil then
       fillTypeIndex = fillType.index
+    end
+
+    if fillTypeIndex == nil or amount == nil or amount <= 0 or destinationFarmId == nil then
+      return false, "Invalid fill transfer data."
     end
 
     if #self.inboundCoopSilos == 0 then
       self:cacheCoopSilos()
     end
 
+    local storageFound = false
+
     for _, thisPlaceable in ipairs(self.inboundCoopSilos) do
 
         -- Loop though the storages to see if farm owns it, if so then add the fill
         for _, storage in ipairs(thisPlaceable.spec_silo.storages) do
             -- Only add the fill to the storage that is owned by the farmId
-            if storage.ownerFarmId == farmId then
-              storage:setFillLevel(storage:getFillLevel(fillTypeIndex) + fillAmount, fillTypeIndex, nil)
-              storage:raiseDirtyFlags(storage.storageDirtyFlag)
+            if storage.ownerFarmId == destinationFarmId then
+              storageFound = true
+              local freeCapacity = storage:getFreeCapacity(fillTypeIndex)
+              if freeCapacity >= amount then
+                storage:setFillLevel(storage:getFillLevel(fillTypeIndex) + amount, fillTypeIndex, nil)
+                storage:raiseDirtyFlags(storage.storageDirtyFlag)
+                return true, "Fill Transfer Successful."
+              end
             end
         end
     end
+
+    if storageFound then
+      return false, "Coop silo does not have enough free capacity."
+    end
+
+    return false, "Coop silo storage not found for farm."
 end
 
 -- Add pallet to object storage
@@ -279,51 +298,71 @@ function CoopSiloManager:addPallet(farmId,configFileName,isBigBag,fillTypeName,f
     rcDebug("CoopSiloManager - addPallet")
 
     -- Get the fillType id by fillName
-    local fillType = g_fillTypeManager:getFillTypeByName(fillTypeName).index
+    local fillTypeData = g_fillTypeManager:getFillTypeByName(fillTypeName)
+    local fillType = fillTypeData ~= nil and fillTypeData.index or nil
+
+    if fillType == nil then
+      return false, "Pallet fill type is not supported."
+    end
 
     if #self.inboundObjectSilos == 0 then
       self:cacheCoopSilos()
     end
 
+    local storageFound = false
+
     for _, thisPlaceable in ipairs(self.inboundObjectSilos) do
 
         -- Loop though the storages to see if farm owns it, if so then add the fill
         local storage = thisPlaceable
+        local spec = storage.spec_objectStorage
+        storageFound = spec ~= nil or storageFound
 
-        local abstractObjectClass = PlaceableObjectStorage.ABSTRACT_OBJECTS_BY_CLASS_NAME["Vehicle"]
-        local abstractPallet = abstractObjectClass.new()
+        if spec ~= nil and #spec.storedObjects < spec.capacity then
 
-        -- Check if dlc and if so then alter the configFileName
-        if string.contains(configFileName, "$pdlcdir$") then
-          local dlcTitle = getDlcDir(configFileName)
-          configFileName = dlcTitle
+          local abstractObjectClass = PlaceableObjectStorage.ABSTRACT_OBJECTS_BY_CLASS_NAME["Vehicle"]
+          local abstractPallet = abstractObjectClass.new()
+
+          -- Check if dlc and if so then alter the configFileName
+          if string.contains(configFileName, "$pdlcdir$") then
+            local dlcTitle = getDlcDir(configFileName)
+            configFileName = dlcTitle
+          end
+
+          abstractPallet.palletAttributes = {}
+          abstractPallet.palletAttributes.ownerFarmId = tonumber(farmId)
+          abstractPallet.palletAttributes.configFileName = NetworkUtil.convertFromNetworkFilename(configFileName)
+          abstractPallet.palletAttributes.isBigBag = convertToBool(isBigBag)
+          abstractPallet.palletAttributes.fillType = tonumber(fillType)
+          abstractPallet.palletAttributes.fillLevel = tonumber(fillLevel)
+          abstractPallet.palletAttributes.configurations = {}
+          if fillUnit ~= nil then
+            abstractPallet.palletAttributes.configurations.fillUnit = tonumber(fillUnit)
+          end
+          if fillVolume ~= nil then
+            abstractPallet.palletAttributes.configurations.fillVolume = tonumber(fillVolume)
+          end
+          if treeSaplingType ~= nil then
+            abstractPallet.palletAttributes.configurations.treeSaplingType = tonumber(treeSaplingType)
+          end
+
+          g_farmManager:updateFarmStats(storage:getOwnerFarmId(), "storedPallets", 1)
+
+          storage:addAbstactObjectToObjectStorage(abstractPallet)
+
+          storage:setObjectStorageObjectInfosDirty()		
+          storage:updateObjectStorageObjectInfos()		
+          storage:raiseDirtyFlags(storage.spec_objectStorage.dirtyFlag)
+
+          return true, "Pallet Transfer Successful."
         end
-
-        abstractPallet.palletAttributes = {}
-        abstractPallet.palletAttributes.ownerFarmId = tonumber(farmId)
-        abstractPallet.palletAttributes.configFileName = NetworkUtil.convertFromNetworkFilename(configFileName)
-        abstractPallet.palletAttributes.isBigBag = convertToBool(isBigBag)
-        abstractPallet.palletAttributes.fillType = tonumber(fillType)
-        abstractPallet.palletAttributes.fillLevel = tonumber(fillLevel)
-        abstractPallet.palletAttributes.configurations = {}
-        if fillUnit ~= nil then
-          abstractPallet.palletAttributes.configurations.fillUnit = tonumber(fillUnit)
-        end
-        if fillVolume ~= nil then
-          abstractPallet.palletAttributes.configurations.fillVolume = tonumber(fillVolume)
-        end
-        if treeSaplingType ~= nil then
-          abstractPallet.palletAttributes.configurations.treeSaplingType = tonumber(treeSaplingType)
-        end
-
-        g_farmManager:updateFarmStats(storage:getOwnerFarmId(), "storedPallets", 1)
-
-        storage:addAbstactObjectToObjectStorage(abstractPallet)
-
-        storage:setObjectStorageObjectInfosDirty()		
-        storage:updateObjectStorageObjectInfos()		
-        storage:raiseDirtyFlags(storage.spec_objectStorage.dirtyFlag)
     end
+
+    if storageFound then
+      return false, "Coop object storage is full."
+    end
+
+    return false, "Coop object storage not found."
 
 end
 
@@ -348,59 +387,79 @@ function CoopSiloManager:addBale(farmId,xmlFilename,fillLevel,wrappingState,supp
   end
 
   -- Get the fillType id by fillName
-  local fillType = g_fillTypeManager:getFillTypeByName(fillTypeName).index
+  local fillTypeData = g_fillTypeManager:getFillTypeByName(fillTypeName)
+  local fillType = fillTypeData ~= nil and fillTypeData.index or nil
+
+  if fillType == nil then
+    return false, "Bale fill type is not supported."
+  end
 
   if #self.inboundObjectSilos == 0 then
     self:cacheCoopSilos()
   end
 
+  local storageFound = false
+
   for _, thisPlaceable in ipairs(self.inboundObjectSilos) do
 
       -- Loop though the storages to see if farm owns it, if so then add the fill
       local storage = thisPlaceable
+      local spec = storage.spec_objectStorage
+      storageFound = spec ~= nil or storageFound
 
-      local abstractObjectClass = PlaceableObjectStorage.ABSTRACT_OBJECTS_BY_CLASS_NAME["Bale"]
-      local abstractBale = abstractObjectClass.new()
+      if spec ~= nil and #spec.storedObjects < spec.capacity then
 
-      abstractBale.baleAttributes = {}
-      abstractBale.baleAttributes.farmId = tonumber(farmId)
-      abstractBale.baleAttributes.xmlFilename = NetworkUtil.convertFromNetworkFilename(xmlFilename)
-      abstractBale.baleAttributes.isFermenting = convertToBool(isFermenting)
-      abstractBale.baleAttributes.baleValueScale = tonumber(baleValueScale)
-      abstractBale.baleAttributes.fillLevel = tonumber(fillLevel)
-      abstractBale.baleAttributes.wrappingState = tonumber(wrappingState)
-      abstractBale.baleAttributes.supportsWrapping = convertToBool(supportsWrapping)
-      abstractBale.baleAttributes.wrappingColor = {}
-      abstractBale.baleAttributes.wrappingColor[1] = tonumber(wc1)
-      abstractBale.baleAttributes.wrappingColor[2] = tonumber(wc2)
-      abstractBale.baleAttributes.wrappingColor[3] = tonumber(wc3)
-      if wc4 ~= nil then
-        abstractBale.baleAttributes.wrappingColor[4] = tonumber(wc4)
-      end
-      abstractBale.baleAttributes.isMissionBale = false
-      abstractBale.baleAttributes.fillType = tonumber(fillType)
-      if abstractBale.baleAttributes.isFermenting then
-        if abstractBale.baleAttributes.fermentationTime ~= nil then
-          abstractBale.baleAttributes.fermentationTime = tonumber(fermentationTime)
-        else
-          abstractBale.baleAttributes.fermentationTime = 0
+        local abstractObjectClass = PlaceableObjectStorage.ABSTRACT_OBJECTS_BY_CLASS_NAME["Bale"]
+        local abstractBale = abstractObjectClass.new()
+
+        abstractBale.baleAttributes = {}
+        abstractBale.baleAttributes.farmId = tonumber(farmId)
+        abstractBale.baleAttributes.xmlFilename = NetworkUtil.convertFromNetworkFilename(xmlFilename)
+        abstractBale.baleAttributes.isFermenting = convertToBool(isFermenting)
+        abstractBale.baleAttributes.baleValueScale = tonumber(baleValueScale)
+        abstractBale.baleAttributes.fillLevel = tonumber(fillLevel)
+        abstractBale.baleAttributes.wrappingState = tonumber(wrappingState)
+        abstractBale.baleAttributes.supportsWrapping = convertToBool(supportsWrapping)
+        abstractBale.baleAttributes.wrappingColor = {}
+        abstractBale.baleAttributes.wrappingColor[1] = tonumber(wc1)
+        abstractBale.baleAttributes.wrappingColor[2] = tonumber(wc2)
+        abstractBale.baleAttributes.wrappingColor[3] = tonumber(wc3)
+        if wc4 ~= nil then
+          abstractBale.baleAttributes.wrappingColor[4] = tonumber(wc4)
         end
+        abstractBale.baleAttributes.isMissionBale = false
+        abstractBale.baleAttributes.fillType = tonumber(fillType)
+        if abstractBale.baleAttributes.isFermenting then
+          if abstractBale.baleAttributes.fermentationTime ~= nil then
+            abstractBale.baleAttributes.fermentationTime = tonumber(fermentationTime)
+          else
+            abstractBale.baleAttributes.fermentationTime = 0
+          end
+        end
+        if variationIndex ~= nil and variationIndex ~= "" then
+          abstractBale.baleAttributes.variationIndex = tonumber(variationIndex)
+        else
+          abstractBale.baleAttributes.variationIndex = 1
+        end
+
+        g_farmManager:updateFarmStats(storage:getOwnerFarmId(), "storedBales", 1)
+
+        storage:addAbstactObjectToObjectStorage(abstractBale)
+
+        storage:setObjectStorageObjectInfosDirty()		
+        storage:updateObjectStorageObjectInfos()		
+        storage:raiseDirtyFlags(storage.spec_objectStorage.dirtyFlag)
+
+        return true, "Bale Transfer Successful."
       end
-      if variationIndex ~= nil and variationIndex ~= "" then
-        abstractBale.baleAttributes.variationIndex = tonumber(variationIndex)
-      else
-        abstractBale.baleAttributes.variationIndex = 1
-      end
-
-      g_farmManager:updateFarmStats(storage:getOwnerFarmId(), "storedBales", 1)
-
-      storage:addAbstactObjectToObjectStorage(abstractBale)
-
-      storage:setObjectStorageObjectInfosDirty()		
-      storage:updateObjectStorageObjectInfos()		
-      storage:raiseDirtyFlags(storage.spec_objectStorage.dirtyFlag)
   
     end
+
+  if storageFound then
+    return false, "Coop object storage is full."
+  end
+
+  return false, "Coop object storage not found."
 end
 
 

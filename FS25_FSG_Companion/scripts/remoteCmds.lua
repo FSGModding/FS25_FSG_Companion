@@ -799,11 +799,19 @@ function RemoteCommands:coopSiloStore(commandData)
     -- Check to make sure this server supports the fillType being sent
     local fillType = g_fillTypeManager:getFillTypeByName(commandData.fillType)
     if fillType ~= nil then
-      g_coopSiloManager:addFillToSilo(commandData.farmId,commandData.fillType,commandData.amount)
+      local success, info = g_coopSiloManager:addFillToSilo(commandData.farmId,commandData.fillType,commandData.amount)
+      if not success then
+        local confirmData = {
+          farmId = commandData.farmId,
+          info = info or "Fill Transfer Unsuccessful.",
+          errorMsg = "fill transfer error"
+        }
+        return confirmData
+      end
       -- Send data back to website
       local confirmData = {
         farmId = commandData.farmId,
-        info = "Fill Transfer Successful."
+        info = info or "Fill Transfer Successful."
       }
       return confirmData
     else
@@ -832,11 +840,19 @@ function RemoteCommands:coopPalletStore(commandData)
     -- Check to make sure this server supports the fillType being sent
     local fillType = g_fillTypeManager:getFillTypeByName(commandData.fillTypeName)
     if fillType ~= nil then
-      g_coopSiloManager:addPallet(commandData.farmId,commandData.configFileName,commandData.isBigBag,commandData.fillTypeName,commandData.fillLevel,commandData.configFillUnit,commandData.configFillVolume,commandData.ConfigTreeSaplingType,storeItem)
+      local success, info = g_coopSiloManager:addPallet(commandData.farmId,commandData.configFileName,commandData.isBigBag,commandData.fillTypeName,commandData.fillLevel,commandData.configFillUnit,commandData.configFillVolume,commandData.ConfigTreeSaplingType,storeItem)
+      if not success then
+        local confirmData = {
+          farmId = commandData.farmId,
+          info = info or "Pallet Transfer Unsuccessful.",
+          errorMsg = "pallet transfer error"
+        }
+        return confirmData
+      end
       -- Send data back to website
       local confirmData = {
         farmId = commandData.farmId,
-        info = "Pallet Transfer Successful."
+        info = info or "Pallet Transfer Successful."
       }
       return confirmData
     else
@@ -876,11 +892,19 @@ function RemoteCommands:coopBaleStore(commandData)
       if not commandData.variationIndex or tostring(commandData.variationIndex) == "" then
           commandData.variationIndex = 1
       end
-      g_coopSiloManager:addBale(commandData.farmId,commandData.xmlFilename,commandData.fillLevel,commandData.wrappingState,commandData.supportsWrapping,commandData.baleValueScale,commandData.wrappingColor,commandData.fillTypeName,commandData.isFermenting,commandData.fermentationTime,commandData.variationIndex)
+      local success, info = g_coopSiloManager:addBale(commandData.farmId,commandData.xmlFilename,commandData.fillLevel,commandData.wrappingState,commandData.supportsWrapping,commandData.baleValueScale,commandData.wrappingColor,commandData.fillTypeName,commandData.isFermenting,commandData.fermentationTime,commandData.variationIndex)
+      if not success then
+        local confirmData = {
+          farmId = commandData.farmId,
+          info = info or "Bale Transfer Unsuccessful.",
+          errorMsg = "bale transfer error"
+        }
+        return confirmData
+      end
       -- Send data back to website
       local confirmData = {
         farmId = commandData.farmId,
-        info = "Bale Transfer Successful."
+        info = info or "Bale Transfer Successful."
       }
       return confirmData
     else
